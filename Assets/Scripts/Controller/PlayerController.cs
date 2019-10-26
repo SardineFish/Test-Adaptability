@@ -5,14 +5,17 @@ using UnityEngine;
 namespace Project.Controller
 {
     [RequireComponent(typeof(Animator), typeof(Player), typeof(PlayerMotionController))]
-    [RequireComponent(typeof(PlayerInput))]
+    [RequireComponent(typeof(PlayerInput), typeof(ActionController))]
     public class PlayerController : EntityBehaviour
     {
         public Locker Locker = new Locker();
+        public Collider PlatformCollider;
 
         Animator animator;
         PlayerMotionController motionController;
         PlayerInput input;
+        ActionController actionController;
+        
 
         [ReadOnly]
         public string CurrentState { get; private set; } = "";
@@ -24,6 +27,7 @@ namespace Project.Controller
             animator = GetComponent<Animator>();
             motionController = GetComponent<PlayerMotionController>();
             input = GetComponent<PlayerInput>();
+            actionController = GetComponent<ActionController>();
         }
 
         // Start is called before the first frame update
@@ -43,12 +47,14 @@ namespace Project.Controller
             animator.SetBool("OnGround", motionController.OnGround);
             animator.SetFloat("VelocityX", motionController.velocity.x);
             animator.SetFloat("VelocityY", motionController.velocity.y);
+            actionController.SetDirection(input.Movement.x);
         }
 
-        void SetStateParameters(bool crouch, bool move)
+        void SetStateParameters(bool crouch = false, bool move = false, bool fall = false)
         {
             animator.SetBool("Crouch", crouch);
             animator.SetBool("Move", move);
+            animator.SetBool("Fall", fall);
         }
 
         Coroutine ChangeState(IEnumerator state) => StartCoroutine(state);
@@ -63,12 +69,16 @@ namespace Project.Controller
                 if (Locker.Locked)
                     yield return null;
 
-                if (input.Movement.magnitude > 0.01)
+                if (input.Movement.magnitude > 0.1)
                 {
-                    ChangeState(PlayerMove());
-                    yield break;
+                    motionController.Move(input.Movement);
+                    if(motionController.ControlledVelocity.magnitude > 0.1)
+                    {
+                        ChangeState(PlayerMove());
+                        yield break;
+                    }
                 }
-                else if(input.Crouch)
+                if(input.Crouch)
                 {
                     // Fall down
                     if(input.Jump)
@@ -80,7 +90,7 @@ namespace Project.Controller
                     yield break;
                 }
                 // jump to airborne
-                else if(input.Jump)
+                if(input.Jump)
                 {
                     motionController.Jump();
                     animator.SetTrigger("Jump");
@@ -177,11 +187,17 @@ namespace Project.Controller
 
         IEnumerator PlayerFall()
         {
+            if (PlatformCollider)
+                PlatformCollider.enabled = false;
             CurrentState = "Fall";
             while (true)
             {
                 motionController.Move(input.Movement);
                 SetMotionParameters();
+                SetStateParameters(fall: true);
+
+                yield return new WaitForFixedUpdate();
+
                 // to idle
                 if (motionController.OnGround)
                 {
@@ -189,13 +205,11 @@ namespace Project.Controller
                     yield break;
                 }
                 // to airborne
-                else if(!input.Crouch || !input.Jump)
+                else if (!input.Crouch || !input.Jump)
                 {
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
-
-                yield return new WaitForFixedUpdate();
             }
         }
     }

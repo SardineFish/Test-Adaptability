@@ -1582,6 +1582,7 @@ GameObject:
   - component: {fileID: 1271223351}
   - component: {fileID: 1271223350}
   - component: {fileID: 1271223353}
+  - component: {fileID: 1271223354}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1666,7 +1667,7 @@ MonoBehaviour:
   IgnoreX: 0
   IgnoreY: 1
   OnGroundThreshold: 0.0625
-  MaxGroundSpeed: 12
+  MaxGroundSpeed: 10
   MaxAirborneSpeed: 10
   MaxJumpSpeedX: 10
 --- !u!50 &1271223352
@@ -1685,7 +1686,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 315d433254621c04286e322e3f579a88, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 0
   m_CollisionDetection: 1
@@ -1702,6 +1703,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a9439a8cd2526241bd8b2af00388b6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1271223354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1271223346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c50107ab7077308419dbb9ebf20b1a26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FaceMethod: 0
 --- !u!1 &1687258581
 GameObject:
   m_ObjectHideFlags: 0
