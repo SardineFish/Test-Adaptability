@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,12 +10,14 @@ namespace Project.Controller
     public class PlayerController : EntityBehaviour
     {
         public Locker Locker = new Locker();
-        public Collider PlatformCollider;
+        public Collider2D PlatformCollider;
 
         Animator animator;
         PlayerMotionController motionController;
         PlayerInput input;
         ActionController actionController;
+
+        event Action OnPlatformCollide;
         
 
         [ReadOnly]
@@ -150,6 +153,11 @@ namespace Project.Controller
             {
                 motionController.Move(input.Movement);
                 SetMotionParameters();
+                if(input.Crouch && input.Jump)
+                {
+                    ChangeState(PlayerFall());
+                    yield break;
+                }
                 if(motionController.OnGround)
                 {
                     ChangeState(PlayerIdle());
@@ -190,6 +198,7 @@ namespace Project.Controller
             if (PlatformCollider)
                 PlatformCollider.enabled = false;
             CurrentState = "Fall";
+            GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.AllowPass(Entity));
             while (true)
             {
                 motionController.Move(input.Movement);
@@ -201,16 +210,27 @@ namespace Project.Controller
                 // to idle
                 if (motionController.OnGround)
                 {
+                    if (PlatformCollider)
+                        PlatformCollider.enabled = true;
+                    GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.BlockPass(Entity));
                     ChangeState(PlayerIdle());
                     yield break;
                 }
                 // to airborne
                 else if (!input.Crouch || !input.Jump)
                 {
+                    if (PlatformCollider)
+                        PlatformCollider.enabled = true;
+                    GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.BlockPass(Entity));
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
             }
+        }
+
+        void OnCollisionEnter2D(Collision2D collision)
+        {
+            
         }
     }
 
