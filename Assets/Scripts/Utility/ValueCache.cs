@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class BooleanCache
+public struct BooleanCache
 {
     public float CacheTime { get; set; }
 
-    public bool Value => cachedValues.Count > 0;
+    public bool Value => cachedValues is null ? false : cachedValues.Count > 0;
 
-    Queue<float> cachedValues = new Queue<float>();
+    Queue<float> cachedValues;
 
     public BooleanCache(float cacheTime)
     {
+        cachedValues = new Queue<float>();
         CacheTime = cacheTime;
     }
 
@@ -25,7 +26,7 @@ public class BooleanCache
     {
         while (cachedValues.Count > 0)
         {
-            if (time - cachedValues.Peek() > CacheTime)
+            if ((time - cachedValues.Peek()) > CacheTime)
                 cachedValues.Dequeue();
             else
                 return;

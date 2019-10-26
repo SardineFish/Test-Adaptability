@@ -54,6 +54,8 @@ namespace Project.GameMap
                 collider.usedByEffector = true;
                 var effector = obj.AddComponent<PlatformEffector2D>();
                 effector.useColliderMask = false;
+                effector.sideArc = 0;
+                effector.surfaceArc = 170;
                 var rigidBody = obj.AddComponent<Rigidbody2D>();
                 rigidBody.bodyType = RigidbodyType2D.Static;
                 return obj.AddComponent<Platform>();

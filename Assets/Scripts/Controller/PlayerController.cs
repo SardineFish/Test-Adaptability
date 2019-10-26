@@ -158,6 +158,10 @@ namespace Project.Controller
                     ChangeState(PlayerFall());
                     yield break;
                 }
+                else if (motionController.CachedWallContacted && input.Jump)
+                {
+                    //motionController.JumpWithSpeed(motionController.ContactedWallNormal.x);
+                }
                 if(motionController.OnGround)
                 {
                     ChangeState(PlayerIdle());

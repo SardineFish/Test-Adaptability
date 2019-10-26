@@ -19,6 +19,7 @@ namespace Project.Controller
         public bool Interact { get; private set; }
         [ReadOnly]
         public float CameraZoom { get; private set; }
+        [ReadOnly]
         public BooleanCache CachedJump { get; private set; }
 
         GameInput input;
@@ -41,6 +42,8 @@ namespace Project.Controller
 
         void FixedUpdate()
         {
+            if (Jump)
+                CachedJump.Record(Time.fixedUnscaledTime);
             CachedJump.Update(Time.fixedUnscaledTime);
         }
 
@@ -53,7 +56,9 @@ namespace Project.Controller
         {
             Jump = context.ReadValue<float>() > 0.5f;
             if (Jump)
+            {
                 CachedJump.Record(Time.fixedUnscaledTime);
+            }
         }
 
         public void OnCrouch(InputAction.CallbackContext context)

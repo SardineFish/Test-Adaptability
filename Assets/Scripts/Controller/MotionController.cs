@@ -14,15 +14,21 @@ namespace Project.Controller
         public bool IgnoreX = false;
         public bool IgnoreY = true;
         public float OnGroundThreshold = 0.0625f;
-        public float OnGroundCacheTime = 0.1f;
+        public float CoyoteTime = 0.033f;
         public Locker Locker = new Locker();
         public bool Locked => Locker.Locked;
         [ReadOnly]
         public bool OnGround { get; protected set; }
+        [ReadOnly]
+        public bool WallContacted { get; protected set; }
+        public Vector2 ContactedWallNormal { get; protected set; }
+        [ReadOnly]
         public BooleanCache CachedOnGround { get; protected set; }
+        public BooleanCache CachedWallContacted { get; protected set; }
 
         protected event Action<ContactPoint2D> OnHitGround;
         protected event Action<Collision2D> OnCollide;
+        protected event Action<ContactPoint2D> OnHitWall;
 
         new Rigidbody2D rigidbody;
         protected Vector2 controlledVelocity;
@@ -46,7 +52,8 @@ namespace Project.Controller
         {
             base.Awake();
             rigidbody = GetComponent<Rigidbody2D>();
-            CachedOnGround = new BooleanCache(OnGroundCacheTime);
+            CachedOnGround = new BooleanCache(CoyoteTime);
+            CachedWallContacted = new BooleanCache(CoyoteTime);
 
             OnCollide += (collision) =>
             {
@@ -55,20 +62,27 @@ namespace Project.Controller
                     var contract = collision.GetContact(i);
                     var localPoint = transform.worldToLocalMatrix.MultiplyPoint(contract.point);
                     var dot = Vector2.Dot(contract.normal, Vector2.up);
-                    if (dot < Mathf.Sqrt(.5f))
-                        continue;
-                    else if (Mathf.Approximately(1, dot)
+                    Debug.DrawLine(contract.point, contract.point + contract.normal, Color.red);
+                    if (Mathf.Approximately(1, dot)
                         && Mathf.Abs(localPoint.y) <= OnGroundThreshold
                         && contract.relativeVelocity.y >= -0.01)
                     {
                         //Debug.Log("ground");
                         OnHitGround?.Invoke(contract);
                     }
+                    /*
                     else if (dot < 1 && Mathf.Abs(localPoint.y) <= 2 * OnGroundThreshold && contract.normalImpulse >= 0)
                     {
                         //Debug.Log("ground");
                         OnHitGround?.Invoke(contract);
+                    }*/
+                    dot = Mathf.Abs(Vector2.Dot(contract.normal, Vector2.right));
+
+                    if(dot > 0.9)
+                    {
+                        OnHitWall?.Invoke(contract);
                     }
+
                 }
             };
             OnHitGround += (contact) =>
@@ -76,12 +90,20 @@ namespace Project.Controller
                 OnGround = true;
                 CachedOnGround.Record(Time.fixedUnscaledTime);
             };
+            OnHitWall += (contact) =>
+            {
+                WallContacted = true;
+                CachedWallContacted.Record(Time.fixedUnscaledTime);
+                ContactedWallNormal = contact.normal;
+            };
         }
 
 
         protected virtual void FixedUpdate()
         {
             CachedOnGround.Update(Time.fixedUnscaledTime);
+            CachedWallContacted.Update(Time.fixedUnscaledTime);
+
             if(EnableGravity)
             {
                 // To allow jumping adjustment by height & time.
@@ -107,6 +129,7 @@ namespace Project.Controller
             controlledVelocity = Vector2.zero;
             forceVelocity = Vector2.zero;
             OnGround = false;
+            WallContacted = false;
         }
 
         private void OnCollisionStay2D(Collision2D collision)

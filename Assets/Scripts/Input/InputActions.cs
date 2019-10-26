@@ -32,7 +32,7 @@ namespace Project.Input
                     ""name"": ""Jump"",
                     ""type"": ""Button"",
                     ""id"": ""93a3a4b4-bfba-421d-90cd-8aaab028abbf"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
                 },
