@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 namespace Project.Controller
 {
@@ -13,10 +14,12 @@ namespace Project.Controller
         public bool IgnoreX = false;
         public bool IgnoreY = true;
         public float OnGroundThreshold = 0.0625f;
+        public float OnGroundCacheTime = 0.1f;
         public Locker Locker = new Locker();
         public bool Locked => Locker.Locked;
         [ReadOnly]
         public bool OnGround { get; protected set; }
+        public BooleanCache CachedOnGround { get; protected set; }
 
         protected event Action<ContactPoint2D> OnHitGround;
         protected event Action<Collision2D> OnCollide;
@@ -43,6 +46,8 @@ namespace Project.Controller
         {
             base.Awake();
             rigidbody = GetComponent<Rigidbody2D>();
+            CachedOnGround = new BooleanCache(OnGroundCacheTime);
+
             OnCollide += (collision) =>
             {
                 for (int i = 0; i < collision.contactCount; i++)
@@ -69,12 +74,14 @@ namespace Project.Controller
             OnHitGround += (contact) =>
             {
                 OnGround = true;
+                CachedOnGround.Record(Time.fixedUnscaledTime);
             };
         }
 
 
         protected virtual void FixedUpdate()
         {
+            CachedOnGround.Update(Time.fixedUnscaledTime);
             if(EnableGravity)
             {
                 // To allow jumping adjustment by height & time.

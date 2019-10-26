@@ -93,7 +93,7 @@ namespace Project.Controller
                     yield break;
                 }
                 // jump to airborne
-                if(input.Jump)
+                if(input.CachedJump && motionController.CachedOnGround)
                 {
                     motionController.Jump();
                     animator.SetTrigger("Jump");
@@ -133,7 +133,7 @@ namespace Project.Controller
                     yield break;
                 }
                 // jump to airborne
-                else if (input.Jump)
+                else if (input.CachedJump && motionController.CachedOnGround)
                 {
                     motionController.Jump();
                     animator.SetTrigger("Jump");
