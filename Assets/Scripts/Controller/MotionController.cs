@@ -4,30 +4,68 @@ using System;
 
 namespace Project.Controller
 {
-    [RequireComponent(typeof(Rigidbody2D))]
-    [RequireComponent(typeof(GameEntity))]
+    [RequireComponent(typeof(Rigidbody2D), typeof(GameEntity))]
     public class MotionController : EntityBehaviour
     {
-        public float JumpHeight;
-        public float JumpTime;
-        public bool OnGround = false;
+        public float JumpHeight = 4;
+        public float JumpTime = 0.5f;
         public bool EnableGravity = true;
         public bool IgnoreX = false;
         public bool IgnoreY = true;
         public float OnGroundThreshold = 0.0625f;
-
         public Locker Locker = new Locker();
         public bool Locked => Locker.Locked;
+        [ReadOnly]
+        public bool OnGround { get; protected set; }
 
         protected event Action<ContactPoint2D> OnHitGround;
+        protected event Action<Collision2D> OnCollide;
 
         new Rigidbody2D rigidbody;
         protected Vector2 controlledVelocity;
         protected Vector2 forceVelocity;
 
-        protected virtual void Awake()
+        public Vector2 ControlledVelocity
         {
+            get
+            {
+                if (Locked)
+                    return Vector2.zero;
+                return new Vector2(
+                    IgnoreX ? 0 : controlledVelocity.x,
+                    IgnoreY ? 0 : controlledVelocity.y
+                );
+            }
+        }
+        public Vector2 velocity => rigidbody.velocity;
+
+        protected override void Awake()
+        {
+            base.Awake();
             rigidbody = GetComponent<Rigidbody2D>();
+            OnCollide += (collision) =>
+            {
+                for (int i = 0; i < collision.contactCount; i++)
+                {
+                    var contract = collision.GetContact(i);
+                    var localPoint = transform.worldToLocalMatrix.MultiplyPoint(contract.point);
+                    var dot = Vector2.Dot(contract.normal, Vector2.up);
+                    if (dot < Mathf.Sqrt(.5f))
+                        continue;
+                    else if (Mathf.Approximately(1, dot)
+                        && Mathf.Abs(localPoint.y) <= OnGroundThreshold
+                        && contract.relativeVelocity.y >= -0.01)
+                    {
+                        //Debug.Log("ground");
+                        OnHitGround?.Invoke(contract);
+                    }
+                    else if (dot < 1 && Mathf.Abs(localPoint.y) <= 2 * OnGroundThreshold && contract.normalImpulse >= 0)
+                    {
+                        //Debug.Log("ground");
+                        OnHitGround?.Invoke(contract);
+                    }
+                }
+            };
             OnHitGround += (contact) =>
             {
                 OnGround = true;
@@ -66,24 +104,12 @@ namespace Project.Controller
 
         private void OnCollisionStay2D(Collision2D collision)
         {
-            for (int i = 0; i < collision.contactCount; i++)
-            {
-                var contract = collision.GetContact(i);
-                var localPoint = transform.worldToLocalMatrix.MultiplyPoint(contract.point);
-                var dot = Vector2.Dot(contract.normal, Vector2.up);
-                if (dot < Mathf.Sqrt(.5f))
-                    continue;
-                else if (Mathf.Approximately(1, dot)
-                    && Mathf.Abs(localPoint.y) <= OnGroundThreshold
-                    && contract.relativeVelocity.y >= 0)
-                {
-                    OnHitGround?.Invoke(contract);
-                }
-                else if (dot < 1 && Mathf.Abs(localPoint.y) <= 2 * OnGroundThreshold && contract.normalImpulse >= 0)
-                {
-                    OnHitGround?.Invoke(contract);
-                }
-            }
+            OnCollide?.Invoke(collision);
+        }
+
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            OnCollide?.Invoke(collision);
         }
     }
 

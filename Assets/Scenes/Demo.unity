@@ -1580,6 +1580,8 @@ GameObject:
   - component: {fileID: 1271223352}
   - component: {fileID: 1271223349}
   - component: {fileID: 1271223351}
+  - component: {fileID: 1271223350}
+  - component: {fileID: 1271223353}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1634,6 +1636,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 988a4464d5d48d540a0b98c337df8368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1271223350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1271223346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e52252952446e9d449d9b2fdf803da30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1271223351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1646,14 +1660,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4b7c02b19d2a6242bcd1efa6705929d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  JumpHeight: 0
-  JumpTime: 0
-  OnGround: 0
+  JumpHeight: 3
+  JumpTime: 0.45
   EnableGravity: 1
   IgnoreX: 0
   IgnoreY: 1
   OnGroundThreshold: 0.0625
-  MaxGroundSpeed: 15
+  MaxGroundSpeed: 12
   MaxAirborneSpeed: 10
   MaxJumpSpeedX: 10
 --- !u!50 &1271223352
@@ -1674,9 +1687,21 @@ Rigidbody2D:
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_SleepingMode: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
+--- !u!114 &1271223353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1271223346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a9439a8cd2526241bd8b2af00388b6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1687258581
 GameObject:
   m_ObjectHideFlags: 0
@@ -1717,31 +1742,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be76e5f14cfee674cb30b491fb72b09b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boost: 3.5
-  positionLerpTime: 0.2
-  mouseSensitivityCurve:
-    m_Curve:
-    - time: 0
-      value: 0.5
-      inSlope: 0
-      outSlope: 5
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - time: 1
-      value: 2.5
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  rotationLerpTime: 0.01
-  invertY: 0
 --- !u!20 &1687258584
 Camera:
   m_ObjectHideFlags: 0

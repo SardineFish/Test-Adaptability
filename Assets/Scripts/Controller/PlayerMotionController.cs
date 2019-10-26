@@ -8,6 +8,9 @@ namespace Project.Controller
         public float MaxGroundSpeed = 15;
         public float MaxAirborneSpeed = 10;
         public float MaxJumpSpeedX = 10;
+        
+        [ReadOnly]
+        float JumpVelocity => 2 * JumpHeight / (JumpTime/2);
 
         protected override void Awake()
         {
@@ -29,7 +32,8 @@ namespace Project.Controller
         {
             if (Locked)
                 return false;
-            forceVelocity.y = 2 * JumpHeight / JumpTime;
+            forceVelocity.y = JumpVelocity;
+            OnGround = false;
             return true;
         }
 

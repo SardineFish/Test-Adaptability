@@ -5,15 +5,13 @@ namespace Project
 {
     public abstract class EntityBehaviour : MonoBehaviour, IEntityLifeCycle
     {
-        public GameEntity Entity
+        public GameEntity Entity { get; private set; }
+
+        protected virtual void Awake()
         {
-            get
-            {
-                var entity = GetComponent<GameEntity>();
-                if (entity == null || !entity)
-                    entity = GetComponentInParent<GameEntity>();
-                return entity;
-            }
+            Entity = GetComponent<GameEntity>();
+            if (!Entity)
+                Entity = GetComponentInParent<GameEntity>();
         }
 
 
