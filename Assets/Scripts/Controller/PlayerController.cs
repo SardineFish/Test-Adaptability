@@ -11,6 +11,10 @@ namespace Project.Controller
     {
         public Locker Locker = new Locker();
         public Collider2D PlatformCollider;
+        public float GroundMoveSpeed = 12;
+        public float AirMoveSpeed = 12;
+        public float AirMoveForce = 10;
+        public float CoyoteTime = 0.05f;
 
         Animator animator;
         PlayerMotionController motionController;
@@ -18,7 +22,13 @@ namespace Project.Controller
         ActionController actionController;
 
         event Action OnPlatformCollide;
-        
+        List<GameMap.BlockType> ContactedWallTypes = new List<GameMap.BlockType>(16);
+
+        [ReadOnly]
+        BooleanCache CachedWallContact;
+        [ReadOnly]
+        BooleanCache CachedGroundContact;
+        Vector2 contactedWallNormal;
 
         [ReadOnly]
         public string CurrentState { get; private set; } = "";
@@ -31,6 +41,23 @@ namespace Project.Controller
             motionController = GetComponent<PlayerMotionController>();
             input = GetComponent<PlayerInput>();
             actionController = GetComponent<ActionController>();
+            CachedWallContact = new BooleanCache(CoyoteTime);
+            CachedGroundContact = new BooleanCache(CoyoteTime);
+
+            motionController.OnHitWall += (contact) =>
+            {
+                contactedWallNormal = contact.normal;
+
+                var type = GameMap.BlocksMap.GetTouchedBlockType(contact.point, contact.normal);
+                ContactedWallTypes.Add(type);
+
+                if (type == GameMap.BlockType.SolidBlock)
+                    CachedWallContact.Record(Time.fixedUnscaledTime);
+            };
+            motionController.OnHitGround += (contact) =>
+            {
+                CachedGroundContact.Record(Time.fixedUnscaledTime);
+            };
         }
 
         // Start is called before the first frame update
@@ -42,7 +69,13 @@ namespace Project.Controller
         // Update is called once per frame
         void Update()
         {
+            CachedWallContact.Update(Time.fixedUnscaledTime);
+            CachedGroundContact.Update(Time.fixedUnscaledTime);
+        }
 
+        void FixedUpdate()
+        {
+            ContactedWallTypes.Clear();
         }
 
         void SetMotionParameters()
@@ -62,9 +95,18 @@ namespace Project.Controller
 
         Coroutine ChangeState(IEnumerator state) => StartCoroutine(state);
 
+
+        void DoJump()
+        {
+            motionController.Jump();
+            animator.SetTrigger("Jump");
+            input.CachedJumpPress.Clear();
+        }
+
         IEnumerator PlayerIdle()
         {
             CurrentState = "Idle";
+            motionController.VelocityLimit = new Vector2(-1, -1);
             while(true)
             {
                 SetMotionParameters();
@@ -74,7 +116,7 @@ namespace Project.Controller
 
                 if (input.Movement.magnitude > 0.1)
                 {
-                    motionController.Move(input.Movement);
+                    motionController.Move(input.Movement * GroundMoveSpeed);
                     if(motionController.ControlledVelocity.magnitude > 0.1)
                     {
                         ChangeState(PlayerMove());
@@ -93,10 +135,9 @@ namespace Project.Controller
                     yield break;
                 }
                 // jump to airborne
-                if(input.CachedJump && motionController.CachedOnGround)
+                if(input.CachedJump && CachedGroundContact)
                 {
-                    motionController.Jump();
-                    animator.SetTrigger("Jump");
+                    DoJump();
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
@@ -108,9 +149,10 @@ namespace Project.Controller
         IEnumerator PlayerMove()
         {
             CurrentState = "Move";
+            motionController.VelocityLimit = new Vector2(GroundMoveSpeed, -1);
             while (true)
             {
-                motionController.Move(input.Movement);
+                motionController.Move(input.Movement * GroundMoveSpeed);
                 SetMotionParameters();
                 SetStateParameters(false, true);
 
@@ -133,10 +175,9 @@ namespace Project.Controller
                     yield break;
                 }
                 // jump to airborne
-                else if (input.CachedJump && motionController.CachedOnGround)
+                else if (input.CachedJump && CachedGroundContact)
                 {
-                    motionController.Jump();
-                    animator.SetTrigger("Jump");
+                    DoJump();
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
@@ -149,21 +190,24 @@ namespace Project.Controller
         IEnumerator PlayerAirborne()
         {
             CurrentState = "Airborne";
+            motionController.VelocityLimit = new Vector2(AirMoveSpeed, -1);
+            motionController.XControl = ControlType.Force;
             while (true)
             {
-                motionController.Move(input.Movement);
+                motionController.Move(new Vector2(input.Movement.x * AirMoveForce, 0));
                 SetMotionParameters();
                 if(input.Crouch && input.Jump)
                 {
                     ChangeState(PlayerFall());
                     yield break;
                 }
-                else if (motionController.CachedWallContacted && input.Jump)
+                else if (motionController.WallContacted && input.CachedJumpPress && ContactedWallTypes.Contains(GameMap.BlockType.SolidBlock))
                 {
-                    //motionController.JumpWithSpeed(motionController.ContactedWallNormal.x);
+                    motionController.JumpWithSpeed(contactedWallNormal.x * AirMoveSpeed);
                 }
                 if(motionController.OnGround)
                 {
+                    motionController.XControl = ControlType.Velocity;
                     ChangeState(PlayerIdle());
                     yield break;
                 }

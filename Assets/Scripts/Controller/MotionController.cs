@@ -5,33 +5,37 @@ using System.Collections.Generic;
 
 namespace Project.Controller
 {
+    public enum ControlType
+    {
+        Velocity,
+        Force,
+        Ignored,
+        Disable,
+    }
+
     [RequireComponent(typeof(Rigidbody2D), typeof(GameEntity))]
     public class MotionController : EntityBehaviour
     {
         public float JumpHeight = 4;
         public float JumpTime = 0.5f;
+        public Vector2 VelocityLimit = new Vector2(-1, -1);
         public bool EnableGravity = true;
-        public bool IgnoreX = false;
-        public bool IgnoreY = true;
+        public ControlType XControl = ControlType.Velocity;
+        public ControlType YControl = ControlType.Ignored;
         public float OnGroundThreshold = 0.0625f;
-        public float CoyoteTime = 0.033f;
         public Locker Locker = new Locker();
         public bool Locked => Locker.Locked;
         [ReadOnly]
         public bool OnGround { get; protected set; }
         [ReadOnly]
         public bool WallContacted { get; protected set; }
-        public Vector2 ContactedWallNormal { get; protected set; }
-        [ReadOnly]
-        public BooleanCache CachedOnGround { get; protected set; }
-        public BooleanCache CachedWallContacted { get; protected set; }
 
-        protected event Action<ContactPoint2D> OnHitGround;
         protected event Action<Collision2D> OnCollide;
-        protected event Action<ContactPoint2D> OnHitWall;
+        public event Action<ContactPoint2D> OnHitGround;
+        public event Action<ContactPoint2D> OnHitWall;
 
         new Rigidbody2D rigidbody;
-        protected Vector2 controlledVelocity;
+        protected Vector2 controlledMovement;
         protected Vector2 forceVelocity;
 
         public Vector2 ControlledVelocity
@@ -41,8 +45,8 @@ namespace Project.Controller
                 if (Locked)
                     return Vector2.zero;
                 return new Vector2(
-                    IgnoreX ? 0 : controlledVelocity.x,
-                    IgnoreY ? 0 : controlledVelocity.y
+                    XControl == ControlType.Velocity ? controlledMovement.x : 0,
+                    YControl == ControlType.Velocity ? controlledMovement.y : 0
                 );
             }
         }
@@ -52,8 +56,6 @@ namespace Project.Controller
         {
             base.Awake();
             rigidbody = GetComponent<Rigidbody2D>();
-            CachedOnGround = new BooleanCache(CoyoteTime);
-            CachedWallContacted = new BooleanCache(CoyoteTime);
 
             OnCollide += (collision) =>
             {
@@ -88,21 +90,16 @@ namespace Project.Controller
             OnHitGround += (contact) =>
             {
                 OnGround = true;
-                CachedOnGround.Record(Time.fixedUnscaledTime);
             };
             OnHitWall += (contact) =>
             {
                 WallContacted = true;
-                CachedWallContacted.Record(Time.fixedUnscaledTime);
-                ContactedWallNormal = contact.normal;
             };
         }
 
 
         protected virtual void FixedUpdate()
         {
-            CachedOnGround.Update(Time.fixedUnscaledTime);
-            CachedWallContacted.Update(Time.fixedUnscaledTime);
 
             if(EnableGravity)
             {
@@ -117,16 +114,49 @@ namespace Project.Controller
                 rigidbody.gravityScale = 0;
             }
 
-            var velocity = controlledVelocity;
-            var v = new Vector2(
-                IgnoreX ? rigidbody.velocity.x : velocity.x,
-                IgnoreY ? rigidbody.velocity.y : velocity.y
-            );
+            var velocity = controlledMovement;
+            Vector2 v = velocity;
+            switch(XControl)
+            {
+                case ControlType.Disable:
+                    v.x = 0;
+                    break;
+                case ControlType.Velocity:
+                    v.x = controlledMovement.x;
+                    break;
+                case ControlType.Force:
+                    v.x = rigidbody.velocity.x;
+                    rigidbody.AddForce(new Vector2(controlledMovement.x, 0), ForceMode2D.Force);
+                    break;
+                case ControlType.Ignored:
+                    v.x = rigidbody.velocity.x;
+                    break;
+            }
+            switch(YControl)
+            {
+                case ControlType.Disable:
+                    v.y = 0;
+                    break;
+                case ControlType.Velocity:
+                    v.y = controlledMovement.y;
+                    break;
+                case ControlType.Force:
+                    v.y = rigidbody.velocity.y;
+                    rigidbody.AddForce(new Vector2(0, controlledMovement.y), ForceMode2D.Force);
+                    break;
+                case ControlType.Ignored:
+                    v.y = rigidbody.velocity.y;
+                    break;
+            }
             v.x = forceVelocity.x != 0 ? forceVelocity.x : v.x;
             v.y = forceVelocity.y != 0 ? forceVelocity.y : v.y;
+            if (VelocityLimit.x >= 0)
+                v.x = Mathf.Clamp(v.x, -VelocityLimit.x, VelocityLimit.x);
+            if (VelocityLimit.y > 0)
+                v.y = Mathf.Clamp(v.y, -VelocityLimit.y, VelocityLimit.y);
             rigidbody.velocity = v;
 
-            controlledVelocity = Vector2.zero;
+            controlledMovement = Vector2.zero;
             forceVelocity = Vector2.zero;
             OnGround = false;
             WallContacted = false;

@@ -21,6 +21,7 @@ namespace Project.Controller
         public float CameraZoom { get; private set; }
         [ReadOnly]
         public BooleanCache CachedJump { get; private set; }
+        public BooleanCache CachedJumpPress { get; private set; }
 
         GameInput input;
         void Awake()
@@ -28,6 +29,7 @@ namespace Project.Controller
             input = new GameInput();
             input.GamePlay.SetCallbacks(this);
             CachedJump = new BooleanCache(JumpCacheTime);
+            CachedJumpPress = new BooleanCache(JumpCacheTime);
         }
 
         void OnEnable()
@@ -42,9 +44,12 @@ namespace Project.Controller
 
         void FixedUpdate()
         {
+            InputSystem.Update();
             if (Jump)
                 CachedJump.Record(Time.fixedUnscaledTime);
+
             CachedJump.Update(Time.fixedUnscaledTime);
+            CachedJumpPress.Update(Time.fixedUnscaledTime);
         }
 
         public void OnMovement(InputAction.CallbackContext context)
@@ -57,7 +62,8 @@ namespace Project.Controller
             Jump = context.ReadValue<float>() > 0.5f;
             if (Jump)
             {
-                CachedJump.Record(Time.fixedUnscaledTime);
+                CachedJumpPress.Record(Time.fixedUnscaledTime);
+                //CachedJump.Record(Time.fixedUnscaledTime);
             }
         }
 

@@ -5,9 +5,6 @@ namespace Project.Controller
 {
     public class PlayerMotionController : MotionController
     {
-        public float MaxGroundSpeed = 15;
-        public float MaxAirborneSpeed = 10;
-        public float MaxJumpSpeedX = 10;
         
         [ReadOnly]
         float JumpVelocity => 2 * JumpHeight / (JumpTime/2);
@@ -17,14 +14,11 @@ namespace Project.Controller
             base.Awake();
         }
 
-        public bool Move(Vector2 movement)
+        public bool Move(Vector2 velocity)
         {
             if (Locked)
                 return false;
-            if (OnGround)
-                controlledVelocity = movement * MaxGroundSpeed;
-            else
-                controlledVelocity = movement * MaxAirborneSpeed;
+            controlledMovement = velocity;
             return true;
         }
 
@@ -41,8 +35,8 @@ namespace Project.Controller
         {
             if (Locked)
                 return false;
-            forceVelocity.y = 2 * JumpHeight / JumpTime;
-            forceVelocity.x = speedX * MaxJumpSpeedX;
+            forceVelocity.y = JumpVelocity;
+            forceVelocity.x = speedX;
             return true;
         }
     }

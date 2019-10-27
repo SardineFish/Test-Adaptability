@@ -6,7 +6,7 @@ namespace Project.GameMap
 {
     public enum BlockType
     {
-        Air,
+        None,
         Platform,
         SolidBlock,
         SlickBlock,
