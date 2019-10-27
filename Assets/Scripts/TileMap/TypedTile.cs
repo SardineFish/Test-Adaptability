@@ -10,7 +10,7 @@ namespace Project.GameMap
         Platform,
         SolidBlock,
         SlickBlock,
-        Boundary
+        Boundary,
     }
 
     [CreateAssetMenu(fileName ="Tile",menuName ="Typed Tile")]

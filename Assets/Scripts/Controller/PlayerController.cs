@@ -142,7 +142,13 @@ namespace Project.Controller
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
-                
+                // fall to airborne
+                if (!motionController.OnGround)
+                {
+                    ChangeState(PlayerAirborne());
+                    yield break;
+                }
+
                 yield return new WaitForFixedUpdate();
             }
         }
@@ -182,6 +188,12 @@ namespace Project.Controller
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
+                // fall to airborne
+                if(!motionController.OnGround)
+                {
+                    ChangeState(PlayerAirborne());
+                    yield break;
+                }
 
                 yield return new WaitForFixedUpdate();
             }
@@ -204,6 +216,7 @@ namespace Project.Controller
                 }
                 else if (motionController.WallContacted && input.CachedJumpPress && ContactedWallTypes.Contains(GameMap.BlockType.SolidBlock))
                 {
+                    actionController.SetDirection(contactedWallNormal.x);
                     motionController.JumpWithSpeed(contactedWallNormal.x * AirMoveSpeed);
                 }
                 if(motionController.OnGround)
