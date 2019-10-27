@@ -202,6 +202,14 @@ public static class Utility
         }
         yield return time;
     }
+    public static IEnumerable<float> FixedTimer(float time)
+    {
+        for (var startTime = Time.fixedTime; Time.fixedTime < startTime + time;)
+        {
+            yield return Time.fixedTime - startTime;
+        }
+        yield return time;
+    }
     public static IEnumerable<float> TimerNormalized(float time)
     {
         foreach (var t in Timer(time))

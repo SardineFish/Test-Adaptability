@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2884a201c96162b4a86644e803630ef9, type: 3}
   m_Name: Block
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -740542302506491842, guid: d3001aeead2f3c24abff13c11c60de19,
+  m_Sprite: {fileID: 5897821589236600388, guid: d3001aeead2f3c24abff13c11c60de19,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
@@ -35,3 +35,4 @@ MonoBehaviour:
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
   m_ColliderType: 1
+  MergeMode: 0

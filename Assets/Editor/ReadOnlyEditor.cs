@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
 
-[CustomAttributeEditor(typeof(ReadOnlyAttribute))]
+[CustomAttributeEditor(typeof(DisplayInInspectorAttribute))]
 class ReadOnlyEditor : AttributeEditor
 {
     public override void OnEdit(MemberInfo member, CustomEditorAttribute attr)
     {
-        var readonlyAttr = attr as ReadOnlyAttribute;
+        var readonlyAttr = attr as DisplayInInspectorAttribute;
         if (readonlyAttr == null)
             return;
 

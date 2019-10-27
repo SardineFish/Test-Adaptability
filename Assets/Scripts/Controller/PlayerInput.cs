@@ -9,17 +9,17 @@ namespace Project.Controller
     public class PlayerInput : MonoBehaviour, GameInput.IGamePlayActions
     {
         public float JumpCacheTime = 0.1f;
-        [ReadOnly]
+        [DisplayInInspector]
         public Vector2 Movement { get; private set; }
-        [ReadOnly]
+        [DisplayInInspector]
         public bool Jump { get; private set; }
-        [ReadOnly]
+        [DisplayInInspector]
         public bool Crouch { get; private set; }
-        [ReadOnly]
+        [DisplayInInspector]
         public bool Interact { get; private set; }
-        [ReadOnly]
+        [DisplayInInspector]
         public float CameraZoom { get; private set; }
-        [ReadOnly]
+        [DisplayInInspector]
         public BooleanCache CachedJump { get; private set; }
         public BooleanCache CachedJumpPress { get; private set; }
 

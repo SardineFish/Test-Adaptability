@@ -15,7 +15,7 @@ namespace Project.Controller
     {
         public FaceMethod FaceMethod;
         float direction = 1;
-        [ReadOnly]
+        [DisplayInInspector]
         public float Direction
         {
             get => direction;

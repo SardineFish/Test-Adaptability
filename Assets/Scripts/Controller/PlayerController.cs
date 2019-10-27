@@ -11,10 +11,16 @@ namespace Project.Controller
     {
         public Locker Locker = new Locker();
         public Collider2D PlatformCollider;
-        public float GroundMoveSpeed = 12;
-        public float AirMoveSpeed = 12;
-        public float MaxDropSpeed = 20;
-        public float AirMoveForce = 10;
+        public float SpeedOnGround = 10;
+        public float ForceInAir = 100;
+        public Vector2 AirSpeedLimit = new Vector2(10, 40);
+        [Delayed]
+        public float JumpHeight = 3;
+        [Delayed]
+        public float JumpTime = 0.5f;
+        public float WallJumpVelocityX = 12;
+        public float WallJumpHeight = 3;
+        public float WallJumpFreezeTime = 0.3f;
         public float CoyoteTime = 0.05f;
 
         Animator animator;
@@ -25,13 +31,21 @@ namespace Project.Controller
         event Action OnPlatformCollide;
         List<GameMap.BlockType> ContactedWallTypes = new List<GameMap.BlockType>(16);
 
-        [ReadOnly]
+        [DisplayInInspector]
         BooleanCache CachedWallContact;
-        [ReadOnly]
+        [DisplayInInspector]
         BooleanCache CachedGroundContact;
+        [DisplayInInspector]
         Vector2 contactedWallNormal;
 
-        [ReadOnly]
+        [DisplayInInspector]
+        float WallJumpVelocityY => Mathf.Sqrt(2 * Gravity * WallJumpHeight);
+        [DisplayInInspector]
+        float JumpVelocity => 2 * JumpHeight / (JumpTime / 2);
+        [DisplayInInspector]
+        float Gravity => 2 * JumpHeight / Mathf.Pow(JumpTime / 2, 2);
+
+        [DisplayInInspector]
         public string CurrentState { get; private set; } = "";
         
 
@@ -76,6 +90,7 @@ namespace Project.Controller
 
         void FixedUpdate()
         {
+            motionController.Gravity = Gravity;
             ContactedWallTypes.Clear();
         }
 
@@ -97,17 +112,37 @@ namespace Project.Controller
         Coroutine ChangeState(IEnumerator state) => StartCoroutine(state);
 
 
-        void DoJump()
+        bool DoJump()
         {
-            motionController.Jump();
-            animator.SetTrigger("Jump");
-            input.CachedJumpPress.Clear();
+            if(input.CachedJumpPress && CachedGroundContact)
+            {
+                motionController.Jump(JumpVelocity);
+                animator.SetTrigger("Jump");
+                input.CachedJumpPress.Clear();
+                CachedGroundContact.Clear();
+                input.CachedJumpPress.Clear();
+                return true;
+            }
+            return false;
+        }
+
+        bool DoWallJump()
+        {
+            if(motionController.WallContacted && input.CachedJumpPress && ContactedWallTypes.Contains(GameMap.BlockType.SolidBlock))
+            {
+                actionController.SetDirection(contactedWallNormal.x);
+                motionController.Jump(new Vector2(WallJumpVelocityX * contactedWallNormal.x, WallJumpVelocityY));
+                input.CachedJumpPress.Clear();
+                CachedWallContact.Clear();
+                return true;
+            }
+            return false;
         }
 
         IEnumerator PlayerIdle()
         {
             CurrentState = "Idle";
-            motionController.VelocityLimit = new Vector2(GroundMoveSpeed, MaxDropSpeed);
+            motionController.VelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
             while(true)
             {
                 SetMotionParameters();
@@ -117,7 +152,7 @@ namespace Project.Controller
 
                 if (input.Movement.magnitude > 0.1)
                 {
-                    motionController.Move(input.Movement * GroundMoveSpeed);
+                    motionController.Move(input.Movement * SpeedOnGround);
                     if(motionController.ControlledVelocity.magnitude > 0.1)
                     {
                         ChangeState(PlayerMove());
@@ -136,9 +171,8 @@ namespace Project.Controller
                     yield break;
                 }
                 // jump to airborne
-                if(input.CachedJump && CachedGroundContact)
+                if(DoJump())
                 {
-                    DoJump();
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
@@ -156,10 +190,10 @@ namespace Project.Controller
         IEnumerator PlayerMove()
         {
             CurrentState = "Move";
-            motionController.VelocityLimit = new Vector2(GroundMoveSpeed, -1);
+            motionController.VelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
             while (true)
             {
-                motionController.Move(input.Movement * GroundMoveSpeed);
+                motionController.Move(input.Movement * SpeedOnGround);
                 SetMotionParameters();
                 SetStateParameters(false, true);
 
@@ -182,9 +216,8 @@ namespace Project.Controller
                     yield break;
                 }
                 // jump to airborne
-                else if (input.CachedJump && CachedGroundContact)
+                else if (DoJump())
                 {
-                    DoJump();
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
@@ -203,21 +236,21 @@ namespace Project.Controller
         IEnumerator PlayerAirborne()
         {
             CurrentState = "Airborne";
-            motionController.VelocityLimit = new Vector2(AirMoveSpeed, MaxDropSpeed);
+            motionController.VelocityLimit = AirSpeedLimit;
             motionController.XControl = ControlType.Force;
             while (true)
             {
-                motionController.Move(new Vector2(input.Movement.x * AirMoveForce, 0));
+                motionController.Move(new Vector2(input.Movement.x * ForceInAir, 0));
                 SetMotionParameters();
                 if(input.Crouch && input.Jump)
                 {
                     ChangeState(PlayerFall());
                     yield break;
                 }
-                else if (motionController.WallContacted && input.CachedJumpPress && ContactedWallTypes.Contains(GameMap.BlockType.SolidBlock))
+                else if (DoWallJump())
                 {
-                    actionController.SetDirection(contactedWallNormal.x);
-                    motionController.JumpWithSpeed(contactedWallNormal.x * AirMoveSpeed);
+                    ChangeState(PlayerWallJump());
+                    yield break;
                 }
                 if(motionController.OnGround)
                 {
@@ -260,7 +293,10 @@ namespace Project.Controller
             if (PlatformCollider)
                 PlatformCollider.enabled = false;
             CurrentState = "Fall";
-            motionController.VelocityLimit = new Vector2(AirMoveSpeed, MaxDropSpeed);
+
+            motionController.VelocityLimit = AirSpeedLimit;
+            motionController.XControl = ControlType.Force;
+
             GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.AllowPass(Entity));
             while (true)
             {
@@ -289,6 +325,34 @@ namespace Project.Controller
                     yield break;
                 }
             }
+        }
+
+        IEnumerator PlayerWallJump()
+        {
+            var dir = contactedWallNormal.x;
+            motionController.VelocityLimit = AirSpeedLimit;
+            motionController.XControl = ControlType.Ignored;
+
+            foreach (var t in Utility.Timer(WallJumpFreezeTime))
+            {
+                SetMotionParameters();
+                actionController.SetDirection(dir);
+
+                if (motionController.OnGround)
+                {
+                    ChangeState(PlayerIdle());
+                    yield break;
+                }
+                if (motionController.WallContacted && input.CachedJumpPress && ContactedWallTypes.Contains(GameMap.BlockType.SolidBlock))
+                {
+                    DoWallJump();
+                    ChangeState(PlayerWallJump());
+                    yield break;
+                }
+
+                yield return new WaitForFixedUpdate();
+            }
+            ChangeState(PlayerAirborne());
         }
 
         void OnCollisionEnter2D(Collision2D collision)

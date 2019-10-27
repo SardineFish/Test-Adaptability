@@ -16,8 +16,6 @@ namespace Project.Controller
     [RequireComponent(typeof(Rigidbody2D), typeof(GameEntity))]
     public class MotionController : EntityBehaviour
     {
-        public float JumpHeight = 4;
-        public float JumpTime = 0.5f;
         public Vector2 VelocityLimit = new Vector2(-1, -1);
         public bool EnableGravity = true;
         public ControlType XControl = ControlType.Velocity;
@@ -25,9 +23,11 @@ namespace Project.Controller
         public float OnGroundThreshold = 0.0625f;
         public Locker Locker = new Locker();
         public bool Locked => Locker.Locked;
-        [ReadOnly]
+        [DisplayInInspector]
+        public float Gravity { get; set; }
+        [DisplayInInspector]
         public bool OnGround { get; protected set; }
-        [ReadOnly]
+        [DisplayInInspector]
         public bool WallContacted { get; protected set; }
 
         protected event Action<Collision2D> OnCollide;
@@ -103,10 +103,7 @@ namespace Project.Controller
 
             if(EnableGravity)
             {
-                // To allow jumping adjustment by height & time.
-                var gravity = 2 * JumpHeight / Mathf.Pow(JumpTime / 2, 2);
-                var jumpVelocity = Mathf.Sqrt(2 * gravity * JumpHeight);
-                rigidbody.gravityScale = gravity / Mathf.Abs(Physics2D.gravity.y);
+                rigidbody.gravityScale = Gravity / Mathf.Abs(Physics2D.gravity.y);
 
             }
             else

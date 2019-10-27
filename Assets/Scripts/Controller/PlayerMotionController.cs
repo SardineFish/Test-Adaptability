@@ -5,9 +5,6 @@ namespace Project.Controller
 {
     public class PlayerMotionController : MotionController
     {
-        
-        [ReadOnly]
-        float JumpVelocity => 2 * JumpHeight / (JumpTime/2);
 
         protected override void Awake()
         {
@@ -22,21 +19,20 @@ namespace Project.Controller
             return true;
         }
 
-        public bool Jump()
+        public bool Jump(float velocity)
         {
             if (Locked)
                 return false;
-            forceVelocity.y = JumpVelocity;
+            forceVelocity.y = velocity;
             OnGround = false;
             return true;
         }
 
-        public bool JumpWithSpeed(float speedX)
+        public bool Jump(Vector2 velocity)
         {
             if (Locked)
                 return false;
-            forceVelocity.y = JumpVelocity;
-            forceVelocity.x = speedX;
+            forceVelocity = velocity;
             return true;
         }
     }

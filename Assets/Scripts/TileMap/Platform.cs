@@ -6,7 +6,7 @@ namespace Project.GameMap
 {
     public class Platform : MonoBehaviour
     {
-        [ReadOnly]
+        [DisplayInInspector]
         bool enablePass = false;
         new BoxCollider2D collider;
         PlatformEffector2D platformEffector;
