@@ -5337,7 +5337,7 @@ MonoBehaviour:
   XControl: 0
   YControl: 2
   OnGroundThreshold: 0.0625
-  BodyCollider: {fileID: 0}
+  BodyCollider: {fileID: 910009327}
 --- !u!50 &1271223352
 Rigidbody2D:
   serializedVersion: 4
@@ -5373,6 +5373,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlatformCollider: {fileID: 1558080640}
   SpeedOnGround: 10
+  GroundDamping: 0.5
   ForceInAir: 100
   AirSpeedLimit: {x: 10, y: 40}
   JumpHeight: 3.5

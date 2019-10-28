@@ -34,6 +34,9 @@ namespace Project.Controller
         protected event Action<Collision2D> OnCollide;
         public event Action<ContactPoint2D> OnHitGround;
         public event Action<ContactPoint2D> OnHitWall;
+        public event Action<Blocks.Block, Vector2> OnBlockContacted;
+        public event Action<Blocks.Block, Vector2> OnBlockWallContacted;
+        public event Action<Blocks.Block> OnBlockGroundContacted;
 
         new Rigidbody2D rigidbody;
         protected Vector2 controlledMovement;
@@ -109,10 +112,51 @@ namespace Project.Controller
         protected virtual void FixedUpdate()
         {
 
+            // DetectBlockContact
+            {
+                var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
+                for (var i = 0; i < count; i++)
+                {
+                    var block = hits[i].rigidbody
+                        ?.GetComponent<GameMap.IBlockInstance>()
+                        ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                    if(block)
+                    {
+                        OnBlockContacted?.Invoke(block, hits[i].normal);
+                        OnBlockWallContacted?.Invoke(block, hits[i].normal);
+                    }
+                }
+                count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.right, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
+                for (var i = 0; i < count; i++)
+                {
+                    var block = hits[i].rigidbody
+                        ?.GetComponent<GameMap.IBlockInstance>()
+                        ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                    if (block)
+                    {
+                        OnBlockContacted?.Invoke(block, hits[i].normal);
+                        OnBlockWallContacted?.Invoke(block, hits[i].normal);
+                    }
+                }
+                count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.down, hits, BodyCollider.size.y / 2 + 0.0625f, 1 << 11);
+                for (var i = 0; i < count; i++)
+                {
+                    var block = hits[i].rigidbody
+                        ?.GetComponent<GameMap.IBlockInstance>()
+                        ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                    if (block)
+                    {
+                        OnBlockContacted?.Invoke(block, hits[i].normal);
+                        OnBlockGroundContacted?.Invoke(block);
+                    }
+                }
+            }
+
             if(EnableGravity)
             {
                 rigidbody.gravityScale = Gravity / Mathf.Abs(Physics2D.gravity.y);
 
+                // Follow the motion block
                 if(OnGround)
                 {
                     var count = Physics2D.RaycastNonAlloc(transform.position, Vector2.down, hits, 0.0625f, 1 << 11);

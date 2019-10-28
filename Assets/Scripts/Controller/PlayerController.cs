@@ -12,6 +12,8 @@ namespace Project.Controller
         public Locker Locker = new Locker();
         public Collider2D PlatformCollider;
         public float SpeedOnGround = 10;
+        [Range(0, 1)]
+        public float GroundDamping = 0.5f;
         public float ForceInAir = 100;
         public Vector2 AirSpeedLimit = new Vector2(10, 40);
         [Delayed]
@@ -59,12 +61,18 @@ namespace Project.Controller
             CachedWallContact = new BooleanCache(CoyoteTime);
             CachedGroundContact = new BooleanCache(CoyoteTime);
 
-            motionController.OnHitWall += (contact) =>
+            /*motionController.OnHitWall += (contact) =>
             {
                 contactedWallNormal = contact.normal;
                 var block = contact.rigidbody.GetComponent<GameMap.IBlockInstance>()?.GetContactedBlock(contact.point, contact.normal);
                 contactedBlocks.Add(block);
 
+                if (block is Blocks.SolidBlock)
+                    CachedWallContact.Record(Time.fixedUnscaledTime);
+            };*/
+            motionController.OnBlockWallContacted += (block, normal) =>
+            {
+                contactedWallNormal = normal;
                 if (block is Blocks.SolidBlock)
                     CachedWallContact.Record(Time.fixedUnscaledTime);
             };
@@ -98,6 +106,7 @@ namespace Project.Controller
             animator.SetBool("OnGround", motionController.OnGround);
             animator.SetFloat("VelocityX", motionController.velocity.x);
             animator.SetFloat("VelocityY", motionController.velocity.y);
+            animator.SetFloat("ControlledSpeedX", Mathf.Abs(motionController.ControlledVelocity.x));
             actionController.SetDirection(input.Movement.x);
         }
 
@@ -138,6 +147,13 @@ namespace Project.Controller
             return false;
         }
 
+        void DoMoveGround()
+        {
+            var damping = (1 - Mathf.Sqrt(GroundDamping)) * 60;
+            var velocity = Mathf.Lerp(motionController.velocity.x, input.Movement.x * SpeedOnGround, Time.fixedDeltaTime * damping);
+            motionController.Move(Vector2.right * velocity);
+        }
+
         IEnumerator PlayerIdle()
         {
             CurrentState = "Idle";
@@ -151,7 +167,7 @@ namespace Project.Controller
 
                 if (input.Movement.magnitude > 0.1)
                 {
-                    motionController.Move(input.Movement * SpeedOnGround);
+                    DoMoveGround();
                     if(motionController.ControlledVelocity.magnitude > 0.1)
                     {
                         ChangeState(PlayerMove());
@@ -193,7 +209,7 @@ namespace Project.Controller
             motionController.VelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
             while (true)
             {
-                motionController.Move(input.Movement * SpeedOnGround);
+                DoMoveGround();
                 SetMotionParameters();
                 SetStateParameters(false, true);
 
