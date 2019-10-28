@@ -29,7 +29,7 @@ namespace Project.Controller
         ActionController actionController;
 
         event Action OnPlatformCollide;
-        List<GameMap.BlockType> ContactedWallTypes = new List<GameMap.BlockType>(16);
+        HashSet<Blocks.Block> contactedBlocks = new HashSet<Blocks.Block>();
 
         [DisplayInInspector]
         BooleanCache CachedWallContact;
@@ -62,11 +62,10 @@ namespace Project.Controller
             motionController.OnHitWall += (contact) =>
             {
                 contactedWallNormal = contact.normal;
+                var block = contact.rigidbody.GetComponent<GameMap.IBlockInstance>()?.GetContactedBlock(contact.point, contact.normal);
+                contactedBlocks.Add(block);
 
-                var type = GameMap.BlocksMap.GetTouchedBlockType(contact.point, contact.normal);
-                ContactedWallTypes.Add(type);
-
-                if (type == GameMap.BlockType.SolidBlock)
+                if (block is Blocks.SolidBlock)
                     CachedWallContact.Record(Time.fixedUnscaledTime);
             };
             motionController.OnHitGround += (contact) =>
@@ -91,7 +90,7 @@ namespace Project.Controller
         void FixedUpdate()
         {
             motionController.Gravity = Gravity;
-            ContactedWallTypes.Clear();
+            contactedBlocks.Clear();
         }
 
         void SetMotionParameters()
@@ -128,7 +127,7 @@ namespace Project.Controller
 
         bool DoWallJump()
         {
-            if(motionController.WallContacted && input.CachedJumpPress && ContactedWallTypes.Contains(GameMap.BlockType.SolidBlock))
+            if(CachedWallContact && input.CachedJumpPress)
             {
                 actionController.SetDirection(contactedWallNormal.x);
                 motionController.Jump(new Vector2(WallJumpVelocityX * contactedWallNormal.x, WallJumpVelocityY));
@@ -312,6 +311,7 @@ namespace Project.Controller
                     if (PlatformCollider)
                         PlatformCollider.enabled = true;
                     GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.BlockPass(Entity));
+                    motionController.XControl = ControlType.Velocity;
                     ChangeState(PlayerIdle());
                     yield break;
                 }
@@ -340,12 +340,12 @@ namespace Project.Controller
 
                 if (motionController.OnGround)
                 {
+                    motionController.XControl = ControlType.Velocity;
                     ChangeState(PlayerIdle());
                     yield break;
                 }
-                if (motionController.WallContacted && input.CachedJumpPress && ContactedWallTypes.Contains(GameMap.BlockType.SolidBlock))
+                if (DoWallJump())
                 {
-                    DoWallJump();
                     ChangeState(PlayerWallJump());
                     yield break;
                 }

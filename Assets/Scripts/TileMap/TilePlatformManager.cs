@@ -11,7 +11,7 @@ namespace Project.GameMap
     {
         public BoundsInt Bound;
         public Transform PlatformContainer;
-        public static List<Platform> Platforms { get; private set; }
+        public static List<PlatformInstance> Platforms { get; private set; }
         
         Tilemap tilemap;
         private void Awake()
@@ -58,7 +58,7 @@ namespace Project.GameMap
                 effector.surfaceArc = 170;
                 var rigidBody = obj.AddComponent<Rigidbody2D>();
                 rigidBody.bodyType = RigidbodyType2D.Static;
-                return obj.AddComponent<Platform>();
+                return obj.AddComponent<PlatformInstance>();
             }).ToList();
         }
 

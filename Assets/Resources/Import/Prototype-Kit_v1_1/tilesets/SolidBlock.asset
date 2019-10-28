@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2884a201c96162b4a86644e803630ef9, type: 3}
-  m_Name: Block 1
+  m_Script: {fileID: 11500000, guid: c0bc05eb106da4845b1898215dbaf12f, type: 3}
+  m_Name: SolidBlock
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 5897821589236600388, guid: d3001aeead2f3c24abff13c11c60de19,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

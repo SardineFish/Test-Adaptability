@@ -1,48 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
-namespace Project.GameMap
+namespace Project.Blocks
 {
-    public class Platform : MonoBehaviour
+    [CreateAssetMenu(fileName ="PlatformBlock", menuName ="Blocks/Platform")]
+    public class Platform : Block
     {
-        [DisplayInInspector]
-        bool enablePass = false;
-        new BoxCollider2D collider;
-        PlatformEffector2D platformEffector;
-        List<GameEntity> passingEntities;
-
-        private void Awake()
+        public override void ProcessMergedBlocks(MergedBlocks blocks)
         {
-            collider = GetComponent<BoxCollider2D>();
-            platformEffector = GetComponent<PlatformEffector2D>();
+            var instance = GameMap.BlocksMap.CreateBlockInstance(this);
+            instance.transform.position = blocks.Bound.center;
+            instance.Blocks = blocks.Blocks;
+            instance.EnableRenderer = true;
+            instance.gameObject.layer = 10;
+            instance.gameObject.name = $"Platform{blocks.Bound.center.x}-{blocks.Bound.center.y}";
+            var collider = instance.gameObject.AddComponent<BoxCollider2D>();
+            collider.size = new Vector2(blocks.Bound.size.x, blocks.Bound.size.y);
+            collider.usedByEffector = true;
+            var effector = instance.gameObject.AddComponent<PlatformEffector2D>();
+            effector.useColliderMask = false;
+            effector.sideArc = 0;
+            effector.surfaceArc = 170;
+            var rigidBody = instance.gameObject.AddComponent<Rigidbody2D>();
+            rigidBody.bodyType = RigidbodyType2D.Static;
+            var platform = instance.gameObject.AddComponent<GameMap.PlatformInstance>();
         }
 
-        Collider2D[] overlapColliders = new Collider2D[16];
-        void Update()
+        public override void PostBlockProcess(BlockData data)
         {
-            if (enablePass)
-                return;
-            if(!Physics2D.OverlapBox(transform.position.ToVector2() + collider.offset, collider.size, 0, 1 << 9))
-            {
-                collider.enabled = true;
-            }
-        }
-
-        void OnTriggerExit2D(Collider2D collision)
-        {
-
-        }
-
-        public void AllowPass(GameEntity entity)
-        {
-            enablePass = true;
-            collider.enabled = false;
-        }
-
-        public void BlockPass(GameEntity entity)
-        {
-            enablePass = false;
+            GameMap.BlocksMap.RemoveBlock(data.Position);
         }
     }
 
