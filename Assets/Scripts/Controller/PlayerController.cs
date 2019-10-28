@@ -178,6 +178,7 @@ namespace Project.Controller
                 // fall to airborne
                 if (!motionController.OnGround)
                 {
+                    motionController.velocity = Vector2.Scale(motionController.velocity, new Vector2(0, 1));
                     ChangeState(PlayerAirborne());
                     yield break;
                 }
@@ -223,6 +224,7 @@ namespace Project.Controller
                 // fall to airborne
                 if(!motionController.OnGround)
                 {
+                    motionController.velocity = Vector2.Scale(motionController.velocity, new Vector2(0, 1));
                     ChangeState(PlayerAirborne());
                     yield break;
                 }

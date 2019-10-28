@@ -22,6 +22,7 @@ namespace Project.Controller
         public ControlType YControl = ControlType.Ignored;
         public float OnGroundThreshold = 0.0625f;
         public Locker Locker = new Locker();
+        public BoxCollider2D BodyCollider;
         public bool Locked => Locker.Locked;
         [DisplayInInspector]
         public float Gravity { get; set; }
@@ -37,6 +38,9 @@ namespace Project.Controller
         new Rigidbody2D rigidbody;
         protected Vector2 controlledMovement;
         protected Vector2 forceVelocity;
+        protected Vector2 surfaceVelocity;
+
+        RaycastHit2D[] hits = new RaycastHit2D[64];
 
         public Vector2 ControlledVelocity
         {
@@ -50,7 +54,11 @@ namespace Project.Controller
                 );
             }
         }
-        public Vector2 velocity => rigidbody.velocity;
+        public Vector2 velocity
+        {
+            get => rigidbody.velocity;
+            set => rigidbody.velocity = value;
+        }
 
         protected override void Awake()
         {
@@ -66,7 +74,7 @@ namespace Project.Controller
                     var dot = Vector2.Dot(contract.normal, Vector2.up);
                     Debug.DrawLine(contract.point, contract.point + contract.normal, Color.red);
                     if (Mathf.Approximately(1, dot)
-                        && Mathf.Abs(localPoint.y) <= OnGroundThreshold
+                        //&& localPoint.y <= OnGroundThreshold
                         && contract.relativeVelocity.y >= -0.01)
                     {
                         //Debug.Log("ground");
@@ -105,11 +113,24 @@ namespace Project.Controller
             {
                 rigidbody.gravityScale = Gravity / Mathf.Abs(Physics2D.gravity.y);
 
+                if(OnGround)
+                {
+                    var count = Physics2D.RaycastNonAlloc(transform.position, Vector2.down, hits, 0.0625f, 1 << 11);
+                    for (int i = 0; i < count; i++)
+                    {
+                        var data = hits[i].rigidbody
+                            ?.GetComponent<GameMap.IBlockInstance>()
+                            ?.GetData<Blocks.MotionBlock.MotionData>(hits[i].point, hits[i].normal);
+                        if (data != null)
+                            surfaceVelocity = Vector2.Dot(data.velocity, Vector2.right) * Vector2.right;
+                    }
+                }
             }
             else
             {
                 rigidbody.gravityScale = 0;
             }
+            
 
             var velocity = controlledMovement;
             Vector2 v = velocity;
@@ -151,12 +172,19 @@ namespace Project.Controller
                 v.x = Mathf.Clamp(v.x, -VelocityLimit.x, VelocityLimit.x);
             if (VelocityLimit.y > 0)
                 v.y = Mathf.Clamp(v.y, -VelocityLimit.y, VelocityLimit.y);
-            rigidbody.velocity = v;
+
+            rigidbody.velocity = v + surfaceVelocity;
 
             controlledMovement = Vector2.zero;
             forceVelocity = Vector2.zero;
             OnGround = false;
             WallContacted = false;
+            surfaceVelocity = Vector2.zero;
+        }
+
+        void UpdateCollision()
+        {
+
         }
 
         private void OnCollisionStay2D(Collision2D collision)

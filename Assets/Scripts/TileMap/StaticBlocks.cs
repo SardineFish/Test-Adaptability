@@ -23,5 +23,8 @@ namespace Project.GameMap
             point = point - normal * 0.01625f;
             return TileMap.GetTile<Block>(new Vector3Int(Mathf.FloorToInt(point.x), Mathf.FloorToInt(point.y), 0));
         }
+
+        public T GetData<T>(Vector3 point, Vector3 normal) where T : BlockInstanceData
+            => null;
     }
 }

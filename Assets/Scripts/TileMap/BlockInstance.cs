@@ -90,6 +90,9 @@ namespace Project.GameMap
             => data as T;
         public void SetData<T>(T data) where T : BlockInstanceData
             => this.data = data;
+
+        public T GetData<T>(Vector3 point, Vector3 normal) where T : BlockInstanceData
+            => data as T;
     }
 
     public abstract class BlockInstanceData { }
