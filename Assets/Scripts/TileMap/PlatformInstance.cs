@@ -16,6 +16,7 @@ namespace Project.GameMap
         {
             collider = GetComponent<BoxCollider2D>();
             platformEffector = GetComponent<PlatformEffector2D>();
+            
         }
 
         Collider2D[] overlapColliders = new Collider2D[16];

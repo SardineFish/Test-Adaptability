@@ -16,7 +16,7 @@ TagManager:
   - PostProcessing
   - Body
   - OneWayPlatform
-  - SolidBlock
+  - Blocks
   - PlatformFoot
   - SceneBoundary
   - CameraCollider

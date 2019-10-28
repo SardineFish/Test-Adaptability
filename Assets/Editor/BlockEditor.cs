@@ -10,15 +10,19 @@ using UnityEngine.UIElements;
 
 namespace Project.Editor
 {
-    [CustomEditor(typeof(Block))]
+    [CustomEditor(typeof(Block), true)]
+    [CanEditMultipleObjects]
     class BlockEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
             var block = target as Block;
-            GUILayout.Label(AssetPreview.GetAssetPreview(block.sprite));
-            EditorGUI.DrawTextureTransparent(GUILayoutUtility.GetRect(100, 100), AssetPreview.GetAssetPreview(block.sprite), ScaleMode.ScaleToFit);
+            if(block.sprite)
+            {
+                GUILayout.Label(AssetPreview.GetAssetPreview(block.sprite));
+                EditorGUI.DrawTextureTransparent(GUILayoutUtility.GetRect(100, 100), AssetPreview.GetAssetPreview(block.sprite), ScaleMode.ScaleToFit);
+            }
         }
         public override bool HasPreviewGUI()
         {

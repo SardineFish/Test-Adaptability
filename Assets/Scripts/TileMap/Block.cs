@@ -16,6 +16,7 @@ namespace Project.Blocks
     [CreateAssetMenu(fileName ="Block",menuName ="Blocks/Block")]
     public class Block : Tile
     {
+        public bool Static = true;
         public BlockMergeMode MergeMode = BlockMergeMode.None;
         public virtual BlockData GetBlockData(Vector2Int pos)
         {
@@ -28,6 +29,16 @@ namespace Project.Blocks
         }
 
         public virtual void PostBlockProcess(BlockData data)
+        {
+
+        }
+
+        public virtual void UpdateInstance(GameMap.BlockInstance instance)
+        {
+
+        }
+
+        public virtual void OnCollision(GameMap.BlockInstance instance, Collision2D collision)
         {
 
         }

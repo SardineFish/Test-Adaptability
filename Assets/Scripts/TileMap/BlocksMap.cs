@@ -11,14 +11,17 @@ namespace Project.GameMap
     {
         public Transform BoundaryObject;
         public Transform InstanceBlocks;
+        public StaticBlocks StaticBlocks;
         public BoundsInt Bound;
         public List<BlockData> Blocks { get; private set; }
-        Tilemap tilemap;
+        public Tilemap tileMap;
 
-        private void Reset()
+
+        private void Awake()
         {
+            tileMap = GetComponent<Tilemap>();
             BoundaryObject = transform.Find("Boundary");
-            if(!BoundaryObject)
+            if (!BoundaryObject)
             {
                 var obj = new GameObject();
                 obj.name = "Boundary";
@@ -26,18 +29,22 @@ namespace Project.GameMap
                 BoundaryObject = obj.transform;
             }
             InstanceBlocks = transform.Find("Instances");
-            if(!InstanceBlocks)
+            if (!InstanceBlocks)
             {
                 var obj = new GameObject();
                 obj.name = "Instances";
                 obj.transform.parent = transform;
                 InstanceBlocks = obj.transform;
             }
-        }
+            var staticBlockTransform = transform.Find("StaticBlocks");
+            if (!staticBlockTransform)
+            {
+                var obj = new GameObject();
+                obj.name = "StaticBlocks";
+                obj.transform.parent = transform;
+                StaticBlocks = obj.AddComponent<StaticBlocks>();
 
-        private void Awake()
-        {
-            tilemap = GetComponent<Tilemap>();
+            }
         }
 
         private void Start()
@@ -70,6 +77,11 @@ namespace Project.GameMap
             {
                 block.BlockType.PostBlockProcess(block);
             }
+
+            Blocks
+                .Where(block => block.BlockType.Static)
+                .ForEach(block => this.StaticBlocks.TileMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
+            GetComponent<TilemapRenderer>().enabled = false;
         }
 
         List<BlockData> TraverseBlocks()
@@ -80,7 +92,7 @@ namespace Project.GameMap
             {
                 for (var x = Bound.position.x; x < Bound.size.x; x++)
                 {
-                    var block = tilemap.GetTile(new Vector3Int(x, y, 0)) as Block;
+                    var block = tileMap.GetTile(new Vector3Int(x, y, 0)) as Block;
                     if(!(block is null))
                     {
                         blocks.Add(block.GetBlockData(new Vector2Int(x, y)));
@@ -92,10 +104,10 @@ namespace Project.GameMap
 
         IEnumerable<BlockData> GetNeighbors(BlockData block)
         {
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
+            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
+            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
+            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
+            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
         }
 
         MergedBlocks MergeBlocks(BlockData startBlock, HashSet<BlockData> visitedBlocks)
@@ -132,29 +144,33 @@ namespace Project.GameMap
         public static BlockType GetTouchedBlockType(Vector2 point, Vector2 normal)
         {
             point = point - normal * 0.01625f;
-            var tile = Instance.tilemap.GetTile<TypedTile>(new Vector3Int(Mathf.FloorToInt(point.x), Mathf.FloorToInt(point.y), 0));
+            var tile = Instance.tileMap.GetTile<TypedTile>(new Vector3Int(Mathf.FloorToInt(point.x), Mathf.FloorToInt(point.y), 0));
             if (tile)
                 return tile.BlockType;
             return BlockType.None;
         }
 
         public static BlockInstance CreateBlockInstance(Block block)
+            => CreateBlockInstance<BlockInstanceData>(block, null);
+        public static BlockInstance CreateBlockInstance<T>(Block block, T data) where T : BlockInstanceData
         {
             var obj = new GameObject();
             obj.transform.parent = Instance.InstanceBlocks;
             var instance = obj.AddComponent<BlockInstance>();
             instance.BlockType = block;
+            instance.SetData(data);
+            
             return instance;
         }
 
         public static void RemoveBlock(Vector2Int pos)
-            => Instance.tilemap.SetTile(pos.ToVector3Int(), null);
+            => Instance.tileMap.SetTile(pos.ToVector3Int(), null);
 
         public static void GetBlock(Vector2Int pos)
-            => Instance.tilemap.GetTile<Block>(pos.ToVector3Int());
+            => Instance.tileMap.GetTile<Block>(pos.ToVector3Int());
 
         public static void GetBlock<T>(Vector2Int pos) where T : Block
-            => Instance.tilemap.GetTile<T>(pos.ToVector3Int());
+            => Instance.tileMap.GetTile<T>(pos.ToVector3Int());
 
         private void OnDrawGizmosSelected()
         {
