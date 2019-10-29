@@ -33,6 +33,11 @@ namespace Project.Blocks
 
         }
 
+        public virtual void OnBlockObjectCreated(GameMap.BlockInstance instance, GameObject obj, BlockData block)
+        {
+
+        }
+
         public virtual void UpdateInstance(GameMap.BlockInstance instance)
         {
 

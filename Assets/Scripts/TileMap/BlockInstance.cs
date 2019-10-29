@@ -25,6 +25,7 @@ namespace Project.GameMap
 
         private void Awake()
         {
+            GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             gameObject.layer = 11;
         }
 
@@ -65,6 +66,7 @@ namespace Project.GameMap
                         collider.size = Vector2.one;
                         collider.usedByComposite = true;
                     }
+                    BlockType.OnBlockObjectCreated(this, obj, block);
                     return obj;
                 }).ToList();
             }

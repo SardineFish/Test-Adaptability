@@ -52,6 +52,8 @@ namespace Project.Blocks
                 Debug.DrawLine(pos, pos + dir, Color.red);
                 for (int i = 0; i < count; i++)
                 {
+                    if (hits[i].collider.isTrigger)
+                        continue;
                     if (hits[i].rigidbody == instance.GetComponent<Rigidbody2D>())
                         continue;
                     var block = hits[i].rigidbody?.GetComponent<IBlockInstance>()?.GetContactedBlock(hits[i].point, hits[i].normal);
