@@ -41,7 +41,7 @@ namespace Project.Controller
         Vector2 contactedWallNormal;
 
         [DisplayInInspector]
-        float WallJumpVelocityY => Mathf.Sqrt(2 * Gravity * WallJumpHeight);
+        float WallJumpVelocityY => CalculateJumpVelocity(WallJumpHeight);
         [DisplayInInspector]
         float JumpVelocity => 2 * JumpHeight / (JumpTime / 2);
         [DisplayInInspector]
@@ -61,15 +61,6 @@ namespace Project.Controller
             CachedWallContact = new BooleanCache(CoyoteTime);
             CachedGroundContact = new BooleanCache(CoyoteTime);
 
-            /*motionController.OnHitWall += (contact) =>
-            {
-                contactedWallNormal = contact.normal;
-                var block = contact.rigidbody.GetComponent<GameMap.IBlockInstance>()?.GetContactedBlock(contact.point, contact.normal);
-                contactedBlocks.Add(block);
-
-                if (block is Blocks.SolidBlock)
-                    CachedWallContact.Record(Time.fixedUnscaledTime);
-            };*/
             motionController.OnBlockWallContacted += (block, normal) =>
             {
                 contactedWallNormal = normal;
@@ -79,6 +70,20 @@ namespace Project.Controller
             motionController.OnHitGround += (contact) =>
             {
                 CachedGroundContact.Record(Time.fixedUnscaledTime);
+            };
+            motionController.OnPreBlockDetect += () =>
+            {
+                contactedBlocks.Clear();
+            };
+            motionController.OnBlockContacted += (block, point, normal) =>
+            {
+                contactedBlocks.Add(block);
+                var processor = block.ProcessPlayerContacted(Entity, point, normal);
+                if (processor != null)
+                {
+                    StopAllCoroutines();
+                    StartCoroutine(SpecialState(processor));
+                }
             };
         }
 
@@ -100,7 +105,10 @@ namespace Project.Controller
             motionController.Gravity = Gravity;
             contactedBlocks.Clear();
         }
-
+        public bool IsContactedWith(Blocks.Block block)
+            => contactedBlocks.Contains(block);
+        public float CalculateJumpVelocity(float height)
+            => Mathf.Sqrt(2 * Gravity * height);
         void SetMotionParameters()
         {
             animator.SetBool("OnGround", motionController.OnGround);
@@ -371,6 +379,21 @@ namespace Project.Controller
                 yield return new WaitForFixedUpdate();
             }
             ChangeState(PlayerAirborne());
+        }
+
+        IEnumerator SpecialState(IEnumerator processor)
+        {
+            while(processor.MoveNext())
+            {
+                SetMotionParameters();
+                yield return processor.Current;
+
+            }
+
+            if (motionController.OnGround)
+                StartCoroutine(PlayerIdle());
+            else
+                StartCoroutine(PlayerAirborne());
         }
 
         void OnCollisionEnter2D(Collision2D collision)

@@ -34,7 +34,8 @@ namespace Project.Controller
         protected event Action<Collision2D> OnCollide;
         public event Action<ContactPoint2D> OnHitGround;
         public event Action<ContactPoint2D> OnHitWall;
-        public event Action<Blocks.Block, Vector2> OnBlockContacted;
+        public event Action OnPreBlockDetect;
+        public event Action<Blocks.Block, Vector2, Vector2> OnBlockContacted;
         public event Action<Blocks.Block, Vector2> OnBlockWallContacted;
         public event Action<Blocks.Block> OnBlockGroundContacted;
 
@@ -114,6 +115,7 @@ namespace Project.Controller
 
             // DetectBlockContact
             {
+                OnPreBlockDetect?.Invoke();
                 var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
                 for (var i = 0; i < count; i++)
                 {
@@ -122,7 +124,7 @@ namespace Project.Controller
                         ?.GetContactedBlock(hits[i].point, hits[i].normal);
                     if(block)
                     {
-                        OnBlockContacted?.Invoke(block, hits[i].normal);
+                        OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
                         OnBlockWallContacted?.Invoke(block, hits[i].normal);
                     }
                 }
@@ -134,7 +136,7 @@ namespace Project.Controller
                         ?.GetContactedBlock(hits[i].point, hits[i].normal);
                     if (block)
                     {
-                        OnBlockContacted?.Invoke(block, hits[i].normal);
+                        OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
                         OnBlockWallContacted?.Invoke(block, hits[i].normal);
                     }
                 }
@@ -146,7 +148,7 @@ namespace Project.Controller
                         ?.GetContactedBlock(hits[i].point, hits[i].normal);
                     if (block)
                     {
-                        OnBlockContacted?.Invoke(block, hits[i].normal);
+                        OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
                         OnBlockGroundContacted?.Invoke(block);
                     }
                 }

@@ -48,6 +48,11 @@ namespace Project.Blocks
 
         }
 
+        public virtual IEnumerator ProcessPlayerContacted(GameEntity player, Vector2 point, Vector2 normal)
+        {
+            return null;
+        }
+
         public virtual BlockData ToBlockData(Vector2Int pos)
             => new BlockData(pos, this);
     }

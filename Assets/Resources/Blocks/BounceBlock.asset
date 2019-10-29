@@ -9,11 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5853577da67405240890830d98ac555c, type: 3}
-  m_Name: ExplosionBlock
+  m_Script: {fileID: 11500000, guid: cabfd5ec9221fc747bd53974f3e17a08, type: 3}
+  m_Name: BounceBlock
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 6608634889621467271, guid: 1c027f7268c50804ca68f4bb3dc321c9,
-    type: 3}
+  m_Sprite: {fileID: 38433539612607256, guid: 1c027f7268c50804ca68f4bb3dc321c9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -35,9 +34,6 @@ MonoBehaviour:
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
   m_ColliderType: 1
-  Static: 0
-  MergeMode: 3
-  ExplosionRange: 1
-  CountDownTime: 1
-  RecoverTime: 2
-  ExplosionAnimator: {fileID: 9100000, guid: 8fbfa83766b8cd9429fff757c6c8e417, type: 2}
+  Static: 1
+  MergeMode: 0
+  BounceHeight: 5
