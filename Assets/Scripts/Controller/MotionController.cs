@@ -46,15 +46,15 @@ namespace Project.Controller
 
         RaycastHit2D[] hits = new RaycastHit2D[64];
 
-        public Vector2 ControlledVelocity
+        public Vector2 ControlledMovement
         {
             get
             {
                 if (Locked)
                     return Vector2.zero;
                 return new Vector2(
-                    XControl == ControlType.Velocity ? controlledMovement.x : 0,
-                    YControl == ControlType.Velocity ? controlledMovement.y : 0
+                    XControl == ControlType.Velocity || XControl == ControlType.Force ? controlledMovement.x : 0,
+                    YControl == ControlType.Velocity || YControl == ControlType.Force ? controlledMovement.y : 0
                 );
             }
         }

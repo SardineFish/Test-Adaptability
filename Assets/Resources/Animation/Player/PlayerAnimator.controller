@@ -322,7 +322,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 3
-    m_ConditionEvent: ControlledSpeedX
+    m_ConditionEvent: ControlledMovementX
     m_EventTreshold: 0.5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 2282142206347444461}
@@ -470,7 +470,7 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
-  - m_Name: ControlledSpeedX
+  - m_Name: ControlledMovementX
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -560,7 +560,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 4
-    m_ConditionEvent: ControlledSpeedX
+    m_ConditionEvent: ControlledMovementX
     m_EventTreshold: 0.5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -3919402455161417936}

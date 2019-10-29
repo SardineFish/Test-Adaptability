@@ -114,7 +114,7 @@ namespace Project.Controller
             animator.SetBool("OnGround", motionController.OnGround);
             animator.SetFloat("VelocityX", motionController.velocity.x);
             animator.SetFloat("VelocityY", motionController.velocity.y);
-            animator.SetFloat("ControlledSpeedX", Mathf.Abs(motionController.ControlledVelocity.x));
+            animator.SetFloat("ControlledMovementX", Mathf.Abs(motionController.ControlledMovement.x));
             actionController.SetDirection(input.Movement.x);
         }
 
@@ -176,7 +176,7 @@ namespace Project.Controller
                 if (input.Movement.magnitude > 0.1)
                 {
                     DoMoveGround();
-                    if(motionController.ControlledVelocity.magnitude > 0.1)
+                    if(motionController.ControlledMovement.magnitude > 0.1)
                     {
                         ChangeState(PlayerMove());
                         yield break;
@@ -222,7 +222,7 @@ namespace Project.Controller
                 SetStateParameters(false, true);
 
                 // to idle
-                if (motionController.ControlledVelocity.magnitude < 0.01)
+                if (motionController.ControlledMovement.magnitude < 0.01)
                 {
                     ChangeState(PlayerIdle());
                     yield break;
