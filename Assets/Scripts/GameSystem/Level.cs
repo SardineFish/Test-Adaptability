@@ -12,5 +12,38 @@ namespace Project
     {
         public CinemachineVirtualCamera GamePlayCamera;
         public CinemachineVirtualCamera EditModeCamera;
+        public GameObject PlayerPrefab;
+        public Transform SpawnPoint;
+        public Player ActivePlayer;
+        public event Action OnPlayerDead;
+
+        private void Awake()
+        {
+            OnPlayerDead += () =>
+            {
+                Debug.Log("Player Dead.");
+            };
+        }
+
+        private void Start()
+        {
+            if(ActivePlayer)
+                ActivePlayer.OnPlayerDead += Level_OnPlayerDead;
+        }
+
+        private void Level_OnPlayerDead()
+        {
+            ActivePlayer.transform.position = SpawnPoint.position;
+        }
+
+        public void Restart()
+        {
+            if (ActivePlayer)
+                Destroy(ActivePlayer.gameObject);
+            ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
+
+            ActivePlayer.transform.position = SpawnPoint.position;
+
+        }
     }
 }

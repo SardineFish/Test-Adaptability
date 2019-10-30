@@ -1,21 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 namespace Project
 {
     public class Player : GameEntity
     {
-
-        // Use this for initialization
-        void Start()
+        public event Action OnPlayerDead;
+        public void Kill()
         {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
+            OnPlayerDead?.Invoke();
         }
     }
 

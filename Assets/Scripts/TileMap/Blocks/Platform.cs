@@ -8,12 +8,12 @@ namespace Project.Blocks
     {
         public override void ProcessMergedBlocks(MergedBlocks blocks)
         {
-            var instance = GameMap.BlocksMap.CreateBlockInstance(this);
-            instance.transform.position = blocks.Bound.center;
-            instance.MergedBlocks = blocks;
-            instance.EnableRenderer = true;
-            // instance.gameObject.layer = 10;
-            instance.gameObject.name = $"Platform{blocks.Bound.center.x}-{blocks.Bound.center.y}";
+            var instance = GameMap.BlocksMap.CreateBlockInstance(new GameMap.BlockInstanceOptions()
+            {
+                Blocks = blocks,
+                BlockType = this,
+                GenerateRenderer = true,
+            });
             var collider = instance.gameObject.AddComponent<BoxCollider2D>();
             collider.size = new Vector2(blocks.Bound.size.x, blocks.Bound.size.y);
             collider.usedByEffector = true;

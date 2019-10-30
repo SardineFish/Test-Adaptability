@@ -150,16 +150,11 @@ namespace Project.GameMap
             return BlockType.None;
         }
 
-        public static BlockInstance CreateBlockInstance(Block block)
-            => CreateBlockInstance<BlockInstanceData>(block, null);
-        public static BlockInstance CreateBlockInstance<T>(Block block, T data) where T : BlockInstanceData
+        public static BlockInstance CreateBlockInstance(BlockInstanceOptions options)
         {
-            var obj = new GameObject();
-            obj.transform.parent = Instance.InstanceBlocks;
-            var instance = obj.AddComponent<BlockInstance>();
-            instance.BlockType = block;
-            instance.SetData(data);
-            
+            options.positionZ = Instance.InstanceBlocks.transform.position.z;
+            var instance = BlockInstance.CreateInstance(options);
+            instance.transform.parent = Instance.InstanceBlocks.transform;
             return instance;
         }
 

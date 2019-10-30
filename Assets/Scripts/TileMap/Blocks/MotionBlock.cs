@@ -17,16 +17,19 @@ namespace Project.Blocks
         public float Speed = 5;
         public override void ProcessMergedBlocks(MergedBlocks blocks)
         {
-            var instance = BlocksMap.CreateBlockInstance(this, new MotionData()
+            var instance = BlocksMap.CreateBlockInstance(new BlockInstanceOptions()
             {
-                velocity = Direction == MoveDirection.Horizontal
+                BlockType=this,
+                Blocks=blocks,
+                GenerateRenderer=true,
+                GenerateCollider=true,
+                Data= new MotionData()
+                {
+                    velocity = Direction == MoveDirection.Horizontal
                     ? Vector2.right * Speed
                     : Vector2.up * Speed
+                }
             });
-            instance.name = $"MotionBlocks{blocks.Bound.center.x},{blocks.Bound.center.y}";
-            instance.MergedBlocks = blocks;
-            instance.EnableRenderer = true;
-            instance.EnableCollider = true;
             var rigidbody = instance.GetComponent<Rigidbody2D>();
             rigidbody.bodyType = RigidbodyType2D.Kinematic;
             rigidbody.useFullKinematicContacts = true;

@@ -14,10 +14,14 @@ namespace Project.Blocks
         public RuntimeAnimatorController ExplosionAnimator;
         public override void ProcessMergedBlocks(MergedBlocks blocks)
         {
-            var instance = BlocksMap.CreateBlockInstance(this, new Data());
-            instance.MergedBlocks = blocks;
-            instance.EnableRenderer = true;
-            instance.EnableCollider = true;
+            var instance = BlocksMap.CreateBlockInstance(new BlockInstanceOptions()
+            {
+                BlockType = this,
+                Blocks = blocks,
+                GenerateRenderer = true,
+                GenerateCollider = true,
+                Data = new Data(),
+            });
         }
         public override void OnBlockObjectCreated(BlockInstance instance, GameObject obj, BlockData block)
         {

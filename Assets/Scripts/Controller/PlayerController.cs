@@ -61,6 +61,11 @@ namespace Project.Controller
             CachedWallContact = new BooleanCache(CoyoteTime);
             CachedGroundContact = new BooleanCache(CoyoteTime);
 
+            (Entity as Player).OnPlayerDead += () =>
+            {
+                StopAllCoroutines();
+                StartCoroutine(PlayerIdle());
+            };
             motionController.OnBlockWallContacted += (block, normal) =>
             {
                 contactedWallNormal = normal;
@@ -109,6 +114,7 @@ namespace Project.Controller
             => contactedBlocks.Contains(block);
         public float CalculateJumpVelocity(float height)
             => Mathf.Sqrt(2 * Gravity * height);
+
         void SetMotionParameters()
         {
             animator.SetBool("OnGround", motionController.OnGround);

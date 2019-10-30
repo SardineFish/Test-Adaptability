@@ -48,6 +48,11 @@ namespace Project.Blocks
 
         }
 
+        public virtual void OnTrigger(GameMap.BlockInstance instance, Collider2D collider)
+        {
+
+        }
+
         public virtual IEnumerator ProcessPlayerContacted(GameEntity player, Vector2 point, Vector2 normal)
         {
             return null;
