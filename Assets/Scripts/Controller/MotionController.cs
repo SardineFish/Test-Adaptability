@@ -107,59 +107,24 @@ namespace Project.Controller
             {
                 WallContacted = true;
             };
+            PhysicsSystem.BeforePhysicsSimulation += () =>
+            {
+                PlayerMotionUpdate();
+            };
+            PhysicsSystem.AfterPhysicsSimulation += () =>
+            {
+                GetBlockContact();
+            };
         }
 
-
-        protected virtual void FixedUpdate()
+        protected virtual void PlayerMotionUpdate()
         {
-
-            // DetectBlockContact
-            {
-                OnPreBlockDetect?.Invoke();
-                var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
-                for (var i = 0; i < count; i++)
-                {
-                    var block = hits[i].rigidbody
-                        ?.GetComponent<GameMap.IBlockInstance>()
-                        ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                    if(block)
-                    {
-                        OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
-                        OnBlockWallContacted?.Invoke(block, hits[i].normal);
-                    }
-                }
-                count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.right, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
-                for (var i = 0; i < count; i++)
-                {
-                    var block = hits[i].rigidbody
-                        ?.GetComponent<GameMap.IBlockInstance>()
-                        ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                    if (block)
-                    {
-                        OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
-                        OnBlockWallContacted?.Invoke(block, hits[i].normal);
-                    }
-                }
-                count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.down, hits, BodyCollider.size.y / 2 + 0.0625f, 1 << 11);
-                for (var i = 0; i < count; i++)
-                {
-                    var block = hits[i].rigidbody
-                        ?.GetComponent<GameMap.IBlockInstance>()
-                        ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                    if (block)
-                    {
-                        OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
-                        OnBlockGroundContacted?.Invoke(block);
-                    }
-                }
-            }
-
-            if(EnableGravity)
+            if (EnableGravity)
             {
                 rigidbody.gravityScale = Gravity / Mathf.Abs(Physics2D.gravity.y);
 
                 // Follow the motion block
-                if(OnGround)
+                if (OnGround)
                 {
                     var count = Physics2D.RaycastNonAlloc(transform.position, Vector2.down, hits, 0.0625f, 1 << 11);
                     for (int i = 0; i < count; i++)
@@ -176,11 +141,11 @@ namespace Project.Controller
             {
                 rigidbody.gravityScale = 0;
             }
-            
+
 
             var velocity = controlledMovement;
             Vector2 v = velocity;
-            switch(XControl)
+            switch (XControl)
             {
                 case ControlType.Disable:
                     v.x = 0;
@@ -196,7 +161,7 @@ namespace Project.Controller
                     v.x = rigidbody.velocity.x;
                     break;
             }
-            switch(YControl)
+            switch (YControl)
             {
                 case ControlType.Disable:
                     v.y = 0;
@@ -226,6 +191,47 @@ namespace Project.Controller
             OnGround = false;
             WallContacted = false;
             surfaceVelocity = Vector2.zero;
+        }
+
+        protected virtual void GetBlockContact()
+        {
+            OnPreBlockDetect?.Invoke();
+            var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (block)
+                {
+                    OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
+                    OnBlockWallContacted?.Invoke(block, hits[i].normal);
+                }
+            }
+            count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.right, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (block)
+                {
+                    OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
+                    OnBlockWallContacted?.Invoke(block, hits[i].normal);
+                }
+            }
+            count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.down, hits, BodyCollider.size.y / 2 + 0.0625f, 1 << 11);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (block)
+                {
+                    OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
+                    OnBlockGroundContacted?.Invoke(block);
+                }
+            }
         }
 
         void UpdateCollision()

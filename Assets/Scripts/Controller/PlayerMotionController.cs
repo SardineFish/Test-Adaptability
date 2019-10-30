@@ -33,6 +33,7 @@ namespace Project.Controller
             if (Locked)
                 return false;
             forceVelocity = velocity;
+            OnGround = false;
             return true;
         }
     }
