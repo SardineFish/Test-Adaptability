@@ -223,68 +223,68 @@ CompositeCollider2D:
   m_ColliderPaths:
   - m_Collider: {fileID: 157835669}
     m_ColliderPaths:
-    - - X: 239999942
+    - - X: 239999536
         Y: -50000000
-      - X: 239999942
+      - X: 239999536
         Y: 200000000
       - X: 230000000
-        Y: 199999942
-      - X: 229999942
+        Y: 199999536
+      - X: 229999536
         Y: 30000000
       - X: 10000000
-        Y: 29999942
-      - X: 9999942
+        Y: 29999536
+      - X: 9999536
         Y: -20000000
       - X: -80000000
-        Y: -19999942
-      - X: -80000058
+        Y: -19999536
+      - X: -80000464
         Y: 200000000
       - X: -90000000
-        Y: 199999942
-      - X: -89999942
+        Y: 199999536
+      - X: -89999536
         Y: -50000000
-    - - X: 9999942
-        Y: 70000000
-      - X: 9999942
+    - - X: 9999739
+        Y: 69999917
+      - X: 9999536
         Y: 160000000
       - X: -40000000
-        Y: 159999942
-      - X: -39999942
+        Y: 159999536
+      - X: -39999536
         Y: 70000000
-    - - X: 189999942
+    - - X: 189999536
         Y: 70000000
-      - X: 189999942
+      - X: 189999536
         Y: 160000000
       - X: 130000000
-        Y: 159999942
-      - X: 130000058
+        Y: 159999536
+      - X: 130000464
         Y: 150000000
       - X: 180000000
-        Y: 149999942
-      - X: 180000058
+        Y: 149999536
+      - X: 180000464
         Y: 70000000
   m_CompositePaths:
     m_Paths:
-    - - {x: 23.999992, y: -5}
-      - {x: 23.999992, y: 20}
-      - {x: 23, y: 19.999992}
-      - {x: 22.999992, y: 3}
-      - {x: 1, y: 2.9999912}
-      - {x: 0.9999913, y: -2}
-      - {x: -8, y: -1.9999912}
-      - {x: -8.000009, y: 20}
-      - {x: -9, y: 19.999992}
-      - {x: -8.999991, y: -5}
-    - - {x: 0.9999913, y: 7}
-      - {x: 0.9999913, y: 16}
-      - {x: -4, y: 15.999992}
-      - {x: -3.9999912, y: 7}
-    - - {x: 18.999992, y: 7}
-      - {x: 18.999992, y: 16}
-      - {x: 13, y: 15.999992}
-      - {x: 13.000009, y: 15}
-      - {x: 18, y: 14.999992}
-      - {x: 18.000008, y: 7}
+    - - {x: 23.99995, y: -5}
+      - {x: 23.99995, y: 20}
+      - {x: 23, y: 19.99995}
+      - {x: 22.99995, y: 3}
+      - {x: 1, y: 2.999951}
+      - {x: 0.9999507, y: -2}
+      - {x: -8, y: -1.9999508}
+      - {x: -8.00005, y: 20}
+      - {x: -9, y: 19.99995}
+      - {x: -8.99995, y: -5}
+    - - {x: 0.99997103, y: 6.999992}
+      - {x: 0.9999507, y: 16}
+      - {x: -4, y: 15.99995}
+      - {x: -3.999951, y: 7}
+    - - {x: 18.99995, y: 7}
+      - {x: 18.99995, y: 16}
+      - {x: 13, y: 15.99995}
+      - {x: 13.00005, y: 15}
+      - {x: 18, y: 14.99995}
+      - {x: 18.00005, y: 7}
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.000005
 --- !u!19719996 &157835669
@@ -3298,9 +3298,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BoundaryObject: {fileID: 0}
   InstanceBlocks: {fileID: 0}
+  StaticBlocks: {fileID: 0}
   Bound:
     m_Position: {x: 0, y: 0, z: 0}
     m_Size: {x: 0, y: 0, z: 0}
+  tileMap: {fileID: 0}
 --- !u!1 &162961544
 GameObject:
   m_ObjectHideFlags: 0
@@ -11540,6 +11542,7 @@ MonoBehaviour:
   XControl: 0
   YControl: 2
   OnGroundThreshold: 0.0625
+  BodyCollider: {fileID: 910009327}
 --- !u!50 &1271223352
 Rigidbody2D:
   serializedVersion: 4
@@ -11574,13 +11577,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlatformCollider: {fileID: 1558080640}
-  SpeedOnGround: 10
+  SpeedOnGround: 15
+  GroundDamping: 0.5
   ForceInAir: 100
   AirSpeedLimit: {x: 10, y: 40}
-  JumpHeight: 3.5
-  JumpTime: 0.65
-  WallJumpVelocityX: 15
-  WallJumpHeight: 2
+  JumpHeight: 4
+  JumpTime: 0.55
+  WallJumpVelocityX: 10
+  WallJumpHeight: 4
   WallJumpFreezeTime: 0.3
   CoyoteTime: 0.05
 --- !u!114 &1271223354
@@ -11765,7 +11769,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687258581}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.333334, y: 2.49999, z: -10}
+  m_LocalPosition: {x: 4.341177, y: 2.49999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
