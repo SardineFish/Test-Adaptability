@@ -37,5 +37,6 @@ MonoBehaviour:
   m_ColliderType: 1
   Static: 0
   MergeMode: 4
+  BlockDirection: 0
   Direction: 1
   Speed: 5
