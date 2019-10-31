@@ -16,6 +16,7 @@ namespace Project.GameMap
             TileMap = GetComponent<Tilemap>();
             GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             GetComponent<TilemapCollider2D>().usedByComposite = true;
+            GetComponent<TilemapCollider2D>().extrusionFactor = 0.01f;
             GetComponent<CompositeCollider2D>().geometryType = CompositeCollider2D.GeometryType.Polygons;
             GetComponent<CompositeCollider2D>().offsetDistance = 0.01f;
         }

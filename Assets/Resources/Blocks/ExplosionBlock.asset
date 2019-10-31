@@ -34,9 +34,10 @@ MonoBehaviour:
     e33: 1
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
-  m_ColliderType: 1
+  m_ColliderType: 2
   Static: 0
   MergeMode: 3
+  BlockDirection: 1
   ExplosionRange: 1
   CountDownTime: 1
   RecoverTime: 2
