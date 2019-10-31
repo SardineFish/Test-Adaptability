@@ -8,6 +8,7 @@ namespace Project.Blocks
     {
         public float ActiveTime = 1;
         public float SleepTime = 1;
+        public bool ActiveOnAwake = false;
         public GameObject LaserPrefab;
         public override void ProcessMergedBlocks(MergedBlocks blocks)
         {
@@ -27,6 +28,7 @@ namespace Project.Blocks
             var obj = Instantiate(LaserPrefab);
             obj.name = "Laser";
             var laser = obj.GetComponent<FX.Laser>();
+            laser.BlockInstance = instance;
             laser.transform.parent = instance.transform;
             laser.transform.position = instance.transform.position + DirectionVector.ToVector3() * .5f;
             laser.transform.rotation = Quaternion.FromToRotation(Vector3.right, DirectionVector);
@@ -37,17 +39,25 @@ namespace Project.Blocks
                     player.Kill();
             };
 
+            if(ActiveOnAwake)
+            {
+                laser.PowerOn(0.05f);
+                foreach (var t in Utility.FixedTimer(ActiveTime))
+                    yield return new WaitForFixedUpdate();
+                laser.ShutDown(0.2f);
+            }
+
             while(true)
             {
-                foreach (var t in Utility.Timer(SleepTime))
-                    yield return null;
+                foreach (var t in Utility.FixedTimer(SleepTime))
+                    yield return new WaitForFixedUpdate();
 
-                laser.PowerOn();
+                laser.PowerOn(0.05f);
 
-                foreach (var t in Utility.Timer(ActiveTime))
-                    yield return null;
+                foreach (var t in Utility.FixedTimer(ActiveTime))
+                    yield return new WaitForFixedUpdate();
 
-                laser.ShutDown();
+                laser.ShutDown(0.2f);
             }
         }
 

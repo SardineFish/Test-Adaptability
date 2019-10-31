@@ -12,6 +12,8 @@ namespace Project.FX
         public float ColliderWidth = .5f;
         public float Length = 0;
         public event Action<Collider2D> OnTrigger;
+        public GameMap.BlockInstance BlockInstance;
+        public bool Active;
         new BoxCollider2D collider;
         new SpriteRenderer renderer;
         private void Awake()
@@ -28,52 +30,74 @@ namespace Project.FX
 
         }
 
-        RaycastHit2D[] hits = new RaycastHit2D[32];
-        public void PowerOn()
+        public float GetLength()
         {
             var count = Physics2D.RaycastNonAlloc(transform.position, transform.right, hits, 100, 1 << 11);
+            var minDist = 100f;
             for (var i = 0; i < count; i++)
             {
-                var block = hits[i].rigidbody?.GetComponent<GameMap.IBlockInstance>()?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if(block!=null && block.Static)
-                {
-                    StartCoroutine(On(hits[i].distance));
-                    return;
-                }
+                var instance = hits[i].rigidbody?.GetComponent<GameMap.IBlockInstance>();
+                if (instance as GameMap.BlockInstance == BlockInstance)
+                    continue;
+                var block = instance?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (block is null || block is Blocks.Platform)
+                    continue;
+                if (hits[i].distance < minDist)
+                    minDist = hits[i].distance;
             }
-        }
-        IEnumerator On(float length)
-        {
-            foreach(var t in Utility.TimerNormalized(0.05f))
-            {
-                Length = length * t;
-                yield return null;
-            }
+            return minDist;
         }
 
-        public void ShutDown()
+        RaycastHit2D[] hits = new RaycastHit2D[32];
+        public void PowerOn(float time)
+        {
+            StartCoroutine(On(time));
+        }
+        IEnumerator On(float time)
+        {
+            var targetLength = GetLength();
+            foreach(var t in Utility.FixedTimerNormalized(time))
+            {
+                var actualLength = GetLength();
+                var length = targetLength * t;
+                if (length >= actualLength)
+                    break;
+                Length = length;
+                yield return new WaitForFixedUpdate();
+            }
+            Active = true;
+        }
+
+        public void ShutDown(float time)
         {
             StopAllCoroutines();
-            StartCoroutine(Off());
+            StartCoroutine(Off(time));
         }
-        IEnumerator Off()
+        IEnumerator Off(float time)
         {
-            foreach(var t in Utility.TimerNormalized(.2f))
+            foreach(var t in Utility.FixedTimerNormalized(time))
             {
                 transform.localScale = new Vector3(transform.localScale.x, 1 - t, 1);
-                yield return null;
+                yield return new WaitForFixedUpdate();
             }
             transform.localScale = new Vector3(0, 1, 1);
             Length = 0;
+            Active = false;
+        }
+
+        private void OnWillRenderObject()
+        {
+            if (Active)
+                Length = GetLength();
+            transform.localScale = new Vector3(Length, transform.localScale.y, 1);
+            MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+            propertyBlock.SetVector("_Scale", transform.localScale);
+            renderer.SetPropertyBlock(propertyBlock);
         }
 
         // Update is called once per frame
         void Update()
         {
-            transform.localScale = new Vector3(Length, transform.localScale.y, 1);
-            MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
-            propertyBlock.SetVector("_Scale", transform.localScale);
-            renderer.SetPropertyBlock(propertyBlock);
         }
 
         private void OnTriggerEnter2D(Collider2D collision)

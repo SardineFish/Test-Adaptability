@@ -38,7 +38,8 @@ MonoBehaviour:
   Static: 0
   MergeMode: 0
   BlockDirection: 2
-  ActiveTime: 2.5
+  ActiveTime: 2
   SleepTime: 2
+  ActiveOnAwake: 0
   LaserPrefab: {fileID: 4155785623033784783, guid: 3d31859cd27590d489413e0f4d63c864,
     type: 3}

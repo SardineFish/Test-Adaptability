@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69dc174f4b2eb394c84d37bbce3361c4, type: 3}
-  m_Name: LaserBlock-Left
+  m_Name: LaserBlock-Active-Left
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 273060093152811556, guid: 1c027f7268c50804ca68f4bb3dc321c9, type: 3}
+  m_Sprite: {fileID: 5257413141725601083, guid: 9005c3d0da952a14ca3315253b1e8f39,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -39,6 +40,6 @@ MonoBehaviour:
   BlockDirection: 3
   ActiveTime: 2
   SleepTime: 2
-  ActiveOnAwake: 0
+  ActiveOnAwake: 1
   LaserPrefab: {fileID: 4155785623033784783, guid: 3d31859cd27590d489413e0f4d63c864,
     type: 3}

@@ -217,6 +217,13 @@ public static class Utility
             yield return t / time;
         }
     }
+    public static IEnumerable<float> FixedTimerNormalized(float time)
+    {
+        foreach (var t in FixedTimer(time))
+        {
+            yield return t / time;
+        }
+    }
 
     public class CallbackYieldInstruction : CustomYieldInstruction
     {
