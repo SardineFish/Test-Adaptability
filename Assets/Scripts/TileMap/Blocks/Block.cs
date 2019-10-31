@@ -24,6 +24,7 @@ namespace Project.Blocks
     [CreateAssetMenu(fileName ="Block",menuName ="Blocks/Block")]
     public class Block : Tile
     {
+        public bool AllowWallJump = false;
         public bool Static = true;
         public BlockMergeMode MergeMode = BlockMergeMode.None;
         public BlockDirection BlockDirection = BlockDirection.Up;

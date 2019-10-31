@@ -69,7 +69,7 @@ namespace Project.Controller
             motionController.OnBlockWallContacted += (block, normal) =>
             {
                 contactedWallNormal = normal;
-                if (block is Blocks.SolidBlock)
+                if (block && block.AllowWallJump)
                     CachedWallContact.Record(Time.fixedUnscaledTime);
             };
             motionController.OnHitGround += (contact) =>
@@ -164,7 +164,7 @@ namespace Project.Controller
         void DoMoveGround()
         {
             var damping = (1 - Mathf.Sqrt(GroundDamping)) * 60;
-            var velocity = Mathf.Lerp(motionController.velocity.x, input.Movement.x * SpeedOnGround, Time.fixedDeltaTime * damping);
+            var velocity = Mathf.Lerp(motionController.SurfaceVelocity.x, input.Movement.x * SpeedOnGround, Time.fixedDeltaTime * damping);
             motionController.Move(Vector2.right * velocity);
         }
 

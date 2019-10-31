@@ -35,6 +35,7 @@ MonoBehaviour:
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
   m_ColliderType: 2
+  AllowWallJump: 1
   Static: 1
   MergeMode: 0
   BlockDirection: 1

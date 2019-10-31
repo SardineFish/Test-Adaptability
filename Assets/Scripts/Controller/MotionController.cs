@@ -30,6 +30,8 @@ namespace Project.Controller
         public bool OnGround { get; protected set; }
         [DisplayInInspector]
         public bool WallContacted { get; protected set; }
+        public Vector2 SurfaceVelocity
+            => velocity - groundBlockVelocity;
 
         protected event Action<Collision2D> OnCollide;
         public event Action<ContactPoint2D> OnHitGround;
@@ -42,7 +44,7 @@ namespace Project.Controller
         new Rigidbody2D rigidbody;
         protected Vector2 controlledMovement;
         protected Vector2 forceVelocity;
-        protected Vector2 surfaceVelocity;
+        protected Vector2 groundBlockVelocity;
 
         RaycastHit2D[] hits = new RaycastHit2D[64];
 
@@ -110,6 +112,7 @@ namespace Project.Controller
             PhysicsSystem.BeforePhysicsSimulation += () =>
             {
                 PlayerMotionUpdate();
+                ValueResetBeforePhyiscalUpdate();
             };
             PhysicsSystem.AfterPhysicsSimulation += () =>
             {
@@ -117,8 +120,17 @@ namespace Project.Controller
             };
         }
 
+        protected virtual void ValueResetBeforePhyiscalUpdate()
+        {
+            controlledMovement = Vector2.zero;
+            forceVelocity = Vector2.zero;
+            OnGround = false;
+            WallContacted = false;
+        }
+
         protected virtual void PlayerMotionUpdate()
         {
+            groundBlockVelocity = Vector2.zero;
             if (EnableGravity)
             {
                 rigidbody.gravityScale = Gravity / Mathf.Abs(Physics2D.gravity.y);
@@ -133,7 +145,7 @@ namespace Project.Controller
                             ?.GetComponent<GameMap.IBlockInstance>()
                             ?.GetData<Blocks.MotionBlock.MotionData>(hits[i].point, hits[i].normal);
                         if (data != null)
-                            surfaceVelocity = Vector2.Dot(data.velocity, Vector2.right) * Vector2.right;
+                            groundBlockVelocity = Vector2.Dot(data.velocity, Vector2.right) * Vector2.right;
                     }
                 }
             }
@@ -184,13 +196,8 @@ namespace Project.Controller
             if (VelocityLimit.y > 0)
                 v.y = Mathf.Clamp(v.y, -VelocityLimit.y, VelocityLimit.y);
 
-            rigidbody.velocity = v + surfaceVelocity;
+            rigidbody.velocity = v + groundBlockVelocity;
 
-            controlledMovement = Vector2.zero;
-            forceVelocity = Vector2.zero;
-            OnGround = false;
-            WallContacted = false;
-            surfaceVelocity = Vector2.zero;
         }
 
         protected virtual void GetBlockContact()
