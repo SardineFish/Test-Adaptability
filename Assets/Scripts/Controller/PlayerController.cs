@@ -101,12 +101,12 @@ namespace Project.Controller
         // Update is called once per frame
         void Update()
         {
-            CachedWallContact.Update(Time.fixedUnscaledTime);
-            CachedGroundContact.Update(Time.fixedUnscaledTime);
         }
 
         void FixedUpdate()
         {
+            CachedWallContact.Update(Time.fixedUnscaledTime);
+            CachedGroundContact.Update(Time.fixedUnscaledTime);
             motionController.Gravity = Gravity;
             contactedBlocks.Clear();
         }
@@ -281,6 +281,12 @@ namespace Project.Controller
                 else if (DoWallJump())
                 {
                     ChangeState(PlayerWallJump());
+                    yield break;
+                }
+                // Jump in coyote time
+                if(DoJump())
+                {
+                    ChangeState(PlayerAirborne());
                     yield break;
                 }
                 if(motionController.OnGround)
