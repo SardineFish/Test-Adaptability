@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1fde791743d7444c8cb8119f419fcf0, type: 3}
-  m_Name: MotionBlockY
+  m_Script: {fileID: 11500000, guid: 69dc174f4b2eb394c84d37bbce3361c4, type: 3}
+  m_Name: LaserBlock
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -8506558392696655332, guid: 1c027f7268c50804ca68f4bb3dc321c9,
+  m_Sprite: {fileID: -2318941221067292905, guid: 1c027f7268c50804ca68f4bb3dc321c9,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
@@ -34,8 +34,10 @@ MonoBehaviour:
     e33: 1
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
-  m_ColliderType: 1
+  m_ColliderType: 2
   Static: 0
-  MergeMode: 4
-  Direction: 1
-  Speed: 5
+  MergeMode: 0
+  ActiveTime: 1
+  SleepTime: 1
+  LaserPrefab: {fileID: 4155785623033784783, guid: 3d31859cd27590d489413e0f4d63c864,
+    type: 3}

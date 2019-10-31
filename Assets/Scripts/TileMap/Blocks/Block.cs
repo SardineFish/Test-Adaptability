@@ -12,6 +12,7 @@ namespace Project.Blocks
         Horizontal,
         Vertical,
         Both = Horizontal | Vertical,
+        Either,
     }
     [CreateAssetMenu(fileName ="Block",menuName ="Blocks/Block")]
     public class Block : Tile

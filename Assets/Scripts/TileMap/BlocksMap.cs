@@ -102,12 +102,54 @@ namespace Project.GameMap
             return blocks;
         }
 
+        BlockData GetNeighbor(BlockData block, Vector2Int delta)
+        {
+            return tileMap.GetTile<Block>((block.Position + delta).ToVector3Int())?.ToBlockData((block.Position + delta));
+        }
+
         IEnumerable<BlockData> GetNeighbors(BlockData block)
         {
-            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
-            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
-            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
-            yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
+            if(block.BlockType.MergeMode == BlockMergeMode.Either)
+            {
+                var tile = GetNeighbor(block, new Vector2Int(1, 0));
+                if(tile!=null)
+                {
+                    yield return tile;
+                    yield return GetNeighbor(block, new Vector2Int(-1, 0));
+                    yield break;
+                }
+                tile = GetNeighbor(block, new Vector2Int(-1, 0));
+                if(tile!=null)
+                {
+                    yield return tile;
+                    yield break;
+                }
+
+                tile = GetNeighbor(block, new Vector2Int(0, 1));
+                if (tile != null)
+                {
+                    yield return tile;
+                    yield return GetNeighbor(block, new Vector2Int(0, -1));
+                    yield break;
+                }
+                tile = GetNeighbor(block, new Vector2Int(0, -1));
+                if (tile != null)
+                {
+                    yield return tile;
+                    yield break;
+                }
+                yield break;
+            }
+            if((block.BlockType.MergeMode & BlockMergeMode.Horizontal) == BlockMergeMode.Horizontal)
+            {
+                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
+                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
+            }
+            if((block.BlockType.MergeMode & BlockMergeMode.Vertical) == BlockMergeMode.Vertical)
+            {
+                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
+                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
+            }
         }
 
         MergedBlocks MergeBlocks(BlockData startBlock, HashSet<BlockData> visitedBlocks)

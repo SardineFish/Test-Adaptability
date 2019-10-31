@@ -1,0 +1,60 @@
+﻿using UnityEngine;
+using System.Collections;
+
+namespace Project.Blocks
+{
+    [CreateAssetMenu(fileName ="LaserBlock",menuName ="Blocks/Laser")]
+    public class LaserBlock : Block
+    {
+        public float ActiveTime = 1;
+        public float SleepTime = 1;
+        public GameObject LaserPrefab;
+        public override void ProcessMergedBlocks(MergedBlocks blocks)
+        {
+            var instance = GameMap.BlocksMap.CreateBlockInstance(new GameMap.BlockInstanceOptions()
+            {
+                BlockType = this,
+                Blocks = blocks,
+                GenerateCollider = true,
+                GenerateRenderer = true,
+            });
+            instance.SetData(new LaserData() { Coroutine = instance.StartCoroutine(LaserCoroutine(instance)) });
+
+        }
+
+        IEnumerator LaserCoroutine(GameMap.BlockInstance instance)
+        {
+            var obj = Instantiate(LaserPrefab);
+            obj.name = "Laser";
+            var laser = obj.GetComponent<FX.Laser>();
+            laser.transform.parent = instance.transform;
+            laser.transform.position = instance.transform.position + instance.transform.right * .5f;
+            laser.transform.rotation = Quaternion.FromToRotation(Vector3.right, instance.transform.right);
+            laser.OnTrigger += (collider) =>
+            {
+                var player = collider.attachedRigidbody?.GetComponent<Player>();
+                if (player)
+                    player.Kill();
+            };
+
+            while(true)
+            {
+                foreach (var t in Utility.Timer(SleepTime))
+                    yield return null;
+
+                laser.PowerOn();
+
+                foreach (var t in Utility.Timer(ActiveTime))
+                    yield return null;
+
+                laser.ShutDown();
+            }
+        }
+
+        public class LaserData : GameMap.BlockInstanceData
+        {
+            public Coroutine Coroutine;
+        }
+    }
+
+}
