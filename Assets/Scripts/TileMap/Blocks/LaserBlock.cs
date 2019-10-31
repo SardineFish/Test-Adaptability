@@ -28,8 +28,8 @@ namespace Project.Blocks
             obj.name = "Laser";
             var laser = obj.GetComponent<FX.Laser>();
             laser.transform.parent = instance.transform;
-            laser.transform.position = instance.transform.position + instance.transform.right * .5f;
-            laser.transform.rotation = Quaternion.FromToRotation(Vector3.right, instance.transform.right);
+            laser.transform.position = instance.transform.position + DirectionVector.ToVector3() * .5f;
+            laser.transform.rotation = Quaternion.FromToRotation(Vector3.right, DirectionVector);
             laser.OnTrigger += (collider) =>
             {
                 var player = collider.attachedRigidbody?.GetComponent<Player>();

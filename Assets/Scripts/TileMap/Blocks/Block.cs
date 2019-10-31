@@ -14,11 +14,22 @@ namespace Project.Blocks
         Both = Horizontal | Vertical,
         Either,
     }
+    public enum BlockDirection : int
+    {
+        Up = 0,
+        Right = 1,
+        Down = 2,
+        Left = 3,
+    }
     [CreateAssetMenu(fileName ="Block",menuName ="Blocks/Block")]
     public class Block : Tile
     {
         public bool Static = true;
         public BlockMergeMode MergeMode = BlockMergeMode.None;
+        public BlockDirection BlockDirection = BlockDirection.Up;
+        public Vector2 DirectionVector
+            => Quaternion.Euler(0, 0, -(int)BlockDirection * 90) * Vector2.up;
+
         public virtual BlockData GetBlockData(Vector2Int pos)
         {
             return new BlockData(pos, this);
