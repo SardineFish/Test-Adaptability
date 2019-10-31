@@ -7,25 +7,46 @@ using System.Linq;
 
 namespace Project.GameMap
 {
+    [RequireComponent(typeof(TilePlatformManager))]
     public class BlocksMap : Singleton<BlocksMap>
     {
+        public Tilemap BaseLayer;
+        public Tilemap UserLayer;
+        public Tilemap GameMap;
         public Transform BoundaryObject;
         public Transform InstanceBlocks;
         public StaticBlocks StaticBlocks;
         public BoundsInt Bound;
         public List<BlockData> Blocks { get; private set; }
-        public Tilemap tileMap;
 
+        private void Reset()
+        {
+            var child = transform.Find("BaseLayer");
+            if(!child)
+            {
+                var obj = new GameObject("BaseLayer");
+                obj.transform.parent = transform;
+                BaseLayer = obj.AddComponent<Tilemap>();
+            }
+            child = transform.Find("UserLayer");
+            if(!child)
+            {
+                var obj = new GameObject("UserLayer");
+                obj.transform.parent = transform;
+                UserLayer = obj.AddComponent<Tilemap>();
+            }
+        }
 
         private void Awake()
         {
-            tileMap = GetComponent<Tilemap>();
             BoundaryObject = transform.Find("Boundary");
             if (!BoundaryObject)
             {
                 var obj = new GameObject();
                 obj.name = "Boundary";
                 obj.transform.parent = transform;
+                obj.AddComponent<BoxCollider2D>();
+                obj.AddComponent<CompositeCollider2D>();
                 BoundaryObject = obj.transform;
             }
             InstanceBlocks = transform.Find("Instances");
@@ -49,12 +70,14 @@ namespace Project.GameMap
 
         private void Start()
         {
+            GenerateGameMap();
+            // Set up boundary & set camera confine
             if(BoundaryObject)
             {
                 BoundaryObject.gameObject.layer = 13;
-                var collider = BoundaryObject.GetComponent<BoxCollider2D>() ?? BoundaryObject.gameObject.AddComponent<BoxCollider2D>();
-                var composite = BoundaryObject.GetComponent<CompositeCollider2D>() ?? BoundaryObject.gameObject.AddComponent<CompositeCollider2D>();
-                var rigidBody = BoundaryObject.GetComponent<Rigidbody2D>() ?? BoundaryObject.gameObject.AddComponent<Rigidbody2D>();
+                var collider = BoundaryObject.GetComponent<BoxCollider2D>();
+                var composite = BoundaryObject.GetComponent<CompositeCollider2D>();
+                var rigidBody = BoundaryObject.GetComponent<Rigidbody2D>();
                 collider.usedByComposite = true;
                 composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
                 composite.generationType = CompositeCollider2D.GenerationType.Synchronous;
@@ -81,18 +104,37 @@ namespace Project.GameMap
             Blocks
                 .Where(block => block.BlockType.Static)
                 .ForEach(block => this.StaticBlocks.TileMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
-            GetComponent<TilemapRenderer>().enabled = false;
+        }
+
+        public void GenerateGameMap()
+        {
+            var obj = new GameObject("GameMap");
+            obj.transform.parent = transform;
+            GameMap = obj.AddComponent<Tilemap>();
+            for (var y = Bound.position.y; y < Bound.size.y + Bound.position.y; y++)
+            {
+                for (var x = Bound.position.x; x < Bound.size.x + Bound.position.x; x++)
+                {
+                    var block = BaseLayer.GetTile(new Vector3Int(x, y, 0));
+                    GameMap.SetTile(new Vector3Int(x, y, 0), block);
+                    var userBlock = UserLayer.GetTile(new Vector3Int(x, y, 0));
+                    if (userBlock)
+                        GameMap.SetTile(new Vector3Int(x, y, 0), userBlock);
+                }
+            }
+            UserLayer.gameObject.SetActive(false);
+            BaseLayer.gameObject.SetActive(false);
         }
 
         List<BlockData> TraverseBlocks()
         {
             var blocks = new List<BlockData>(Bound.size.x * Bound.size.y);
 
-            for (var y = Bound.position.y; y < Bound.size.y; y++)
+            for (var y = Bound.position.y; y < Bound.size.y + Bound.position.y; y++)
             {
-                for (var x = Bound.position.x; x < Bound.size.x; x++)
+                for (var x = Bound.position.x; x < Bound.size.x + Bound.position.x; x++)
                 {
-                    var block = tileMap.GetTile(new Vector3Int(x, y, 0)) as Block;
+                    var block = GameMap.GetTile(new Vector3Int(x, y, 0)) as Block;
                     if(!(block is null))
                     {
                         blocks.Add(block.GetBlockData(new Vector2Int(x, y)));
@@ -104,7 +146,7 @@ namespace Project.GameMap
 
         BlockData GetNeighbor(BlockData block, Vector2Int delta)
         {
-            return tileMap.GetTile<Block>((block.Position + delta).ToVector3Int())?.ToBlockData((block.Position + delta));
+            return GameMap.GetTile<Block>((block.Position + delta).ToVector3Int())?.ToBlockData((block.Position + delta));
         }
 
         IEnumerable<BlockData> GetNeighbors(BlockData block)
@@ -142,13 +184,13 @@ namespace Project.GameMap
             }
             if((block.BlockType.MergeMode & BlockMergeMode.Horizontal) == BlockMergeMode.Horizontal)
             {
-                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
-                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
+                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
+                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
             }
             if((block.BlockType.MergeMode & BlockMergeMode.Vertical) == BlockMergeMode.Vertical)
             {
-                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
-                yield return tileMap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
+                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
+                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
             }
         }
 
@@ -186,7 +228,7 @@ namespace Project.GameMap
         public static BlockType GetTouchedBlockType(Vector2 point, Vector2 normal)
         {
             point = point - normal * 0.01625f;
-            var tile = Instance.tileMap.GetTile<TypedTile>(new Vector3Int(Mathf.FloorToInt(point.x), Mathf.FloorToInt(point.y), 0));
+            var tile = Instance.GameMap.GetTile<TypedTile>(new Vector3Int(Mathf.FloorToInt(point.x), Mathf.FloorToInt(point.y), 0));
             if (tile)
                 return tile.BlockType;
             return BlockType.None;
@@ -201,15 +243,19 @@ namespace Project.GameMap
         }
 
         public static void RemoveBlock(Vector2Int pos)
-            => Instance.tileMap.SetTile(pos.ToVector3Int(), null);
+            => Instance.GameMap.SetTile(pos.ToVector3Int(), null);
 
         public static void GetBlock(Vector2Int pos)
-            => Instance.tileMap.GetTile<Block>(pos.ToVector3Int());
+            => Instance.GameMap.GetTile<Block>(pos.ToVector3Int());
 
         public static void GetBlock<T>(Vector2Int pos) where T : Block
-            => Instance.tileMap.GetTile<T>(pos.ToVector3Int());
+            => Instance.GameMap.GetTile<T>(pos.ToVector3Int());
 
         private void OnDrawGizmosSelected()
+        {
+        }
+
+        private void OnDrawGizmos()
         {
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireCube(Bound.center, Bound.size);

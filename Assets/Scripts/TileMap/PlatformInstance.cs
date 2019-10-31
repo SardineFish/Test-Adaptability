@@ -12,11 +12,16 @@ namespace Project.GameMap
         PlatformEffector2D platformEffector;
         List<GameEntity> passingEntities;
 
+        private void OnDestroy()
+        {
+            TilePlatformManager.RemoveEntity(this);
+        }
+
         private void Awake()
         {
             collider = GetComponent<BoxCollider2D>();
             platformEffector = GetComponent<PlatformEffector2D>();
-            
+            TilePlatformManager.RegisterEntity(this);
         }
 
         Collider2D[] overlapColliders = new Collider2D[16];

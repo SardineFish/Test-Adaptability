@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class CustomLifeCycleManager<ComponentT> : Singleton<CustomLifeCycleManager<ComponentT>> where ComponentT : MonoBehaviour
 {
-    public static List<ComponentT> Entities;
+    public static List<ComponentT> Entities = new List<ComponentT>();
     //public List<GameEntity> Entities = new List<GameEntity>();
     // Use this for initialization
     protected virtual void Start()
