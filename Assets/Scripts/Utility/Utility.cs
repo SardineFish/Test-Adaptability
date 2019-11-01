@@ -9,6 +9,62 @@ using System.Collections;
 
 public static class Utility
 {
+    public static bool NotNull(this object obj) => !(obj is null);
+    public static IComparer<T> MakeComparer<T>(Func<T, T, int> comparer)
+        => new DelegateComparer<T>(comparer);
+    public static IEqualityComparer<T> MakeEqualityComparer<T>(Func<T, T, bool> comparer)
+        => new DelegateEqualityComparer<T>(comparer);
+     
+    public class DelegateEqualityComparer<T> : IEqualityComparer<T>
+    {
+        Func<T, T, bool> comparerFunc;
+
+        public DelegateEqualityComparer(Func<T, T, bool> comparerFunc)
+        {
+            this.comparerFunc = comparerFunc;
+        }
+
+        public bool Equals(T x, T y)
+        {
+            if (comparerFunc != null)
+                return comparerFunc(x, y);
+            throw new NotImplementedException();
+        }
+
+        public int GetHashCode(T obj)
+        {
+            return 0;
+            //return obj.GetHashCode();
+        }
+    }
+    public class DelegateComparer<T> : IComparer<T>, IEqualityComparer<T>
+    {
+        Func<T, T, int> ComparerFunc;
+
+        public DelegateComparer(Func<T, T, int> comparerFunc)
+        {
+            ComparerFunc = comparerFunc;
+        }
+
+        public int Compare(T x, T y)
+        {
+            if (ComparerFunc != null)
+                return ComparerFunc(x, y);
+            throw new NotImplementedException();
+        }
+
+        public bool Equals(T x, T y)
+        {
+            if (ComparerFunc != null)
+                return ComparerFunc(x, y) == 0;
+            throw new NotImplementedException();
+        }
+
+        public int GetHashCode(T obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
     public static void ForEach<T>(this IEnumerable<T> ts, Action<T> callback)
     {
         foreach (var item in ts)

@@ -18,11 +18,15 @@ namespace Project.Editor
         {
             base.OnInspectorGUI();
             var block = target as Block;
-            if(block.sprite)
+            /*if(block.sprite)
             {
-                GUILayout.Label(AssetPreview.GetAssetPreview(block.sprite));
-                EditorGUI.DrawTextureTransparent(GUILayoutUtility.GetRect(100, 100), AssetPreview.GetAssetPreview(block.sprite), ScaleMode.ScaleToFit);
-            }
+                var texture = AssetPreview.GetAssetPreview(block.sprite);
+                if(texture)
+                {
+                    GUILayout.Label(texture);
+                    EditorGUI.DrawTextureTransparent(GUILayoutUtility.GetRect(100, 100), texture, ScaleMode.ScaleToFit);
+                }
+            }*/
         }
         public override bool HasPreviewGUI()
         {
@@ -31,12 +35,16 @@ namespace Project.Editor
         public override void OnPreviewGUI(Rect r, GUIStyle background)
         {
             var block = target as Block;
+            var texture = AssetPreview.GetAssetPreview(block.sprite);
+            if(texture)
+            {
+                var mat = new Material(Shader.Find("Project/SpritePreview"));
+                //r.width = 500;
+                //r.height = 500;
+                EditorGUI.DrawPreviewTexture(r, texture, mat, ScaleMode.ScaleToFit);
+            }
             // EditorGUI.DrawPreviewTexture(r, AssetPreview.GetAssetPreview(block.sprite));
-            r.width = 500;
-            r.height = 500;
-            GUI.DrawTexture(r, AssetPreview.GetAssetPreview(block.sprite));
             
-            base.OnPreviewGUI(r, background);
         }
     }
 }

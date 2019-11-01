@@ -10,6 +10,7 @@ namespace Project.GameMap
     [RequireComponent(typeof(TilePlatformManager))]
     public class BlocksMap : Singleton<BlocksMap>
     {
+        public BlockSet BlockSet;
         public Tilemap BaseLayer;
         public Tilemap UserLayer;
         public Tilemap GameMap;
@@ -90,7 +91,7 @@ namespace Project.GameMap
                 confiner.m_BoundingShape2D = composite;
             }
 
-            Blocks = TraverseBlocks();
+            Blocks = TraverseBlocks(GameMap);
             foreach(var mergedBlock in GetMergeBlocks(Blocks))
             {
                 mergedBlock.Blocks[0].BlockType.ProcessMergedBlocks(mergedBlock);
@@ -104,6 +105,20 @@ namespace Project.GameMap
             Blocks
                 .Where(block => block.BlockType.Static)
                 .ForEach(block => this.StaticBlocks.TileMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
+
+            var userComponents = GetUserMapComponents()
+                .GroupBy(merged => merged, Utility.MakeEqualityComparer<MergedBlocks>((a, b) => a.Equals(b)))
+                .Select(group => new UserBlockComponent(group.Key, group.Count()))
+                .ToList();
+            Vector2Int pos = new Vector2Int(0, -20);
+            foreach (var component in userComponents)
+            {
+                foreach(var block in component.Blocks)
+                {
+                    StaticBlocks.TileMap.SetTile((pos + block.Position).ToVector3Int(), block.BlockType);
+                }
+                pos += new Vector2Int(component.Bound.size.x + 1, 0);
+            }
         }
 
         public void GenerateGameMap()
@@ -126,7 +141,7 @@ namespace Project.GameMap
             BaseLayer.gameObject.SetActive(false);
         }
 
-        List<BlockData> TraverseBlocks()
+        List<BlockData> TraverseBlocks(Tilemap tilemap)
         {
             var blocks = new List<BlockData>(Bound.size.x * Bound.size.y);
 
@@ -134,7 +149,7 @@ namespace Project.GameMap
             {
                 for (var x = Bound.position.x; x < Bound.size.x + Bound.position.x; x++)
                 {
-                    var block = GameMap.GetTile(new Vector3Int(x, y, 0)) as Block;
+                    var block = tilemap.GetTile(new Vector3Int(x, y, 0)) as Block;
                     if(!(block is null))
                     {
                         blocks.Add(block.GetBlockData(new Vector2Int(x, y)));
@@ -144,9 +159,57 @@ namespace Project.GameMap
             return blocks;
         }
 
+        public IEnumerable<MergedBlocks> GetUserMapComponents()
+        {
+            var blocks = TraverseBlocks(UserLayer);
+            HashSet<BlockData> visitedBlocks = new HashSet<BlockData>();
+            Queue<BlockData> blocksToVisit = new Queue<BlockData>(32);
+            foreach (var startBlock in blocks)
+            {
+                var t = visitedBlocks;
+                if (visitedBlocks.Contains(startBlock))
+                    continue;
+                var merged = new MergedBlocks();
+                blocksToVisit.Clear();
+                blocksToVisit.Enqueue(startBlock);
+                while (blocksToVisit.Count > 0)
+                {
+                    var block = blocksToVisit.Dequeue();
+                    if (visitedBlocks.Contains(block))
+                        continue;
+                    visitedBlocks.Add(block);
+                    merged.Blocks.Add(block);
+                    GetNeighborsFrom(block, UserLayer)
+                        .Where(next => next != null)
+                        .Where(next => !visitedBlocks.Contains(next))
+                        .Where(next => next.BlockType == block.BlockType)
+                        .ForEach(next => blocksToVisit.Enqueue(next));
+
+                }
+                merged.Blocks = merged.Blocks
+                                      .OrderBy(b => b.Position, Utility.MakeComparer<Vector2Int>((u, v) => u.y == v.y ? u.x - v.x : u.y - v.y))
+                                      .ToList();
+                var boundMin = merged.Bound.min.ToVector2Int();
+                merged.Blocks = merged.Blocks
+                    .Select(block => new BlockData(block.Position - boundMin, block.BlockType))
+                    .ToList();
+
+                var pos = merged.Blocks.Select(b => b.Position).ToArray();
+                yield return merged;
+            }
+        }
+
         BlockData GetNeighbor(BlockData block, Vector2Int delta)
         {
             return GameMap.GetTile<Block>((block.Position + delta).ToVector3Int())?.ToBlockData((block.Position + delta));
+        }
+
+        IEnumerable<BlockData> GetNeighborsFrom(BlockData block, Tilemap tilemap)
+        {
+            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
+            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
+            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
+            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
         }
 
         IEnumerable<BlockData> GetNeighbors(BlockData block)
@@ -197,8 +260,7 @@ namespace Project.GameMap
         MergedBlocks MergeBlocks(BlockData startBlock, HashSet<BlockData> visitedBlocks)
         {
             var mergedBlocks = new MergedBlocks();
-            Queue<BlockData> blocksToVisit = new Queue<BlockData>();
-            blocksToVisit = new Queue<BlockData>();
+            Queue<BlockData> blocksToVisit = new Queue<BlockData>(32);
             blocksToVisit.Enqueue(startBlock);
             while (blocksToVisit.Count > 0)
             {
