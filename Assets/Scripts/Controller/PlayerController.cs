@@ -171,7 +171,9 @@ namespace Project.Controller
         IEnumerator PlayerIdle()
         {
             CurrentState = "Idle";
-            motionController.VelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
+            motionController.ControlledVelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
+            motionController.XControl = ControlType.Velocity;
+            motionController.YControl = ControlType.Ignored;
             while(true)
             {
                 SetMotionParameters();
@@ -220,7 +222,7 @@ namespace Project.Controller
         IEnumerator PlayerMove()
         {
             CurrentState = "Move";
-            motionController.VelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
+            motionController.ControlledVelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
             while (true)
             {
                 DoMoveGround();
@@ -267,7 +269,7 @@ namespace Project.Controller
         IEnumerator PlayerAirborne()
         {
             CurrentState = "Airborne";
-            motionController.VelocityLimit = AirSpeedLimit;
+            motionController.ControlledVelocityLimit = AirSpeedLimit;
             motionController.XControl = ControlType.Force;
             while (true)
             {
@@ -331,7 +333,7 @@ namespace Project.Controller
                 PlatformCollider.enabled = false;
             CurrentState = "Fall";
 
-            motionController.VelocityLimit = AirSpeedLimit;
+            motionController.ControlledVelocityLimit = AirSpeedLimit;
             motionController.XControl = ControlType.Force;
 
             GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.AllowPass(Entity));
@@ -368,7 +370,7 @@ namespace Project.Controller
         IEnumerator PlayerWallJump()
         {
             var dir = contactedWallNormal.x;
-            motionController.VelocityLimit = AirSpeedLimit;
+            motionController.ControlledVelocityLimit = AirSpeedLimit;
             motionController.XControl = ControlType.Ignored;
 
             foreach (var t in Utility.Timer(WallJumpFreezeTime))

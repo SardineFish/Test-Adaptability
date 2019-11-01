@@ -17,6 +17,7 @@ namespace Project.Blocks
             if(BlockDirection == BlockDirection.Down || BlockDirection == BlockDirection.Up)
             {
                 motionController.YControl = Controller.ControlType.Velocity;
+                motionController.ControlledVelocityLimit = new Vector2(Speed, Speed);
                 motionController.Move(Speed * DirectionVector);
                 while(playerController.IsContactedWith(this))
                 {
@@ -35,6 +36,7 @@ namespace Project.Blocks
             {
                 motionController.XControl = Controller.ControlType.Velocity;
                 motionController.Move(Speed * DirectionVector);
+                motionController.ControlledVelocityLimit = new Vector2(Speed, Speed);
                 while (playerController.IsContactedWith(this))
                 {
                     motionController.Move(Speed * DirectionVector);

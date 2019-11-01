@@ -16,7 +16,9 @@ namespace Project.Controller
     [RequireComponent(typeof(Rigidbody2D), typeof(GameEntity))]
     public class MotionController : EntityBehaviour
     {
-        public Vector2 VelocityLimit = new Vector2(-1, -1);
+        public Vector2 VelocityLimit = new Vector2(100, 100);
+        public float FallDownVelocityLimit = 40;
+        public Vector2 ControlledVelocityLimit = new Vector2(-1, -1);
         public bool EnableGravity = true;
         public ControlType XControl = ControlType.Velocity;
         public ControlType YControl = ControlType.Ignored;
@@ -163,10 +165,12 @@ namespace Project.Controller
                     v.x = 0;
                     break;
                 case ControlType.Velocity:
-                    v.x = controlledMovement.x;
+                    v.x = Mathf.Clamp(controlledMovement.x, -ControlledVelocityLimit.x, ControlledVelocityLimit.x);
                     break;
                 case ControlType.Force:
                     v.x = rigidbody.velocity.x;
+                    if (ControlledVelocityLimit.x > 0 && Mathf.Abs(v.x) >= ControlledVelocityLimit.x && MathUtility.SignInt(controlledMovement.x) == MathUtility.SignInt(v.x))
+                        break;
                     rigidbody.AddForce(new Vector2(controlledMovement.x, 0), ForceMode2D.Force);
                     break;
                 case ControlType.Ignored:
@@ -196,12 +200,17 @@ namespace Project.Controller
             if (VelocityLimit.y > 0)
                 v.y = Mathf.Clamp(v.y, -VelocityLimit.y, VelocityLimit.y);
 
+            // Limit fall down speed;
+            if (v.y < 0)
+                v.y = Mathf.Clamp(v.y, -FallDownVelocityLimit, 0);
+
             rigidbody.velocity = v + groundBlockVelocity;
 
         }
 
         protected virtual void GetBlockContact()
         {
+            // Cast left
             OnPreBlockDetect?.Invoke();
             var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
             for (var i = 0; i < count; i++)
@@ -211,10 +220,11 @@ namespace Project.Controller
                     ?.GetContactedBlock(hits[i].point, hits[i].normal);
                 if (block)
                 {
-                    OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
+                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.right);
                     OnBlockWallContacted?.Invoke(block, hits[i].normal);
                 }
             }
+            // Cast right
             count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.right, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
             for (var i = 0; i < count; i++)
             {
@@ -223,10 +233,11 @@ namespace Project.Controller
                     ?.GetContactedBlock(hits[i].point, hits[i].normal);
                 if (block)
                 {
-                    OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
+                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.left);
                     OnBlockWallContacted?.Invoke(block, hits[i].normal);
                 }
             }
+            // Cast down
             count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.down, hits, BodyCollider.size.y / 2 + 0.0625f, 1 << 11);
             for (var i = 0; i < count; i++)
             {
@@ -235,7 +246,7 @@ namespace Project.Controller
                     ?.GetContactedBlock(hits[i].point, hits[i].normal);
                 if (block)
                 {
-                    OnBlockContacted?.Invoke(block, hits[i].point, hits[i].normal);
+                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.up);
                     OnBlockGroundContacted?.Invoke(block);
                 }
             }
