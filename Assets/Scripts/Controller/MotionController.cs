@@ -250,6 +250,18 @@ namespace Project.Controller
                     OnBlockGroundContacted?.Invoke(block);
                 }
             }
+            // Cast up
+            count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.up, hits, BodyCollider.size.y / 2 + 0.0625f, 1 << 11);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (block)
+                {
+                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.down);
+                }
+            }
         }
 
         void UpdateCollision()

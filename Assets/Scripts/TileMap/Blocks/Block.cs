@@ -22,7 +22,7 @@ namespace Project.Blocks
         Left = 3,
     }
     [CreateAssetMenu(fileName ="Block",menuName ="Blocks/Block")]
-    public class Block : Tile
+    public class Block : Tile, IBlockGroup
     {
         public bool AllowWallJump = false;
         public bool Static = true;
@@ -73,6 +73,21 @@ namespace Project.Blocks
 
         public virtual BlockData ToBlockData(Vector2Int pos)
             => new BlockData(pos, this);
+
+        public Block GetDefault()
+        {
+            return this;
+        }
+
+        public Block GetNext(Block block)
+        {
+            return this;
+        }
+
+        public bool HasBlock(Block block)
+        {
+            return block == this;
+        }
     }
 
     public class MergedBlocks
@@ -91,6 +106,32 @@ namespace Project.Blocks
                     xMax - xMin, yMax - yMin, 0);
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is MergedBlocks blocks &&
+                   this.Blocks.Count == blocks.Blocks.Count &&
+                   this.Blocks.All((block, idx) => block == blocks.Blocks[idx]);
+        }
+
+        public override int GetHashCode()
+        {
+            return 54238299 + EqualityComparer<List<BlockData>>.Default.GetHashCode(Blocks);
+        }
+
+        public static bool operator ==(MergedBlocks a, MergedBlocks b)
+        {
+            if (a is null && b is null)
+                return true;
+            else if (a is null)
+                return false;
+            return a.Equals(b);
+        }
+        public static bool operator !=(MergedBlocks a, MergedBlocks b)
+        {
+            return !(a == b);
+        }
+
     }
 
     public class BlockData
@@ -124,5 +165,17 @@ namespace Project.Blocks
             hashCode = hashCode * -1521134295 + EqualityComparer<Block>.Default.GetHashCode(BlockType);
             return hashCode;
         }
+
+        public static bool operator ==(BlockData a, BlockData b)
+        {
+            if (a is null && b is null)
+                return true;
+            else if (a is null || b is null)
+                return false;
+
+            return a.BlockType == b.BlockType && a.Position == b.Position;
+        }
+        public static bool operator !=(BlockData a, BlockData b)
+            => !(a == b);
     }
 }

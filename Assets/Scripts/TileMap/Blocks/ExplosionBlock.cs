@@ -11,6 +11,7 @@ namespace Project.Blocks
         public int ExplosionRange = 1;
         public float CountDownTime = 1f;
         public float RecoverTime = 1f;
+        public bool TriggerByBlock = false;
         public RuntimeAnimatorController ExplosionAnimator;
         public override void ProcessMergedBlocks(MergedBlocks blocks)
         {

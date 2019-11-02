@@ -33,12 +33,12 @@ namespace Project.GameMap
         }
         void OnTriggerStay2D(Collider2D collision)
         {
-            if (collision.attachedRigidbody?.GetComponent<Player>() || collision.attachedRigidbody?.GetComponent<BlockInstance>())
+            if (collision.attachedRigidbody?.GetComponent<Player>() || (BlockType.TriggerByBlock && collision.attachedRigidbody?.GetComponent<BlockInstance>()))
                 Contacted = true;
         }
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.attachedRigidbody?.GetComponent<Player>() || collision.attachedRigidbody?.GetComponent<BlockInstance>())
+            if (collision.attachedRigidbody?.GetComponent<Player>() || (BlockType.TriggerByBlock && collision.attachedRigidbody?.GetComponent<BlockInstance>()))
                 Contacted = true;
         }
 
@@ -57,20 +57,6 @@ namespace Project.GameMap
             while (!Contacted)
                 yield return new WaitForFixedUpdate();
             StartCoroutine(Explosion());
-            /*while(true)
-            {
-                var count = Physics2D.OverlapBoxNonAlloc(transform.position, Vector2.one, 0, overlapColliders, (1 << 9) | (1 << 11));
-                for (var i = 0; i < count; i++)
-                {
-                    var player = overlapColliders[i].attachedRigidbody?.GetComponent<Player>();
-                    var block = overlapColliders[i].attachedRigidbody?.GetComponent<BlockInstance>();
-                    if (player || block?.BlockType is Blocks.MotionBlock)
-                    {
-                        yield break;
-                    }
-                }
-                yield return new WaitForFixedUpdate();
-            }*/
         }
 
         IEnumerator Explosion()
@@ -92,15 +78,6 @@ namespace Project.GameMap
                     }
                 }
             }
-            /*
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(1, 0))?.TriggerExplosion();
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(-1, 0))?.TriggerExplosion();
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(0, 1))?.TriggerExplosion();
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(0, -1))?.TriggerExplosion();
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(1, 1))?.TriggerExplosion();
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(-1, 1))?.TriggerExplosion();
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(1, 1))?.TriggerExplosion();
-            data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(1, -1))?.TriggerExplosion();*/
 
             yield return new WaitForSeconds(BlockType.RecoverTime);
             GetComponent<Animator>().SetTrigger("Reset");
