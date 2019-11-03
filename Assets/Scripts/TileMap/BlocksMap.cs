@@ -11,6 +11,9 @@ namespace Project.GameMap
     public class BlocksMap : Singleton<BlocksMap>
     {
         public BlockSet BlockSet;
+        public Tilemap SceneLayer;
+        public Tilemap VisibilityLayer;
+        public Tilemap EffectLayer;
         public Tilemap BaseLayer;
         public Tilemap UserLayer;
         public Tilemap PlacementLayer;
@@ -23,20 +26,26 @@ namespace Project.GameMap
 
         private void Reset()
         {
-            var child = transform.Find("BaseLayer");
-            if(!child)
-            {
-                var obj = new GameObject("BaseLayer");
-                obj.transform.parent = transform;
-                BaseLayer = obj.AddComponent<Tilemap>();
-            }
-            child = transform.Find("UserLayer");
-            if(!child)
-            {
-                var obj = new GameObject("UserLayer");
-                obj.transform.parent = transform;
-                UserLayer = obj.AddComponent<Tilemap>();
-            }
+            BaseLayer = GetOrCreateLayer("BaseLayer");
+            UserLayer = GetOrCreateLayer("UserLyaer");
+            EffectLayer = GetOrCreateLayer("EffectLayer");
+            EffectLayer.color = Utility.SetAlpha(EffectLayer.color, 0.5f);
+            EffectLayer.gameObject.layer = 15;
+            SceneLayer = GetOrCreateLayer("SceneLayer");
+            SceneLayer.color = Utility.SetAlpha(Color.green, 0.5f);
+            SceneLayer.gameObject.layer = 15;
+            VisibilityLayer = GetOrCreateLayer("VisibilityLayer");
+            VisibilityLayer.color = Utility.SetAlpha(Color.cyan, 0.5f);
+            VisibilityLayer.gameObject.layer = 15;
+        }
+
+        Tilemap GetOrCreateLayer(string name)
+        {
+            var obj = transform.Find(name)?.gameObject ?? new GameObject(name);
+            obj.transform.parent = transform;
+            var tilemap = obj.GetOrAddComponent<Tilemap>();
+            var renderer = obj.GetOrAddComponent<TilemapRenderer>();
+            return tilemap;
         }
 
         private void Awake()
@@ -243,7 +252,7 @@ namespace Project.GameMap
                     visitedBlocks.Add(block);
                     merged.Blocks.Add(block);
                     GetNeighborsFrom(block, UserLayer)
-                        .Where(next => next != null)
+                        .Where(next => next != BlockData.Null)
                         .Where(next => !visitedBlocks.Contains(next))
                         .Where(next => next.BlockType == block.BlockType)
                         .ForEach(next => blocksToVisit.Enqueue(next));
@@ -264,15 +273,15 @@ namespace Project.GameMap
 
         BlockData GetNeighbor(BlockData block, Vector2Int delta)
         {
-            return GameMap.GetTile<Block>((block.Position + delta).ToVector3Int())?.ToBlockData((block.Position + delta));
+            return new BlockData(block.Position + delta, GameMap.GetTile<Block>((block.Position + delta).ToVector3Int()));
         }
 
         IEnumerable<BlockData> GetNeighborsFrom(BlockData block, Tilemap tilemap)
         {
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
-            yield return tilemap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
+            yield return new BlockData(block.Position + new Vector2Int(1, 0), tilemap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
+            yield return new BlockData(block.Position + new Vector2Int(-1, 0), tilemap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
+            yield return new BlockData(block.Position + new Vector2Int(0, 1), tilemap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
+            yield return new BlockData(block.Position + new Vector2Int(0, -1), tilemap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
         }
 
         IEnumerable<BlockData> GetNeighbors(BlockData block)
@@ -310,13 +319,13 @@ namespace Project.GameMap
             }
             if((block.BlockType.MergeMode & BlockMergeMode.Horizontal) == BlockMergeMode.Horizontal)
             {
-                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(1, 0)));
-                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(-1, 0)));
+                yield return new BlockData(block.Position + new Vector2Int(1, 0), GameMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
+                yield return new BlockData(block.Position + new Vector2Int(-1, 0), GameMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
             }
             if((block.BlockType.MergeMode & BlockMergeMode.Vertical) == BlockMergeMode.Vertical)
             {
-                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, 1)));
-                yield return GameMap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())?.ToBlockData((block.Position + new Vector2Int(0, -1)));
+                yield return new BlockData(block.Position + new Vector2Int(0, 1), GameMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
+                yield return new BlockData(block.Position + new Vector2Int(0, -1), GameMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int())); 
             }
         }
 
@@ -334,7 +343,7 @@ namespace Project.GameMap
                 visitedBlocks.Add(block);
                 mergedBlocks.Blocks.Add(block);
                 GetNeighbors(block)
-                    .Where(next => next != null)
+                    .Where(next => next != BlockData.Null)
                     .Where(next => !visitedBlocks.Contains(next))
                     .Where(next => next.BlockType == block.BlockType)
                     .ForEach(next => blocksToVisit.Enqueue(next));
@@ -382,7 +391,7 @@ namespace Project.GameMap
 
         private void OnDrawGizmos()
         {
-            Gizmos.color = Color.cyan;
+            Gizmos.color = Color.red;
             Gizmos.DrawWireCube(Bound.center, Bound.size);
         }
     }

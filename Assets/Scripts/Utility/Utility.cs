@@ -396,6 +396,14 @@ public static class Utility
         }
     }
 
+    public static T GetOrAddComponent<T>(this GameObject gameObject) where T : UnityEngine.Component
+    {
+        var component = gameObject.GetComponent<T>();
+        if (!component)
+            return gameObject.AddComponent<T>();
+        return component;
+    }
+
     public static bool Diff<T>(this IEnumerable<T> ts, IEnumerable<T> target) where T: class
         => Diff<T, T>(ts, target, (s, t) => s == t);
 
@@ -517,6 +525,12 @@ public static class Utility
         for (var i = 1; i < strings.Length; i++)
             output = output + seperator + strings[i];
         return output;
+    }
+
+    public static Color SetAlpha(Color color, float alpha)
+    {
+        color.a = alpha;
+        return color;
     }
 }
 
