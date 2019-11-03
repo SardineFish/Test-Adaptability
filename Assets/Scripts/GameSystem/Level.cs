@@ -10,6 +10,7 @@ namespace Project
 {
     public class Level : Singleton<Level>
     {
+        public Camera MainCamera;
         public CinemachineVirtualCamera GamePlayCamera;
         public CinemachineVirtualCamera EditModeCamera;
         public GameObject PlayerPrefab;
@@ -23,12 +24,25 @@ namespace Project
             {
                 Debug.Log("Player Dead.");
             };
+            MainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
         }
 
         private void Start()
         {
-            if(ActivePlayer)
-                ActivePlayer.OnPlayerDead += Level_OnPlayerDead;
+            ActivePlayer = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
+            StartLevelEdit();
+        }
+
+        private void Update()
+        {
+            if(UnityEngine.Input.GetKeyDown(KeyCode.F1))
+            {
+                StartLevelEdit();
+            }
+            if(UnityEngine.Input.GetKeyDown(KeyCode.F2))
+            {
+                StartGamePlay();
+            }
         }
 
         private void Level_OnPlayerDead()
@@ -36,14 +50,27 @@ namespace Project
             ActivePlayer.transform.position = SpawnPoint.position;
         }
 
-        public void Restart()
+        public void StartGamePlay()
         {
+            GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(false);
+            GameMap.BlocksMap.Instance.StartPlayerMode();
+
+
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
             ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
 
             ActivePlayer.transform.position = SpawnPoint.position;
+            GamePlayCamera.Follow = ActivePlayer.transform;
+        }
 
+        public void StartLevelEdit()
+        {
+            if (ActivePlayer)
+                Destroy(ActivePlayer.gameObject);
+            GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(true);
+            GameMap.BlocksMap.Instance.StartEditMode();
+            GameMap.Editor.MapEidtoUI.Instance.SetComponents(GameMap.BlocksMap.Instance.GetUserComponents());
         }
     }
 }

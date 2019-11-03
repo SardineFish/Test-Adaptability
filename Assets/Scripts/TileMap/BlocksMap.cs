@@ -13,6 +13,7 @@ namespace Project.GameMap
         public BlockSet BlockSet;
         public Tilemap BaseLayer;
         public Tilemap UserLayer;
+        public Tilemap PlacementLayer;
         public Tilemap GameMap;
         public Transform BoundaryObject;
         public Transform InstanceBlocks;
@@ -65,15 +66,52 @@ namespace Project.GameMap
                 obj.name = "StaticBlocks";
                 obj.transform.parent = transform;
                 StaticBlocks = obj.AddComponent<StaticBlocks>();
-
+                obj.transform.localPosition = obj.transform.localPosition.Set(z: -1);
+            }
+            if(!PlacementLayer)
+            {
+                var obj = (transform.Find("Placement")?.gameObject ?? new GameObject("Placement"));
+                PlacementLayer = obj.AddComponent<Tilemap>();
+                PlacementLayer.transform.parent = transform;
+                PlacementLayer.transform.localPosition = PlacementLayer.transform.localPosition.Set(z: -2);
+            }
+            if(!GameMap)
+            {
+                var obj = new GameObject("GameMap");
+                obj.transform.parent = transform;
+                GameMap = obj.AddComponent<Tilemap>();
             }
         }
 
         private void Start()
         {
-            GenerateGameMap();
+            UserLayer.gameObject.SetActive(false);
+            InitBoundary();
+            StartEditMode();
+        }
+
+        public List<Editor.UserComponentUIData> GetUserComponents()
+        {
+            var userComponents = GetUserMapComponents()
+                .GroupBy(merged => merged, Utility.MakeEqualityComparer<MergedBlocks>((a, b) => a.Equals(b)))
+                .Select(group => new UserBlockComponent(group.Key, group.Count()))
+                .ToList();
+            Vector2Int pos = new Vector2Int(0, -20);
+            foreach (var component in userComponents)
+            {
+                foreach (var block in component.Blocks)
+                {
+                    StaticBlocks.TileMap.SetTile((pos + block.Position).ToVector3Int(), block.BlockType);
+                }
+                pos += new Vector2Int(component.Bound.size.x + 1, 0);
+            }
+            return userComponents.Select(component => new Editor.UserComponentUIData(component)).ToList();
+        }
+
+        public void InitBoundary()
+        {
             // Set up boundary & set camera confine
-            if(BoundaryObject)
+            if (BoundaryObject)
             {
                 BoundaryObject.gameObject.layer = 13;
                 var collider = BoundaryObject.GetComponent<BoxCollider2D>();
@@ -87,12 +125,54 @@ namespace Project.GameMap
                 collider.offset = new Vector2(Bound.position.x + Bound.size.x / 2.0f, Bound.position.y + Bound.size.y / 2.0f);
                 collider.size = new Vector2(Bound.size.x, Bound.size.y);
 
-                var confiner =  Level.Instance.GamePlayCamera.GetComponent<Cinemachine.CinemachineConfiner>();
+                var confiner = Level.Instance.GamePlayCamera.GetComponent<Cinemachine.CinemachineConfiner>();
                 confiner.m_BoundingShape2D = composite;
             }
+        }
 
+        public void StartEditorPlay()
+        {
+            GameMap.ClearAllTiles();
+            GenerateGameMap();
+            UserLayer.gameObject.SetActive(false);
+            BaseLayer.gameObject.SetActive(false);
+            Play();
+        }
+
+        public void StartEditMode()
+        {
+            InstanceBlocks.gameObject.ClearChildren();
+            StaticBlocks.TileMap.ClearAllTiles();
+            PlacementLayer.gameObject.SetActive(true);
+            GameMap.ClearAllTiles();
+            TraverseBlocks(BaseLayer)
+                .ForEach(block => GameMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
+            UserLayer.gameObject.SetActive(false);
+            BaseLayer.gameObject.SetActive(true);
+            BaseLayer.color = Color.white;
+        }
+        public void StartPlayerMode()
+        {
+            GameMap.ClearAllTiles();
+
+            TraverseBlocks(BaseLayer)
+                .ForEach(block => GameMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
+
+            TraverseBlocks(PlacementLayer)
+                .ForEach(block => GameMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
+
+            BaseLayer.gameObject.SetActive(false);
+
+            PlacementLayer.GetComponentsInChildren<Editor.ComponentPlacement>()
+                .ForEach(placement => placement.gameObject.SetActive(false));
+
+            Play();
+        }
+
+        public void Play()
+        {
             Blocks = TraverseBlocks(GameMap);
-            foreach(var mergedBlock in GetMergeBlocks(Blocks))
+            foreach (var mergedBlock in GetMergeBlocks(Blocks))
             {
                 mergedBlock.Blocks[0].BlockType.ProcessMergedBlocks(mergedBlock);
             }
@@ -105,27 +185,10 @@ namespace Project.GameMap
             Blocks
                 .Where(block => block.BlockType.Static)
                 .ForEach(block => this.StaticBlocks.TileMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
-
-            var userComponents = GetUserMapComponents()
-                .GroupBy(merged => merged, Utility.MakeEqualityComparer<MergedBlocks>((a, b) => a.Equals(b)))
-                .Select(group => new UserBlockComponent(group.Key, group.Count()))
-                .ToList();
-            Vector2Int pos = new Vector2Int(0, -20);
-            foreach (var component in userComponents)
-            {
-                foreach(var block in component.Blocks)
-                {
-                    StaticBlocks.TileMap.SetTile((pos + block.Position).ToVector3Int(), block.BlockType);
-                }
-                pos += new Vector2Int(component.Bound.size.x + 1, 0);
-            }
         }
 
         public void GenerateGameMap()
         {
-            var obj = new GameObject("GameMap");
-            obj.transform.parent = transform;
-            GameMap = obj.AddComponent<Tilemap>();
             for (var y = Bound.position.y; y < Bound.size.y + Bound.position.y; y++)
             {
                 for (var x = Bound.position.x; x < Bound.size.x + Bound.position.x; x++)

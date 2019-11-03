@@ -10,6 +10,7 @@ namespace Project.GameMap
     public class UserBlockComponent : MergedBlocks
     {
         public int Count;
+        public Block BlockType => Blocks[0].BlockType;
         public UserBlockComponent(MergedBlocks blocks, int count)
         {
             this.Blocks = blocks.Blocks;

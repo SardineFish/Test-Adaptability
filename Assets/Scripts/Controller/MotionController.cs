@@ -111,15 +111,15 @@ namespace Project.Controller
             {
                 WallContacted = true;
             };
-            PhysicsSystem.BeforePhysicsSimulation += () =>
-            {
-                PlayerMotionUpdate();
-                ValueResetBeforePhyiscalUpdate();
-            };
-            PhysicsSystem.AfterPhysicsSimulation += () =>
-            {
-                GetBlockContact();
-            };
+            PhysicsSystem.BeforePhysicsSimulation += PlayerMotionUpdate;
+            PhysicsSystem.BeforePhysicsSimulation += ValueResetBeforePhyiscalUpdate;
+            PhysicsSystem.AfterPhysicsSimulation += GetBlockContact;
+        }
+        private void OnDestroy()
+        {
+            PhysicsSystem.BeforePhysicsSimulation -= PlayerMotionUpdate;
+            PhysicsSystem.BeforePhysicsSimulation -= ValueResetBeforePhyiscalUpdate;
+            PhysicsSystem.AfterPhysicsSimulation -= GetBlockContact;
         }
 
         protected virtual void ValueResetBeforePhyiscalUpdate()
