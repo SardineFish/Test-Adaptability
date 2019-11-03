@@ -270,6 +270,7 @@ namespace Project.Controller
         {
             CurrentState = "Airborne";
             motionController.ControlledVelocityLimit = AirSpeedLimit;
+            motionController.FallDownVelocityLimit = AirSpeedLimit.y;
             motionController.XControl = ControlType.Force;
             while (true)
             {
@@ -334,6 +335,7 @@ namespace Project.Controller
             CurrentState = "Fall";
 
             motionController.ControlledVelocityLimit = AirSpeedLimit;
+            motionController.FallDownVelocityLimit = AirSpeedLimit.y;
             motionController.XControl = ControlType.Force;
 
             GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.AllowPass(Entity));
