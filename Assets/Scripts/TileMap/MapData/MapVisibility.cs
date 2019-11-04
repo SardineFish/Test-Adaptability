@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 namespace Project.GameMap.Data
 {
     [CreateAssetMenu(fileName ="MapVisibility", menuName ="MapData/Visibility")]
-    public class MapVisibility : DataTile
+    public class MapVisibility : DataBlock
     {
     }
 }

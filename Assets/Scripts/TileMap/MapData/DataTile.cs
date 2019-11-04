@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 namespace Project.GameMap.Data
 {
     [CreateAssetMenu(fileName ="MapData", menuName ="MapData/Data")]
-    public class DataTile : Tile
+    public class DataBlock : Blocks.Block
     {
         void Awake()
         {

@@ -10,7 +10,7 @@ namespace Project.Blocks
         public float SleepTime = 1;
         public bool ActiveOnAwake = false;
         public GameObject LaserPrefab;
-        public override void ProcessMergedBlocks(MergedBlocks blocks)
+        public override void ProcessMergedBlocks(BlocksCollection blocks)
         {
             var instance = GameMap.BlocksMap.CreateBlockInstance(new GameMap.BlockInstanceOptions()
             {

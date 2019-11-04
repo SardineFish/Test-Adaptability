@@ -56,6 +56,8 @@ public static class MathUtility
         => new Vector3(v.x, v.y, z);
     public static Vector2 ToVector2(this Vector3Int v)
         => new Vector2(v.x, v.y);
+    public static Vector2Int ToVector2Int(this Vector3 v)
+        => new Vector2Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y));
     public static Vector2 Abs(this Vector2 v)
     {
         return new Vector2(Mathf.Abs(v.x), Mathf.Abs(v.y));

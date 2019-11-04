@@ -74,7 +74,7 @@ namespace Project.GameMap
                 {
                     for (int x = -i; x <= i; x++)
                     {
-                        data.Blocks.GetBlockAt(BlockData.Position + new Vector2Int(x, y))?.TriggerExplosion();
+                        data.Blocks.Get(BlockData.Position + new Vector2Int(x, y))?.TriggerExplosion();
                     }
                 }
             }

@@ -57,7 +57,7 @@ namespace Project.GameMap.Editor
         bool CheckBlockOccupation()
         {
             var offset = Component.Component.Bound.size.ToVector2() / 2;
-            foreach(var block in Component.Component.Blocks)
+            foreach(var block in Component.Component)
             {
                 var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
                 if (BlocksMap.Instance.BaseLayer.GetTile(pos) != null)
@@ -72,7 +72,7 @@ namespace Project.GameMap.Editor
             if (Placed)
                 return;
             var offset = Component.Component.Bound.size.ToVector2() / 2;
-            foreach (var block in Component.Component.Blocks)
+            foreach (var block in Component.Component)
             {
                 var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
                 BlocksMap.Instance.PlacementLayer.SetTile(pos, Component.Component.BlockType);

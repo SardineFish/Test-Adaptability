@@ -10,8 +10,8 @@ namespace Project.GameMap
     public class BlockInstance : MonoBehaviour, IBlockInstance
     {
         public Block BlockType { get; private set; }
-        public MergedBlocks MergedBlocks { get; private set; }
-        public List<BlockData> Blocks => MergedBlocks.Blocks;
+        public BlocksCollection MergedBlocks { get; private set; }
+        public BlocksCollection Blocks => MergedBlocks;
         public List<GameObject> BlocksObject { get; private set; }
         public BoxCollider2D BoxCollider { get; private set; }
         BlockInstanceData data;
@@ -88,7 +88,7 @@ namespace Project.GameMap
             if (options.GenerateCollider || options.GenerateRenderer)
             {
                 instance.BlocksObject =
-                options.Blocks.Blocks.Select(block =>
+                options.Blocks.Select(block =>
                 {
                     var obj = new GameObject();
                     obj.layer = 11;
@@ -122,7 +122,7 @@ namespace Project.GameMap
         public bool GenerateRenderer;
         public bool GenerateCollider;
         public bool IsTrigger;
-        public MergedBlocks Blocks;
+        public BlocksCollection Blocks;
         public Block BlockType;
         public BlockInstanceData Data;
         public BlockInstanceOptions(Block block)

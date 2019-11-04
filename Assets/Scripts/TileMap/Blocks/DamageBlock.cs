@@ -7,7 +7,7 @@ namespace Project.Blocks
     [CreateAssetMenu(fileName ="DamageBlock", menuName ="Blocks/Damage")]
     public class DamageBlock : Block
     {
-        public override void ProcessMergedBlocks(MergedBlocks blocks)
+        public override void ProcessMergedBlocks(BlocksCollection blocks)
         {
             var instance = GameMap.BlocksMap.CreateBlockInstance(new GameMap.BlockInstanceOptions()
             {

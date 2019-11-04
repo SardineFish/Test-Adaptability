@@ -8,22 +8,24 @@ using System.Collections;
 
 namespace Project.Blocks
 {
-    public class BlockDataCollection<T> : IEnumerable<T> where T: class
+    public class TiledDataCollection<T> : Project.GameMap.IDataMap<T> where T: class
     {
         Dictionary<Vector2Int, T> blockData = new Dictionary<Vector2Int, T>();
         public T this[Vector2Int pos]
-            => GetBlockAt(pos);
+            => Get(pos);
 
-        public BlockDataCollection() : this(16) { }
-        public BlockDataCollection(int capacity)
+        public TiledDataCollection() : this(16) { }
+        public TiledDataCollection(int capacity)
         {
             blockData = new Dictionary<Vector2Int, T>(capacity);
         }
 
-        public T GetBlockAt(Vector2Int pos)
+        public T Get(Vector2Int pos)
             => blockData.ContainsKey(pos) ? blockData[pos] : null;
-        public T SetDataAt(Vector2Int pos, T data)
+        public void Set(Vector2Int pos, T data)
             => blockData[pos] = data;
+        public bool Has(Vector2Int pos)
+            => blockData.ContainsKey(pos);
 
         public IEnumerator<T> GetEnumerator()
         {

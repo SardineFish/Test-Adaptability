@@ -27,7 +27,7 @@ namespace Project.GameMap.Editor
             Texture.Create();
             MeshBuilder mb = new MeshBuilder(Component.BlockType.sprite.vertices.Length * Component.Count);
             Vector2 offset = .5f * (component.Bound.size.ToVector2() - Vector2.one);
-            foreach (var block in Component.Blocks)
+            foreach (var block in Component)
             {
                 mb.AddVerts(
                     Component.BlockType.sprite.vertices.Select(vert => (vert + block.Position + new Vector2(.5f,.5f)).ToVector3()).ToArray(),

@@ -15,7 +15,7 @@ namespace Project.Blocks
     {
         public MoveDirection Direction;
         public float Speed = 5;
-        public override void ProcessMergedBlocks(MergedBlocks blocks)
+        public override void ProcessMergedBlocks(BlocksCollection blocks)
         {
             var instance = BlocksMap.CreateBlockInstance(new BlockInstanceOptions()
             {

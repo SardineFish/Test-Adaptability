@@ -13,7 +13,7 @@ namespace Project.Blocks
         public float RecoverTime = 1f;
         public bool TriggerByBlock = false;
         public RuntimeAnimatorController ExplosionAnimator;
-        public override void ProcessMergedBlocks(MergedBlocks blocks)
+        public override void ProcessMergedBlocks(BlocksCollection blocks)
         {
             var instance = BlocksMap.CreateBlockInstance(new BlockInstanceOptions()
             {
@@ -29,11 +29,11 @@ namespace Project.Blocks
             var explosion = obj.AddComponent<ExplosionBlockInstance>();
             explosion.BlockInstance = instance;
             explosion.BlockData = block;
-            instance.GetData<Data>().Blocks.SetDataAt(block.Position, explosion);
+            instance.GetData<Data>().Blocks.Set(block.Position, explosion);
         }
         public class Data  : GameMap.BlockInstanceData
         {
-            public BlockDataCollection<GameMap.ExplosionBlockInstance> Blocks = new BlockDataCollection<ExplosionBlockInstance>();
+            public TiledDataCollection<GameMap.ExplosionBlockInstance> Blocks = new TiledDataCollection<ExplosionBlockInstance>();
         }
     }
 

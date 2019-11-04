@@ -6,7 +6,7 @@ namespace Project.Blocks
     [CreateAssetMenu(fileName ="PlatformBlock", menuName ="Blocks/Platform")]
     public class Platform : Block
     {
-        public override void ProcessMergedBlocks(MergedBlocks blocks)
+        public override void ProcessMergedBlocks(BlocksCollection blocks)
         {
             var instance = GameMap.BlocksMap.CreateBlockInstance(new GameMap.BlockInstanceOptions()
             {

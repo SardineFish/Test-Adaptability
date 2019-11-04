@@ -8,8 +8,18 @@ using Cinemachine;
 
 namespace Project
 {
+    public enum GameState
+    {
+        Pause,
+        EditMode,
+        Playing,
+    }
+
+    [RequireComponent(typeof(ScenesManager))]
     public class Level : Singleton<Level>
     {
+        [DisplayInInspector]
+        public GameState GameState { get; private set; }
         public Camera MainCamera;
         public CinemachineVirtualCamera GamePlayCamera;
         public CinemachineVirtualCamera EditModeCamera;
@@ -52,6 +62,7 @@ namespace Project
 
         public void StartGamePlay()
         {
+            GameState = GameState.Playing;
             GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(false);
             GameMap.BlocksMap.Instance.StartPlayerMode();
 
@@ -66,6 +77,7 @@ namespace Project
 
         public void StartLevelEdit()
         {
+            GameState = GameState.EditMode;
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
             GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(true);

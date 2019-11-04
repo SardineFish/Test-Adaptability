@@ -7,13 +7,12 @@ using Project.Blocks;
 
 namespace Project.GameMap
 {
-    public class UserBlockComponent : MergedBlocks
+    public class UserBlockComponent : BlocksCollection
     {
         public int Count;
-        public Block BlockType => Blocks[0].BlockType;
-        public UserBlockComponent(MergedBlocks blocks, int count)
+        public Block BlockType => blocksList[0].BlockType;
+        public UserBlockComponent(BlocksCollection blocks, int count) : base(blocks)
         {
-            this.Blocks = blocks.Blocks;
             this.Count = count;
         }
     }

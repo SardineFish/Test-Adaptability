@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 namespace Project.GameMap.Data
 {
     [CreateAssetMenu(fileName ="Scene", menuName ="MapData/Scene")]
-    public class SceneBoundary : DataTile
+    public class SceneBoundary : DataBlock
     {
     }
 }

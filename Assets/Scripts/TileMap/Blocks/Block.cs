@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Project.Blocks
 {
@@ -36,7 +37,7 @@ namespace Project.Blocks
             return new BlockData(pos, this);
         }
 
-        public virtual void ProcessMergedBlocks(MergedBlocks blocks)
+        public virtual void ProcessMergedBlocks(BlocksCollection blocks)
         {
 
         }
@@ -90,49 +91,7 @@ namespace Project.Blocks
         }
     }
 
-    public class MergedBlocks
-    {
-        public List<BlockData> Blocks = new List<BlockData>(4);
-        public BoundsInt Bound
-        {
-            get
-            {
-                var xMin = Blocks.Min(block => block.Position.x);
-                var yMin = Blocks.Min(block => block.Position.y);
-                var xMax = Blocks.Max(block => block.Position.x) + 1;
-                var yMax = Blocks.Max(block => block.Position.y) + 1;
-                return new BoundsInt(
-                    xMin, yMin, 0, 
-                    xMax - xMin, yMax - yMin, 0);
-            }
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is MergedBlocks blocks &&
-                   this.Blocks.Count == blocks.Blocks.Count &&
-                   this.Blocks.All((block, idx) => block == blocks.Blocks[idx]);
-        }
-
-        public override int GetHashCode()
-        {
-            return 54238299 + EqualityComparer<List<BlockData>>.Default.GetHashCode(Blocks);
-        }
-
-        public static bool operator ==(MergedBlocks a, MergedBlocks b)
-        {
-            if (a is null && b is null)
-                return true;
-            else if (a is null)
-                return false;
-            return a.Equals(b);
-        }
-        public static bool operator !=(MergedBlocks a, MergedBlocks b)
-        {
-            return !(a == b);
-        }
-
-    }
+    
 
     public struct BlockData
     {
