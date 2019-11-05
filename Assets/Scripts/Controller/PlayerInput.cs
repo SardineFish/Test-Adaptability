@@ -44,7 +44,7 @@ namespace Project.Controller
 
         void FixedUpdate()
         {
-            InputSystem.Update();
+            // InputSystem.Update();
             if (Jump)
                 CachedJump.Record(Time.fixedUnscaledTime);
 

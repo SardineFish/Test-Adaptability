@@ -46,6 +46,7 @@ namespace Project
             var startupScene = BlocksMap.Instance.GetSceneAt(Level.Instance.SpawnPoint.transform.position.ToVector2Int());
             GamePlayCamera = SceneCameras[startupScene];
             GamePlayCamera.gameObject.SetActive(true);
+            CreateEditorCamera();
         }
 
         void CreateEditorCamera()
@@ -83,6 +84,17 @@ namespace Project
                 }
                 if(!GamePlayCamera.Follow)
                     GamePlayCamera.Follow = player.transform;
+                if (EditorCamera.gameObject.activeInHierarchy)
+                {
+                    EditorCamera.gameObject.SetActive(false);
+                    GamePlayCamera.gameObject.SetActive(true);
+                }
+            }
+            else if (Level.Instance.GameState == GameState.EditMode)
+            {
+                EditorCamera.gameObject.SetActive(true);
+                GamePlayCamera.gameObject.SetActive(false);
+                EditorCamera.GetComponent<CinemachineConfiner>().m_BoundingShape2D = ScenesManager.Instance.CurrentScene.BoundaryCollider;
             }
         }
     }
