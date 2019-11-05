@@ -20,9 +20,6 @@ namespace Project
     {
         [DisplayInInspector]
         public GameState GameState { get; private set; }
-        public Camera MainCamera;
-        public CinemachineVirtualCamera GamePlayCamera;
-        public CinemachineVirtualCamera EditModeCamera;
         public GameObject PlayerPrefab;
         public Transform SpawnPoint;
         public Player ActivePlayer;
@@ -34,7 +31,6 @@ namespace Project
             {
                 Debug.Log("Player Dead.");
             };
-            MainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
         }
 
         private void Start()

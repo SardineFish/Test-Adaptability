@@ -9,7 +9,8 @@ namespace Project
     public class CameraManager : Singleton<CameraManager>
     {
         public float CameraZ = -10;
-        public CinemachineBrain MainCamera;
+        public CinemachineBrain CinemachineBrain;
+        public Camera MainCamera;
         public GameObject GamePlayCameraPrefab;
         public GameObject EditorCameraPrefab;
         public CinemachineVirtualCamera GamePlayCamera;
@@ -19,6 +20,9 @@ namespace Project
         private void Awake()
         {
             BlocksMap.Instance.AfterMapGeneration += AfterMapGeneration;
+            MainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+            CinemachineBrain = MainCamera.gameObject.GetOrAddComponent<CinemachineBrain>();
+
             if (GamePlayCamera)
                 Destroy(GamePlayCamera.gameObject);
             if (EditorCamera)

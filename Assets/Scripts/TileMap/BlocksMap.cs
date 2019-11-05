@@ -165,8 +165,6 @@ namespace Project.GameMap
                 rigidbody.bodyType = RigidbodyType2D.Static;
                 scene.BoundaryCollider = composite;
             }
-
-            var confiner = Level.Instance.GamePlayCamera.GetComponent<Cinemachine.CinemachineConfiner>();
         }
 
 

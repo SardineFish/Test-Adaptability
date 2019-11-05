@@ -38,7 +38,7 @@ namespace Project.Controller
 
             var damping = (1 - Mathf.Sqrt(Damping)) * 60;
             velocity = math.lerp(velocity, v, Time.fixedDeltaTime * damping);
-            transform.position = CameraManager.Instance.MainCamera.transform.position + velocity.ToVector3() * Time.fixedDeltaTime;
+            transform.position = CameraManager.Instance.CinemachineBrain.transform.position + velocity.ToVector3() * Time.fixedDeltaTime;
         }
     }
 }

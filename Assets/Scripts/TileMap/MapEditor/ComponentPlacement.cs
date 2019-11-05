@@ -3,6 +3,8 @@ using System.Collections;
 using Unity.Mathematics;
 using System;
 using System.Linq;
+using Project.Blocks;
+using System.Collections.Generic;
 
 namespace Project.GameMap.Editor
 {
@@ -62,26 +64,31 @@ namespace Project.GameMap.Editor
         void Update()
         {
         }
-        bool CheckBlockOccupation()
+        IEnumerable<BlockData> BlocksInWorldSpace()
         {
             var offset = rotatedBlocks.Bound.size.ToVector2() / 2;
-            foreach(var block in rotatedBlocks)
+            foreach (var block in rotatedBlocks)
             {
-                var pos = rotatedBlocks.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
-                if (BlocksMap.Instance.BaseLayer.GetTile(pos) != null)
+                var pos = block.Position.ToVector3Int() - rotatedBlocks.Bound.min + (transform.position.ToVector2() - offset).ToVector3Int();
+                yield return new BlockData(pos.ToVector2Int(), block.BlockType);
+            }
+        }
+        bool CheckBlockOccupation()
+        {
+            foreach(var block in BlocksInWorldSpace())
+            {
+                if (BlocksMap.Instance.BaseLayer.GetTile(block.Position.ToVector3Int()) != null)
                     return true;
-                if (BlocksMap.Instance.PlacementLayer.GetTile(pos) != null)
+                if (BlocksMap.Instance.PlacementLayer.GetTile(block.Position.ToVector3Int()) != null)
                     return true;
             }
             return false;
         }
         public void Replace()
         {
-            var offset = rotatedBlocks.Bound.size.ToVector2() / 2;
-            foreach (var block in rotatedBlocks)
+            foreach(var block in BlocksInWorldSpace())
             {
-                var pos = rotatedBlocks.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
-                BlocksMap.Instance.PlacementLayer.SetTile(pos, rotatedBlocks.First().BlockType);
+                BlocksMap.Instance.PlacementLayer.SetTile(block.Position.ToVector3Int(), block.BlockType);
             }
             Placed = true;
         }
@@ -101,11 +108,10 @@ namespace Project.GameMap.Editor
             Placed = false;
             Dragging = false;
             UI.gameObject.SetActive(true);
-            var offset = rotatedBlocks.Bound.size.ToVector2() / 2;
-            foreach (var block in rotatedBlocks)
+
+            foreach(var block in BlocksInWorldSpace())
             {
-                var pos = rotatedBlocks.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
-                BlocksMap.Instance.PlacementLayer.SetTile(pos, null);
+                BlocksMap.Instance.PlacementLayer.SetTile(block.Position.ToVector3Int(), null);
             }
         }
 
@@ -157,7 +163,7 @@ namespace Project.GameMap.Editor
             {
                 yield return null;
 
-                var position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                var position = CameraManager.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
                 MoveTo(position);
 
                 CanPlace = !CheckBlockOccupation();
@@ -175,7 +181,7 @@ namespace Project.GameMap.Editor
             {
                 yield return null;
 
-                var position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                var position = CameraManager.Instance.CinemachineBrain.GetComponent<Camera>().ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
                 MoveTo(position);
 
                 CanPlace = !CheckBlockOccupation();
@@ -227,6 +233,8 @@ namespace Project.GameMap.Editor
         }
         public void Rotate()
         {
+            if (Placed)
+                return;
             rotateStep++;
             rotateStep %= 4;
             GenerateBlockInstance();
