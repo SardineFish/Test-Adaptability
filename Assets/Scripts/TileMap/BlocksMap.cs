@@ -160,6 +160,7 @@ namespace Project.GameMap
                 collider.usedByComposite = true;
                 var composite = obj.AddComponent<CompositeCollider2D>();
                 composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
+                composite.offsetDistance = 0.01f;
                 var rigidbody = obj.GetComponent<Rigidbody2D>();
                 rigidbody.bodyType = RigidbodyType2D.Static;
                 scene.BoundaryCollider = composite;

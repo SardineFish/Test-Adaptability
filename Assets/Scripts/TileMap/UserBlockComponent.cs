@@ -18,11 +18,16 @@ namespace Project.GameMap
             this.Count = count;
             this.Scene = scene;
         }
-        public IEnumerable<BlockData> Rotate(float angle)
+        public IEnumerable<BlockData> Rotate(int step)
         {
+            Block blockType = BlockType;
+            for (var i = 0; i < step; i++)
+            {
+                blockType = BlocksMap.Instance.BlockSet.GetNext(blockType);
+            }
             foreach(var block in this)
             {
-                yield return new BlockData(MathUtility.Rotate(block.Position, angle * Mathf.Deg2Rad).RoundToVector2Int(), block.BlockType);
+                yield return new BlockData(MathUtility.Rotate(block.Position, 90 * step * Mathf.Deg2Rad).RoundToVector2Int(), blockType);
             }
         }
         public BoundsInt RotateBound(float angle)

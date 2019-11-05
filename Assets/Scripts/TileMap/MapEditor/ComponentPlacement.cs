@@ -18,7 +18,9 @@ namespace Project.GameMap.Editor
         public RectTransform UI;
         public UserComponentUIData ComponentData;
         public BlockInstance BlockInstance;
-        public float Angle { get; private set; } = 0;
+
+        int rotateStep = 0;
+        public float Angle => rotateStep * 90;
         public bool Dragging { get; private set; }
         
         [DisplayInInspector]
@@ -99,10 +101,10 @@ namespace Project.GameMap.Editor
             Placed = false;
             Dragging = false;
             UI.gameObject.SetActive(true);
-            var offset = ComponentData.Component.Bound.size.ToVector2() / 2;
+            var offset = rotatedBlocks.Bound.size.ToVector2() / 2;
             foreach (var block in rotatedBlocks)
             {
-                var pos = ComponentData.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
+                var pos = rotatedBlocks.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
                 BlocksMap.Instance.PlacementLayer.SetTile(pos, null);
             }
         }
@@ -155,14 +157,10 @@ namespace Project.GameMap.Editor
             {
                 yield return null;
 
-                float2 position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
-                var snapOffset = math.frac(rotatedBlocks.Bound.center.ToVector2());
-                position -= snapOffset;
-                position = math.round(position);
-                position += snapOffset;
-                transform.position = math.float3(position.x, position.y, 0);
-                CanPlace = !CheckBlockOccupation();
+                var position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                MoveTo(position);
 
+                CanPlace = !CheckBlockOccupation();
                 if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
                 {
                     Dragging = false;
@@ -177,20 +175,25 @@ namespace Project.GameMap.Editor
             {
                 yield return null;
 
-                float2 position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
-                var snapOffset = math.frac(rotatedBlocks.Bound.center.ToVector2());
-                position -= snapOffset;
-                position = math.round(position);
-                position += snapOffset;
-                transform.position = math.float3(position.x, position.y, 0);
-                CanPlace = !CheckBlockOccupation();
+                var position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                MoveTo(position);
 
+                CanPlace = !CheckBlockOccupation();
                 if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
                 {
                     Dragging = false;
                     yield break;
                 }
             }
+        }
+
+        public void MoveTo(Vector2 position)
+        {
+            var snapOffset = (Vector2)math.frac(rotatedBlocks.Bound.center.ToVector2());
+            position -= snapOffset;
+            position = math.round(position);
+            position += snapOffset;
+            transform.position = math.float3(position.x, position.y, 0);
         }
 
         public void StartDrag(PlaceMode placeMode)
@@ -224,14 +227,15 @@ namespace Project.GameMap.Editor
         }
         public void Rotate()
         {
-            Angle += 90;
-            Angle %= 360;
+            rotateStep++;
+            rotateStep %= 4;
             GenerateBlockInstance();
         }
 
         void GenerateBlockInstance()
         {
-            rotatedBlocks = new Blocks.BlocksCollection(ComponentData.Component.Rotate(Angle));
+            var position = transform.position.ToVector2();
+            rotatedBlocks = new Blocks.BlocksCollection(ComponentData.Component.Rotate(rotateStep));
             if(!blockInstance)
             {
                 blockInstance = BlockInstance.CreateInstance(new BlockInstanceOptions()
@@ -265,6 +269,7 @@ namespace Project.GameMap.Editor
                 });
             }
             UI.sizeDelta = rotatedBlocks.Bound.size.ToVector2();
+            MoveTo(position);
         }
 
         public void SetComponent(UserComponentUIData data)
