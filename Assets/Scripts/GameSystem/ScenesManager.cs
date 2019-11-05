@@ -12,7 +12,6 @@ namespace Project
         public SceneArea CurrentScene { get; private set; } = null;
         public List<SceneArea> Scenes { get; private set; }
 
-        Dictionary<SceneArea, SceneEditorState> sceneEditorStates;
 
         private void Awake()
         {
@@ -38,24 +37,10 @@ namespace Project
             }
         }
 
-        public static void StartEditMode()
-        {
-            MapEidtoUI.Instance.gameObject.SetActive(true);
-            BlocksMap.Instance.StartEditMode();
-            MapEidtoUI.Instance.SetComponents(Instance.CurrentScene.ComponentsUIData);
-        }
-
         public static SceneArea GetSceneAt(Vector2Int position)
             => Instance?.Scenes
                 .Where(scene => scene.Blocks.Has(position))
                 .FirstOrDefault();
-
-        class SceneEditorState
-        {
-            public SceneArea Scene;
-            public List<ComponentPlacement> PlacedComponents;
-            public List<UserComponentUIData> AvailableComponents;
-        }
     }
 }
 

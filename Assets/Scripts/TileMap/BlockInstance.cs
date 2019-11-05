@@ -68,8 +68,7 @@ namespace Project.GameMap
 
         public static BlockInstance CreateInstance(BlockInstanceOptions options)
         {
-            var gameobject = new GameObject();
-            gameobject.name = $"{options.BlockType.name}{options.Blocks.Bound.center.x},{options.Blocks.Bound.center.y}";
+            var gameobject = options.GameObject ?? new GameObject($"{options.BlockType.name}{options.Blocks.Bound.center.x},{options.Blocks.Bound.center.y}");
             var instance = gameobject.AddComponent<BlockInstance>();
             instance.MergedBlocks = options.Blocks;
             instance.BlockType = options.BlockType;
@@ -132,6 +131,7 @@ namespace Project.GameMap
         public Block BlockType;
         public BlockInstanceData Data;
         public bool IsStatic;
+        public GameObject GameObject;
         public BlockInstanceOptions(Block block)
         {
             positionZ = 0;
@@ -142,6 +142,7 @@ namespace Project.GameMap
             BlockType = block;
             Data = null;
             IsStatic = false;
+            GameObject = null;
         }
     }
 }

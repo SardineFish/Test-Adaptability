@@ -8,14 +8,16 @@ namespace Project.GameMap.Editor
     public enum PlaceMode
     {
         Drag,
-        Click
+        Click,
+        None,
     }
 
     public class ComponentPlacement : MonoBehaviour
     {
+        public RectTransform UI;
         public UserComponentUIData Component;
         public BlockInstance BlockInstance;
-        public PlaceMode PlaceMode;
+        public bool Dragging { get; private set; }
         
         [DisplayInInspector]
         public bool CanPlace { get; private set; }
@@ -41,18 +43,6 @@ namespace Project.GameMap.Editor
         // Update is called once per frame
         void Update()
         {
-            if(!Placed)
-            {
-                float2 position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
-                var snapOffset = math.frac(Component.Component.Bound.center.ToVector2());
-                position -= snapOffset;
-                position = math.round(position);
-                position += snapOffset;
-                rigidbody.MovePosition(position);
-                CanPlace = !CheckBlockOccupation();
-                if (CanPlace && UnityEngine.Input.GetKey(KeyCode.Mouse0))
-                    Place();
-            }
         }
         bool CheckBlockOccupation()
         {
@@ -67,10 +57,8 @@ namespace Project.GameMap.Editor
             }
             return false;
         }
-        void Place()
+        public void Replace()
         {
-            if (Placed)
-                return;
             var offset = Component.Component.Bound.size.ToVector2() / 2;
             foreach (var block in Component.Component)
             {
@@ -78,6 +66,35 @@ namespace Project.GameMap.Editor
                 BlocksMap.Instance.PlacementLayer.SetTile(pos, Component.Component.BlockType);
             }
             Placed = true;
+        }
+        void Place()
+        {
+            if (Placed)
+                return;
+
+            UI.gameObject.SetActive(false);
+
+            var offset = Component.Component.Bound.size.ToVector2() / 2;
+            foreach (var block in Component.Component)
+            {
+                var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
+                BlocksMap.Instance.PlacementLayer.SetTile(pos, Component.Component.BlockType);
+            }
+            Placed = true;
+        }
+        public void Pick()
+        {
+            if (!Placed)
+                return;
+            Placed = false;
+            Dragging = false;
+            UI.gameObject.SetActive(true);
+            var offset = Component.Component.Bound.size.ToVector2() / 2;
+            foreach (var block in Component.Component)
+            {
+                var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
+                BlocksMap.Instance.PlacementLayer.SetTile(pos, null);
+            }
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
@@ -90,26 +107,133 @@ namespace Project.GameMap.Editor
             onTrigger?.Invoke(collision);
         }
 
-        public static ComponentPlacement Create(UserComponentUIData component, PlaceMode placeMode)
+        Coroutine dragCoroutine;
+        private void OnMouseDown()
         {
+            if (!Placed)
+                StartDrag(PlaceMode.None);
+        }
+        private void OnMouseUpAsButton()
+        {
+            if (Placed)
+                Pick();
+        }
+
+        IEnumerator DragProcess()
+        {
+            var startPos = UnityEngine.Input.mousePosition;
+            foreach(var t in Utility.Timer(1))
+            {
+                if((UnityEngine.Input.mousePosition - startPos).magnitude > 30)
+                {
+                    yield return DragMove();
+                    yield break;
+                }
+                else if (UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
+                {
+                    yield return ClickMove();
+                    yield break;
+                }
+                yield return null;
+            }
+            yield return DragMove();
+        }
+
+        IEnumerator DragMove()
+        {
+            while(true)
+            {
+                yield return null;
+
+                float2 position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                var snapOffset = math.frac(Component.Component.Bound.center.ToVector2());
+                position -= snapOffset;
+                position = math.round(position);
+                position += snapOffset;
+                transform.position = math.float3(position.x, position.y, 0);
+                CanPlace = !CheckBlockOccupation();
+
+                if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
+                {
+                    Dragging = false;
+                    yield break;
+                }
+            }
+        }
+
+        IEnumerator ClickMove()
+        {
+            while (true)
+            {
+                yield return null;
+
+                float2 position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                var snapOffset = math.frac(Component.Component.Bound.center.ToVector2());
+                position -= snapOffset;
+                position = math.round(position);
+                position += snapOffset;
+                transform.position = math.float3(position.x, position.y, 0);
+                CanPlace = !CheckBlockOccupation();
+
+                if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
+                {
+                    Dragging = false;
+                    yield break;
+                }
+            }
+        }
+
+        public void StartDrag(PlaceMode placeMode)
+        {
+            if (Dragging)
+                return;
+            Dragging = true;
+            switch(placeMode)
+            {
+                case PlaceMode.None:
+                    dragCoroutine = StartCoroutine(DragProcess());
+                    break;
+                case PlaceMode.Click:
+                    dragCoroutine = StartCoroutine(ClickMove());
+                    break;
+                case PlaceMode.Drag:
+                    dragCoroutine = StartCoroutine(ClickMove());
+                    break;
+            }
+
+        }
+        
+
+        public void Remove()
+        {
+            EditorManager.RemovePlacement(this);
+        }
+        public void Done()
+        {
+            Place();
+        }
+
+        public void SetComponent(UserComponentUIData data)
+        {
+            Component = data;
             var instance = BlockInstance.CreateInstance(new BlockInstanceOptions()
             {
-                BlockType = component.Component.BlockType,
-                Blocks = component.Component,
+                BlockType = data.Component.BlockType,
+                Blocks = data.Component,
                 GenerateRenderer = true,
                 GenerateCollider = true,
                 IsTrigger = true,
-                IsStatic = true
+                IsStatic = true,
+                GameObject = gameObject
             });
-            var placement = instance.gameObject.AddComponent<ComponentPlacement>();
-            placement.rigidbody = instance.GetComponent<Rigidbody2D>();
-            placement.rigidbody.bodyType = RigidbodyType2D.Kinematic;
-            placement.rigidbody.sleepMode = RigidbodySleepMode2D.NeverSleep;
-            placement.BlockInstance = instance;
-            placement.Component = component;
-            placement.PlaceMode = placeMode;
-            placement.transform.parent = BlocksMap.Instance.PlacementLayer.transform;
-            return placement;
+            var rigidbody = instance.GetComponent<Rigidbody2D>();
+            rigidbody.bodyType = RigidbodyType2D.Kinematic;
+            rigidbody.sleepMode = RigidbodySleepMode2D.NeverSleep;
+            instance.transform.parent = transform;
+            instance.transform.localPosition = Vector3.zero;
+            BlockInstance = instance;
+            UI.sizeDelta = data.Component.Bound.size.ToVector2();
+
         }
     }
 

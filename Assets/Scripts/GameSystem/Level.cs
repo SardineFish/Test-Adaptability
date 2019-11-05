@@ -63,8 +63,7 @@ namespace Project
         public void StartGamePlay()
         {
             GameState = GameState.Playing;
-            GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(false);
-            GameMap.BlocksMap.Instance.StartPlayerMode();
+            EditorManager.StopEdit();
 
 
             if (ActivePlayer)
@@ -80,7 +79,7 @@ namespace Project
             GameState = GameState.EditMode;
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
-            ScenesManager.StartEditMode();
+            EditorManager.StartEditMode();
         }
 
         public void RestartLevel()
@@ -91,7 +90,7 @@ namespace Project
 
             GameState = GameState.Playing;
             GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(false);
-            GameMap.BlocksMap.Instance.StartPlayerMode();
+            GameMap.BlocksMap.Instance.SwitchToPlayMap();
 
 
             if (ActivePlayer)

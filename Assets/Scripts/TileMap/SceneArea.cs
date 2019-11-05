@@ -10,7 +10,6 @@ namespace Project.GameMap
     {
         public string Name { get; set; }
         public Vector2Int SpawnPoint;
-        public List<Editor.UserComponentUIData> ComponentsUIData { get; private set; }
         public List<UserBlockComponent> UserComponents { get; private set; } = new List<UserBlockComponent>();
         public BlocksCollection Blocks { get; private set; }
         public BoundsInt Bound => Blocks.Bound;
@@ -36,13 +35,6 @@ namespace Project.GameMap
 
         public bool InScene(Vector2Int position)
             => Blocks.Has(position);
-
-        public void InitUserComponentsUIData()
-        {
-            ComponentsUIData = UserComponents
-                .Select(component => new Editor.UserComponentUIData(component))
-                .ToList();
-        }
     }
 
 }

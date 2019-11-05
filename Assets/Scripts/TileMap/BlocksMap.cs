@@ -105,8 +105,7 @@ namespace Project.GameMap
             Scenes = GetSceneAreas().ToList();
             InitBoundary();
             GetSceneComponents();
-            Scenes.ForEach(scene => scene.InitUserComponentsUIData());
-            StartEditMode();
+            SwitchToEditorMap();
             foreach(var scene in Scenes)
             {
                 foreach (var block in scene.Blocks)
@@ -149,7 +148,6 @@ namespace Project.GameMap
 
         public void InitBoundary()
         {
-            var i = 0;
             foreach(var scene in Scenes)
             {
                 var obj = new GameObject(scene.Name);
@@ -178,10 +176,10 @@ namespace Project.GameMap
             GenerateGameMap();
             UserLayer.gameObject.SetActive(false);
             BaseLayer.gameObject.SetActive(false);
-            Play();
+            GenerateBlockInstances();
         }
 
-        public void StartEditMode()
+        public void SwitchToEditorMap()
         {
             InstanceBlocks.gameObject.ClearChildren();
             StaticBlocks.TileMap.ClearAllTiles();
@@ -193,7 +191,7 @@ namespace Project.GameMap
             BaseLayer.gameObject.SetActive(true);
             BaseLayer.color = Color.white;
         }
-        public void StartPlayerMode()
+        public void SwitchToPlayMap()
         {
             GameMap.ClearAllTiles();
 
@@ -205,13 +203,13 @@ namespace Project.GameMap
 
             BaseLayer.gameObject.SetActive(false);
 
-            PlacementLayer.GetComponentsInChildren<Editor.ComponentPlacement>()
-                .ForEach(placement => placement.gameObject.SetActive(false));
+            /*PlacementLayer.GetComponentsInChildren<Editor.ComponentPlacement>()
+                .ForEach(placement => placement.gameObject.SetActive(false));*/
 
-            Play();
+            GenerateBlockInstances();
         }
 
-        public void Play()
+        void GenerateBlockInstances()
         {
             Blocks = TraverseBlocks(GameMap);
             foreach (var mergedBlock in GetMergeBlocks(Blocks))
