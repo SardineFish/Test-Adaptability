@@ -19,7 +19,6 @@ namespace Project.GameMap
         public Tilemap UserLayer;
         public Tilemap PlacementLayer;
         public Tilemap GameMap;
-        public Transform BoundaryObject;
         public Transform InstanceBlocks;
         public StaticBlocks StaticBlocks;
         public BoundsInt Bound;
@@ -34,7 +33,7 @@ namespace Project.GameMap
         private void Reset()
         {
             BaseLayer = GetOrCreateLayer("BaseLayer");
-            UserLayer = GetOrCreateLayer("UserLyaer");
+            UserLayer = GetOrCreateLayer("UserLayer");
             EffectLayer = GetOrCreateLayer("EffectLayer");
             EffectLayer.color = Utility.SetAlpha(EffectLayer.color, 0.5f);
             EffectLayer.gameObject.layer = 15;
@@ -57,7 +56,7 @@ namespace Project.GameMap
 
         private void Awake()
         {
-            BoundaryObject = transform.Find("Boundary");
+            /*BoundaryObject = transform.Find("Boundary");
             if (!BoundaryObject)
             {
                 var obj = new GameObject();
@@ -66,7 +65,7 @@ namespace Project.GameMap
                 obj.AddComponent<BoxCollider2D>();
                 obj.AddComponent<CompositeCollider2D>();
                 BoundaryObject = obj.transform;
-            }
+            }*/
             InstanceBlocks = transform.Find("Instances");
             if (!InstanceBlocks)
             {
@@ -105,6 +104,8 @@ namespace Project.GameMap
             UserLayer.gameObject.SetActive(false);
             Scenes = GetSceneAreas().ToList();
             InitBoundary();
+            GetSceneComponents();
+            Scenes.ForEach(scene => scene.InitUserComponentsUIData());
             StartEditMode();
             foreach(var scene in Scenes)
             {
@@ -117,22 +118,33 @@ namespace Project.GameMap
         public SceneArea GetSceneAt(Vector2Int position)
             => blockInScene.Get(position);
 
-        public List<Editor.UserComponentUIData> GetUserComponents()
+        SceneArea GetSceneOfBlocks(BlocksCollection blocks)
+            => Scenes.Where(scene => scene.Blocks
+                     .Has(blocks.First().Position))
+                     .First();
+        bool InSameScene(BlocksCollection a, BlocksCollection b)
+            => GetSceneOfBlocks(a) == GetSceneOfBlocks(b);
+
+        void GetSceneComponents()
         {
             var userComponents = GetUserMapComponents()
-                .GroupBy(merged => merged, Utility.MakeEqualityComparer<BlocksCollection>((a, b) => a.Equals(b)))
-                .Select(group => new UserBlockComponent(group.Key, group.Count()))
+                .GroupBy(merged => merged, Utility.MakeEqualityComparer<UserBlockComponent>((a, b) => a.Scene == b.Scene && a.Equals(b)))
+                .Select(group => new UserBlockComponent(group.Key, group.Count(), group.Key.Scene))
                 .ToList();
+            // debug
             Vector2Int pos = new Vector2Int(0, -20);
             foreach (var component in userComponents)
             {
-                foreach (var block in component)
+                /*foreach (var block in component)
                 {
                     StaticBlocks.TileMap.SetTile((pos + block.Position).ToVector3Int(), block.BlockType);
                 }
-                pos += new Vector2Int(component.Bound.size.x + 1, 0);
+                pos += new Vector2Int(component.Bound.size.x + 1, 0);*/
+
+                var scene = component.Scene;
+                scene.UserComponents.Add(component);
             }
-            return userComponents.Select(component => new Editor.UserComponentUIData(component)).ToList();
+            //return userComponents.Select(component => new Editor.UserComponentUIData(component)).ToList();
         }
 
         public void InitBoundary()
@@ -140,7 +152,7 @@ namespace Project.GameMap
             var i = 0;
             foreach(var scene in Scenes)
             {
-                var obj = new GameObject($"Scene-{i++}");
+                var obj = new GameObject(scene.Name);
                 obj.transform.parent = SceneLayer.transform;
                 obj.layer = 13;
                 var tilemap = obj.AddComponent<Tilemap>();
@@ -236,9 +248,10 @@ namespace Project.GameMap
 
         public IEnumerable<SceneArea> GetSceneAreas()
         {
-            foreach(var blocks in GetMergedBlocksFrom(SceneLayer))
+            int i = 0;
+            foreach (var blocks in GetMergedBlocksFrom(SceneLayer, (a, b) => true))
             {
-                yield return new SceneArea(blocks);
+                yield return new SceneArea(blocks, $"Scene-{i++}");
             }
         }
 
@@ -261,6 +274,8 @@ namespace Project.GameMap
         }
 
         public IEnumerable<BlocksCollection> GetMergedBlocksFrom(Tilemap tilemap)
+            => GetMergedBlocksFrom(tilemap, (block, neighbor) => block.BlockType == neighbor.BlockType);
+        public IEnumerable<BlocksCollection> GetMergedBlocksFrom(Tilemap tilemap, Func<BlockData, BlockData, bool> mergeRule)
         {
             var blocks = TraverseBlocks(tilemap);
             HashSet<BlockData> visitedBlocks = new HashSet<BlockData>();
@@ -283,7 +298,7 @@ namespace Project.GameMap
                     GetNeighborsFrom(block, tilemap)
                         .Where(next => next != BlockData.Null)
                         .Where(next => !visitedBlocks.Contains(next))
-                        .Where(next => next.BlockType == block.BlockType)
+                        .Where(next => mergeRule(block, next))
                         .ForEach(next => blocksToVisit.Enqueue(next));
 
                 }
@@ -291,14 +306,15 @@ namespace Project.GameMap
             }
         }
 
-        public IEnumerable<BlocksCollection> GetUserMapComponents()
+        IEnumerable<UserBlockComponent> GetUserMapComponents()
         {
             foreach(var merged in GetMergedBlocksFrom(UserLayer))
             {
+                var scene = GetSceneOfBlocks(merged);
                 merged.OrderBy(b => b.Position, (u, v) => u.y == v.y ? u.x - v.x : u.y - v.y);
                 var boundMin = merged.Bound.min.ToVector2Int();
                 merged.MoveAll(Vector2Int.zero - boundMin);
-                yield return merged;
+                yield return new UserBlockComponent(merged, 0, scene);
             }
         }
 

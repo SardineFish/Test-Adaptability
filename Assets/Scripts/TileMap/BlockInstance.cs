@@ -16,6 +16,8 @@ namespace Project.GameMap
         public BoxCollider2D BoxCollider { get; private set; }
         BlockInstanceData data;
 
+        public bool IsStatic { get; set; }
+
         public Block GetContactedBlock(Vector3 point, Vector3 normal)
         {
             return BlockType;
@@ -40,17 +42,20 @@ namespace Project.GameMap
 
         private void FixedUpdate()
         {
-            BlockType.UpdateInstance(this);
+            if (!IsStatic)
+                BlockType.UpdateInstance(this);
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            BlockType.OnCollision(this, collision);
+            if (!IsStatic)
+                BlockType.OnCollision(this, collision);
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            BlockType.OnTrigger(this, collision);
+            if (!IsStatic)
+                BlockType.OnTrigger(this, collision);
         }
 
         public T GetData<T>() where T : BlockInstanceData
@@ -69,6 +74,7 @@ namespace Project.GameMap
             instance.MergedBlocks = options.Blocks;
             instance.BlockType = options.BlockType;
             instance.data = options.Data;
+            instance.IsStatic = options.IsStatic;
             gameobject.transform.position = options.Blocks.Bound.center.Set(z: options.positionZ);
 
             if (options.GenerateCollider && options.BlockType.MergeMode == BlockMergeMode.Both)
@@ -125,6 +131,7 @@ namespace Project.GameMap
         public BlocksCollection Blocks;
         public Block BlockType;
         public BlockInstanceData Data;
+        public bool IsStatic;
         public BlockInstanceOptions(Block block)
         {
             positionZ = 0;
@@ -134,6 +141,7 @@ namespace Project.GameMap
             Blocks = null;
             BlockType = block;
             Data = null;
+            IsStatic = false;
         }
     }
 }

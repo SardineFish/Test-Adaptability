@@ -40,7 +40,7 @@ namespace Project
         private void Start()
         {
             ActivePlayer = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
-            StartLevelEdit();
+            RestartLevel();
         }
 
         private void Update()
@@ -71,8 +71,8 @@ namespace Project
                 Destroy(ActivePlayer.gameObject);
             ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
 
-            ActivePlayer.transform.position = SpawnPoint.position;
-            GamePlayCamera.Follow = ActivePlayer.transform;
+
+            ActivePlayer.transform.position = ScenesManager.Instance.CurrentScene.SpawnPoint.ToVector3();
         }
 
         public void StartLevelEdit()
@@ -80,9 +80,35 @@ namespace Project
             GameState = GameState.EditMode;
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
-            GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(true);
-            GameMap.BlocksMap.Instance.StartEditMode();
-            GameMap.Editor.MapEidtoUI.Instance.SetComponents(GameMap.BlocksMap.Instance.GetUserComponents());
+            ScenesManager.StartEditMode();
+        }
+
+        public void RestartLevel()
+        {
+            var startupScene = ScenesManager.GetSceneAt(SpawnPoint.position.ToVector2Int());
+            var spawnPos = startupScene.SpawnPoint;
+
+
+            GameState = GameState.Playing;
+            GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(false);
+            GameMap.BlocksMap.Instance.StartPlayerMode();
+
+
+            if (ActivePlayer)
+                Destroy(ActivePlayer.gameObject);
+            ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
+
+
+            ActivePlayer.transform.position = spawnPos.ToVector3();
+        }
+
+        private void OnDrawGizmos()
+        {
+            if(SpawnPoint)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(SpawnPoint.position, 1);
+            }
         }
     }
 }

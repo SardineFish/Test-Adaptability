@@ -9,7 +9,9 @@ namespace Project.GameMap.Data
     {
         void Awake()
         {
-            sprite = Resources.Load<Sprite>("Texture/white-16");    
+            Static = false;
+            if (!sprite)
+                sprite = Resources.Load<Sprite>("Texture/white-16");
         }
     }
 }

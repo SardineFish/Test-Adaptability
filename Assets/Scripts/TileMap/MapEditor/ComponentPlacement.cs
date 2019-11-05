@@ -99,6 +99,7 @@ namespace Project.GameMap.Editor
                 GenerateRenderer = true,
                 GenerateCollider = true,
                 IsTrigger = true,
+                IsStatic = true
             });
             var placement = instance.gameObject.AddComponent<ComponentPlacement>();
             placement.rigidbody = instance.GetComponent<Rigidbody2D>();

@@ -2,24 +2,47 @@
 using System.Collections;
 using System.Collections.Generic;
 using Project.Blocks;
+using System.Linq;
 
 namespace Project.GameMap
 {
     public class SceneArea
     {
-        public List<UserBlockComponent> UserComponents { get; private set; }
+        public string Name { get; set; }
+        public Vector2Int SpawnPoint;
+        public List<Editor.UserComponentUIData> ComponentsUIData { get; private set; }
+        public List<UserBlockComponent> UserComponents { get; private set; } = new List<UserBlockComponent>();
         public BlocksCollection Blocks { get; private set; }
         public BoundsInt Bound => Blocks.Bound;
-        public List<Editor.ComponentPlacement> PlacedComponents { get; private set; }
         public Collider2D BoundaryCollider { get; set; }
 
-        public SceneArea(BlocksCollection blocks)
+        public SceneArea(BlocksCollection blocks, string name = null)
         {
             this.Blocks = blocks;
+            if (name is null)
+                name = System.Guid.NewGuid().ToString();
+            Name = name;
+            try
+            {
+                SpawnPoint = blocks.Where(block => block.BlockType is GameMap.Data.SceneData data && data.DataType == Data.SceneData.Type.SpawnPoint)
+                    .First()
+                    .Position;
+            }
+            catch
+            {
+                Debug.LogError($"Cannot found spawn point of scene {Name}.");
+            }
         }
 
         public bool InScene(Vector2Int position)
             => Blocks.Has(position);
+
+        public void InitUserComponentsUIData()
+        {
+            ComponentsUIData = UserComponents
+                .Select(component => new Editor.UserComponentUIData(component))
+                .ToList();
+        }
     }
 
 }

@@ -11,9 +11,11 @@ namespace Project.GameMap
     {
         public int Count;
         public Block BlockType => blocksList[0].BlockType;
-        public UserBlockComponent(BlocksCollection blocks, int count) : base(blocks)
+        public GameMap.SceneArea Scene { get; private set; }
+        public UserBlockComponent(BlocksCollection blocks, int count, SceneArea scene) : base(blocks)
         {
             this.Count = count;
+            this.Scene = scene;
         }
     }
 }
