@@ -43,7 +43,7 @@ namespace Project
         public static void RemovePlacement(ComponentPlacement placement)
         {
             Instance.CurrentEditorState.PlacedComponents.Remove(placement);
-            placement.Component.Component.Count++;
+            placement.ComponentData.Component.Count++;
             Destroy(placement.gameObject);
         }
 

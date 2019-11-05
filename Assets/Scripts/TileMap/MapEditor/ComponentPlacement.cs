@@ -2,6 +2,7 @@
 using System.Collections;
 using Unity.Mathematics;
 using System;
+using System.Linq;
 
 namespace Project.GameMap.Editor
 {
@@ -15,8 +16,9 @@ namespace Project.GameMap.Editor
     public class ComponentPlacement : MonoBehaviour
     {
         public RectTransform UI;
-        public UserComponentUIData Component;
+        public UserComponentUIData ComponentData;
         public BlockInstance BlockInstance;
+        public float Angle { get; private set; } = 0;
         public bool Dragging { get; private set; }
         
         [DisplayInInspector]
@@ -26,6 +28,8 @@ namespace Project.GameMap.Editor
         
         event Action<Collider2D> onTrigger;
         new Rigidbody2D rigidbody;
+        BlockInstance blockInstance;
+        Blocks.BlocksCollection rotatedBlocks;
         private void Awake()
         {
             onTrigger += (collider) =>
@@ -33,7 +37,19 @@ namespace Project.GameMap.Editor
                 if (collider.attachedRigidbody.GetComponent<IBlockInstance>() != null)
                     CanPlace = false;
             };
+            Input.InputManager.Input.EditorMode.Rotate.performed += Rotate_performed;
         }
+
+        private void OnDestroy()
+        {
+            Input.InputManager.Input.EditorMode.Rotate.performed -= Rotate_performed;
+        }
+
+        private void Rotate_performed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+        {
+            Rotate();
+        }
+
         // Use this for initialization
         void Start()
         {
@@ -46,10 +62,10 @@ namespace Project.GameMap.Editor
         }
         bool CheckBlockOccupation()
         {
-            var offset = Component.Component.Bound.size.ToVector2() / 2;
-            foreach(var block in Component.Component)
+            var offset = rotatedBlocks.Bound.size.ToVector2() / 2;
+            foreach(var block in rotatedBlocks)
             {
-                var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
+                var pos = rotatedBlocks.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
                 if (BlocksMap.Instance.BaseLayer.GetTile(pos) != null)
                     return true;
                 if (BlocksMap.Instance.PlacementLayer.GetTile(pos) != null)
@@ -59,11 +75,11 @@ namespace Project.GameMap.Editor
         }
         public void Replace()
         {
-            var offset = Component.Component.Bound.size.ToVector2() / 2;
-            foreach (var block in Component.Component)
+            var offset = rotatedBlocks.Bound.size.ToVector2() / 2;
+            foreach (var block in rotatedBlocks)
             {
-                var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
-                BlocksMap.Instance.PlacementLayer.SetTile(pos, Component.Component.BlockType);
+                var pos = rotatedBlocks.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
+                BlocksMap.Instance.PlacementLayer.SetTile(pos, rotatedBlocks.First().BlockType);
             }
             Placed = true;
         }
@@ -74,13 +90,7 @@ namespace Project.GameMap.Editor
 
             UI.gameObject.SetActive(false);
 
-            var offset = Component.Component.Bound.size.ToVector2() / 2;
-            foreach (var block in Component.Component)
-            {
-                var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
-                BlocksMap.Instance.PlacementLayer.SetTile(pos, Component.Component.BlockType);
-            }
-            Placed = true;
+            Replace();
         }
         public void Pick()
         {
@@ -89,10 +99,10 @@ namespace Project.GameMap.Editor
             Placed = false;
             Dragging = false;
             UI.gameObject.SetActive(true);
-            var offset = Component.Component.Bound.size.ToVector2() / 2;
-            foreach (var block in Component.Component)
+            var offset = ComponentData.Component.Bound.size.ToVector2() / 2;
+            foreach (var block in rotatedBlocks)
             {
-                var pos = Component.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
+                var pos = ComponentData.Component.Bound.min + block.Position.ToVector3Int() + (transform.position.ToVector2() - offset).ToVector3Int();
                 BlocksMap.Instance.PlacementLayer.SetTile(pos, null);
             }
         }
@@ -146,7 +156,7 @@ namespace Project.GameMap.Editor
                 yield return null;
 
                 float2 position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
-                var snapOffset = math.frac(Component.Component.Bound.center.ToVector2());
+                var snapOffset = math.frac(rotatedBlocks.Bound.center.ToVector2());
                 position -= snapOffset;
                 position = math.round(position);
                 position += snapOffset;
@@ -168,7 +178,7 @@ namespace Project.GameMap.Editor
                 yield return null;
 
                 float2 position = Level.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
-                var snapOffset = math.frac(Component.Component.Bound.center.ToVector2());
+                var snapOffset = math.frac(rotatedBlocks.Bound.center.ToVector2());
                 position -= snapOffset;
                 position = math.round(position);
                 position += snapOffset;
@@ -212,28 +222,55 @@ namespace Project.GameMap.Editor
         {
             Place();
         }
+        public void Rotate()
+        {
+            Angle += 90;
+            Angle %= 360;
+            GenerateBlockInstance();
+        }
+
+        void GenerateBlockInstance()
+        {
+            rotatedBlocks = new Blocks.BlocksCollection(ComponentData.Component.Rotate(Angle));
+            if(!blockInstance)
+            {
+                blockInstance = BlockInstance.CreateInstance(new BlockInstanceOptions()
+                {
+                    BlockType = rotatedBlocks.First().BlockType,
+                    Blocks = rotatedBlocks,
+                    GenerateRenderer = true,
+                    GenerateCollider = true,
+                    IsTrigger = true,
+                    IsStatic = true,
+                    GameObject = gameObject
+                });
+                var rigidbody = blockInstance.GetComponent<Rigidbody2D>();
+                rigidbody.bodyType = RigidbodyType2D.Kinematic;
+                rigidbody.sleepMode = RigidbodySleepMode2D.NeverSleep;
+                blockInstance.transform.parent = transform;
+                blockInstance.transform.localPosition = Vector3.zero;
+                BlockInstance = blockInstance;
+            }
+            else
+            {
+                blockInstance.UpdateInstance(new BlockInstanceOptions()
+                {
+                    BlockType = rotatedBlocks.First().BlockType,
+                    Blocks = rotatedBlocks,
+                    GenerateRenderer = true,
+                    GenerateCollider = true,
+                    IsTrigger = true,
+                    IsStatic = true,
+                    GameObject = gameObject
+                });
+            }
+            UI.sizeDelta = rotatedBlocks.Bound.size.ToVector2();
+        }
 
         public void SetComponent(UserComponentUIData data)
         {
-            Component = data;
-            var instance = BlockInstance.CreateInstance(new BlockInstanceOptions()
-            {
-                BlockType = data.Component.BlockType,
-                Blocks = data.Component,
-                GenerateRenderer = true,
-                GenerateCollider = true,
-                IsTrigger = true,
-                IsStatic = true,
-                GameObject = gameObject
-            });
-            var rigidbody = instance.GetComponent<Rigidbody2D>();
-            rigidbody.bodyType = RigidbodyType2D.Kinematic;
-            rigidbody.sleepMode = RigidbodySleepMode2D.NeverSleep;
-            instance.transform.parent = transform;
-            instance.transform.localPosition = Vector3.zero;
-            BlockInstance = instance;
-            UI.sizeDelta = data.Component.Bound.size.ToVector2();
-
+            ComponentData = data;
+            GenerateBlockInstance();
         }
     }
 

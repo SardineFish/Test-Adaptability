@@ -50,6 +50,8 @@ public static class MathUtility
         => new Vector2Int(v.x, v.y);
     public static Vector2Int ToVector2Int(this Vector2 v)
         => new Vector2Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y));
+    public static Vector2Int RoundToVector2Int(this Vector2 v)
+        => new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
     public static Vector3Int ToVector3Int(this Vector2 v, int z = 0)
         => new Vector3Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y), z);
     public static Vector3 ToVector3(this Vector2Int v, float z = 0)

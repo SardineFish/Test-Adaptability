@@ -29,6 +29,13 @@ namespace Project.Blocks
         public BlocksCollection()
         {
         }
+        public BlocksCollection(IEnumerable<BlockData> source)
+        {
+            foreach(var block in source)
+            {
+                this.Set(block);
+            }
+        }
         protected BlocksCollection(BlocksCollection clone)
         {
             this.blocksList = clone.blocksList;
