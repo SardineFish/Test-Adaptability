@@ -31,12 +31,15 @@ namespace Project
             {
                 Debug.Log("Player Dead.");
             };
+            GameMap.BlocksMap.Instance.AfterMapGeneration += () =>
+            {
+                RestartLevel();
+            };
         }
 
         private void Start()
         {
             ActivePlayer = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
-            RestartLevel();
         }
 
         private void Update()

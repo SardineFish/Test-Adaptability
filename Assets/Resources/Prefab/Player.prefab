@@ -164,7 +164,7 @@ GameObject:
   - component: {fileID: 4294146819638328084}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -288,11 +288,11 @@ MonoBehaviour:
   ForceInAir: 100
   AirSpeedLimit: {x: 10, y: 40}
   JumpHeight: 4
-  JumpTime: 0.55
+  JumpTime: 0.5
   WallJumpVelocityX: 10
   WallJumpHeight: 4
   WallJumpFreezeTime: 0.3
-  CoyoteTime: 0.05
+  CoyoteTime: 0.1
 --- !u!114 &4294146819638328084
 MonoBehaviour:
   m_ObjectHideFlags: 0

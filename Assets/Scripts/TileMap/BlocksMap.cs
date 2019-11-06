@@ -118,9 +118,9 @@ namespace Project.GameMap
             => blockInScene.Get(position);
 
         SceneArea GetSceneOfBlocks(BlocksCollection blocks)
-            => Scenes.Where(scene => scene.Blocks
-                     .Has(blocks.First().Position))
-                     .First();
+            => Scenes.Where(scene => 
+                scene.Blocks.Has(blocks.First().Position))
+               .FirstOrDefault();
         bool InSameScene(BlocksCollection a, BlocksCollection b)
             => GetSceneOfBlocks(a) == GetSceneOfBlocks(b);
 
@@ -308,6 +308,8 @@ namespace Project.GameMap
             foreach(var merged in GetMergedBlocksFrom(UserLayer))
             {
                 var scene = GetSceneOfBlocks(merged);
+                if (scene is null)
+                    continue;
                 merged.OrderBy(b => b.Position, (u, v) => u.y == v.y ? u.x - v.x : u.y - v.y);
                 var boundMin = merged.Bound.min.ToVector2Int();
                 merged.MoveAll(Vector2Int.zero - boundMin);
