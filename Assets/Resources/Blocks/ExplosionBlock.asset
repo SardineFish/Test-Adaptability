@@ -35,10 +35,12 @@ MonoBehaviour:
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
   m_ColliderType: 2
+  AllowWallJump: 0
   Static: 0
   MergeMode: 3
   BlockDirection: 1
   ExplosionRange: 1
-  CountDownTime: 1
-  RecoverTime: 2
+  CountDownTime: 2
+  RecoverTime: 4
+  TriggerByBlock: 0
   ExplosionAnimator: {fileID: 9100000, guid: 8fbfa83766b8cd9429fff757c6c8e417, type: 2}
