@@ -17,6 +17,7 @@ namespace Project
         public CinemachineVirtualCamera EditorCamera;
 
         Dictionary<SceneArea, CinemachineVirtualCamera> SceneCameras = new Dictionary<SceneArea, CinemachineVirtualCamera>();
+        Dictionary<SceneArea, CinemachineVirtualCamera> SceneEditorCameras = new Dictionary<SceneArea, CinemachineVirtualCamera>();
         private void Awake()
         {
             BlocksMap.Instance.AfterMapGeneration += AfterMapGeneration;
@@ -31,26 +32,47 @@ namespace Project
 
         private void AfterMapGeneration()
         {
-
             foreach(var scene in BlocksMap.Instance.Scenes)
             {
-                var obj = Instantiate(GamePlayCameraPrefab);
-                obj.name = $"Camera-{scene.BoundaryCollider.name}";
-                obj.transform.parent = transform;
-                obj.transform.position = obj.transform.position.Set(z: CameraZ);
-                obj.SetActive(false);
-                var camera = obj.GetComponent<CinemachineVirtualCamera>();
-                var confiner = obj.GetComponent<CinemachineConfiner>();
-                confiner.m_ConfineMode = CinemachineConfiner.Mode.Confine2D;
-                confiner.m_BoundingShape2D = scene.BoundaryCollider;
-                confiner.m_ConfineScreenEdges = true;
-                confiner.m_Damping = 0;
-                SceneCameras[scene] = camera;
+                SceneCameras[scene] = CreateGamePlayCamera(scene);
+                SceneEditorCameras[scene] = CreateEditorCamera(scene);
             }
             var startupScene = BlocksMap.Instance.GetSceneAt(Level.Instance.SpawnPoint.transform.position.ToVector2Int());
             GamePlayCamera = SceneCameras[startupScene];
             GamePlayCamera.gameObject.SetActive(true);
-            CreateEditorCamera();
+            EditorCamera = SceneEditorCameras[startupScene];
+        }
+
+        CinemachineVirtualCamera CreateGamePlayCamera(SceneArea scene)
+        {
+            var obj = Instantiate(GamePlayCameraPrefab);
+            obj.name = $"Camera-{scene.BoundaryCollider.name}";
+            obj.transform.parent = transform;
+            obj.transform.position = obj.transform.position.Set(z: CameraZ);
+            obj.SetActive(false);
+            var camera = obj.GetComponent<CinemachineVirtualCamera>();
+            var confiner = obj.GetComponent<CinemachineConfiner>();
+            confiner.m_ConfineMode = CinemachineConfiner.Mode.Confine2D;
+            confiner.m_BoundingShape2D = scene.BoundaryCollider;
+            confiner.m_ConfineScreenEdges = true;
+            confiner.m_Damping = 0;
+            return camera;
+        }
+
+        CinemachineVirtualCamera CreateEditorCamera(SceneArea scene)
+        {
+            var obj = Instantiate(EditorCameraPrefab);
+            obj.name = $"EditorCamera-{scene.BoundaryCollider.name}";
+            obj.transform.parent = transform;
+            obj.transform.position = obj.transform.position.Set(z: CameraZ);
+            obj.SetActive(false);
+            var camera = obj.GetComponent<CinemachineVirtualCamera>();
+            var confiner = obj.GetComponent<CinemachineConfiner>();
+            confiner.m_ConfineMode = CinemachineConfiner.Mode.Confine2D;
+            confiner.m_BoundingShape2D = scene.BoundaryCollider;
+            confiner.m_ConfineScreenEdges = true;
+            confiner.m_Damping = 0;
+            return camera;
         }
 
         void CreateEditorCamera()
@@ -59,6 +81,7 @@ namespace Project
             obj.transform.parent = transform;
             obj.transform.position = transform.position.Set(z: CameraZ);
             var cinemachine = obj.GetComponent<CinemachineVirtualCamera>();
+            var confiner = obj.GetComponent<CinemachineConfiner>();
             EditorCamera = cinemachine;
             obj.SetActive(false);
         }
@@ -96,9 +119,11 @@ namespace Project
             }
             else if (Level.Instance.GameState == GameState.EditMode)
             {
+                EditorCamera = SceneEditorCameras[ScenesManager.Instance.CurrentScene];
                 EditorCamera.gameObject.SetActive(true);
+                //EditorCamera.gameObject.SetActive(true);
                 GamePlayCamera.gameObject.SetActive(false);
-                EditorCamera.GetComponent<CinemachineConfiner>().m_BoundingShape2D = ScenesManager.Instance.CurrentScene.BoundaryCollider;
+                //EditorCamera.GetComponent<CinemachineConfiner>().m_BoundingShape2D = ScenesManager.Instance.CurrentScene.BoundaryCollider;
             }
         }
     }
