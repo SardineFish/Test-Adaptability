@@ -27,10 +27,6 @@ namespace Project
 
         private void Awake()
         {
-            OnPlayerDead += () =>
-            {
-                Debug.Log("Player Dead.");
-            };
             GameMap.BlocksMap.Instance.AfterMapGeneration += () =>
             {
                 RestartLevel();
@@ -56,11 +52,15 @@ namespace Project
 
         private void Level_OnPlayerDead()
         {
-            ActivePlayer.transform.position = SpawnPoint.position;
+            Debug.Log("Player Dead.");
+            OnPlayerDead?.Invoke();
+            RestartScene();
         }
 
         public void StartGamePlay()
         {
+            if (GameState == GameState.Playing)
+                return;
             GameState = GameState.Playing;
             EditorManager.StopEdit();
 
@@ -68,6 +68,7 @@ namespace Project
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
             ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
+            ActivePlayer.OnPlayerDead += Level_OnPlayerDead;
 
 
             ActivePlayer.transform.position = ScenesManager.Instance.CurrentScene.SpawnPoint.ToVector3();
@@ -75,10 +76,21 @@ namespace Project
 
         public void StartLevelEdit()
         {
+            if (GameState == GameState.EditMode)
+                return;
             GameState = GameState.EditMode;
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
             EditorManager.StartEditMode();
+        }
+
+        public void RestartScene()
+        {
+            if (ActivePlayer)
+                Destroy(ActivePlayer.gameObject);
+            ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
+            ActivePlayer.OnPlayerDead += Level_OnPlayerDead;
+            ActivePlayer.transform.position = ScenesManager.Instance.CurrentScene.SpawnPoint.ToVector3();
         }
 
         public void RestartLevel()
@@ -95,6 +107,7 @@ namespace Project
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
             ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
+            ActivePlayer.OnPlayerDead += Level_OnPlayerDead;
 
 
             ActivePlayer.transform.position = spawnPos.ToVector3();
