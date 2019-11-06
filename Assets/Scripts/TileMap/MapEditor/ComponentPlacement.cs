@@ -20,6 +20,11 @@ namespace Project.GameMap.Editor
         public RectTransform UI;
         public UserComponentUIData ComponentData;
         public BlockInstance BlockInstance;
+        public Material FXMaterial;
+        [ColorUsage(true, true)]
+        public Color PlaceColor;
+        [ColorUsage(true, true)]
+        public Color ErrorColor;
 
         int rotateStep = 0;
         public float Angle => rotateStep * 90;
@@ -34,8 +39,11 @@ namespace Project.GameMap.Editor
         new Rigidbody2D rigidbody;
         BlockInstance blockInstance;
         Blocks.BlocksCollection rotatedBlocks;
+        SpriteRenderer[] renderers;
+        Material defaultMat;
         private void Awake()
         {
+            defaultMat = new Material(Shader.Find("Sprites/Default"));
             onTrigger += (collider) =>
             {
                 if (collider.attachedRigidbody.GetComponent<IBlockInstance>() != null)
@@ -98,6 +106,7 @@ namespace Project.GameMap.Editor
                 return;
 
             UI.gameObject.SetActive(false);
+            SetFx(defaultMat, Color.white);
 
             Replace();
         }
@@ -113,6 +122,24 @@ namespace Project.GameMap.Editor
             {
                 BlocksMap.Instance.PlacementLayer.SetTile(block.Position.ToVector3Int(), null);
             }
+            SetFx(FXMaterial, PlaceColor);
+
+        }
+
+        void SetFx(Material mat, Color color)
+        {
+            MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+            propertyBlock.SetColor("_FXColor", color);
+            renderers
+                .Where(renderer=>renderer)
+                .ForEach(renderer =>
+            {
+                renderer.material = mat;
+                renderer.GetPropertyBlock(propertyBlock);
+                propertyBlock.SetColor("_FXColor", color);
+                renderer.SetPropertyBlock(propertyBlock);
+
+            });
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
@@ -167,6 +194,12 @@ namespace Project.GameMap.Editor
                 MoveTo(position);
 
                 CanPlace = !CheckBlockOccupation();
+
+                if (CanPlace)
+                    SetFx(FXMaterial, PlaceColor);
+                else
+                    SetFx(FXMaterial, ErrorColor);
+
                 if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
                 {
                     Dragging = false;
@@ -185,6 +218,12 @@ namespace Project.GameMap.Editor
                 MoveTo(position);
 
                 CanPlace = !CheckBlockOccupation();
+
+                if (CanPlace)
+                    SetFx(FXMaterial, PlaceColor);
+                else
+                    SetFx(FXMaterial, ErrorColor);
+
                 if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
                 {
                     Dragging = false;
@@ -238,6 +277,13 @@ namespace Project.GameMap.Editor
             rotateStep++;
             rotateStep %= 4;
             GenerateBlockInstance();
+
+            CanPlace = !CheckBlockOccupation();
+
+            if (CanPlace)
+                SetFx(FXMaterial, PlaceColor);
+            else
+                SetFx(FXMaterial, ErrorColor);
         }
 
         void GenerateBlockInstance()
@@ -278,6 +324,7 @@ namespace Project.GameMap.Editor
             }
             UI.sizeDelta = rotatedBlocks.Bound.size.ToVector2();
             MoveTo(position);
+            renderers = GetComponentsInChildren<SpriteRenderer>();
         }
 
         public void SetComponent(UserComponentUIData data)

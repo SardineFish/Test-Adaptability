@@ -438,6 +438,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 1509050642940999023}
   BlockInstance: {fileID: 0}
+  FXMaterial: {fileID: 2100000, guid: 86df5db21a198494292631c909bfbe3e, type: 2}
+  PlaceColor: {r: 0.3977, g: 1.1029, b: 1.1511, a: 0.7294118}
+  ErrorColor: {r: 1.143, g: 0.4349, b: 0.2676, a: 0.67058825}
 --- !u!1 &1509050644109044463
 GameObject:
   m_ObjectHideFlags: 0
