@@ -286,7 +286,7 @@ MonoBehaviour:
   SpeedOnGround: 15
   GroundDamping: 0.5
   ForceInAir: 100
-  AirSpeedLimit: {x: 10, y: 40}
+  AirSpeedLimit: {x: 12, y: 35}
   JumpHeight: 4
   JumpTime: 0.5
   WallJumpVelocityX: 10
