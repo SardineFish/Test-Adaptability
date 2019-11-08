@@ -40,12 +40,81 @@ namespace Project.Blocks
             BlocksMap.RemoveBlock(data.Position);
         }
         RaycastHit2D[] hits = new RaycastHit2D[16];
+        bool HitForward(BlockInstance instance)
+        {
+            var data = instance.GetData<MotionData>();
+            var dir = data.velocity.normalized * .5f;
+            if (Mathf.Approximately(data.velocity.magnitude, 0))
+                dir = this.Direction == MoveDirection.Horizontal
+                    ? Vector2.right
+                    : Vector2.up;
+            foreach (var block in instance.Blocks)
+            {
+                var pos = block.Position.ToVector3() - instance.Blocks.Bound.center + instance.transform.position + new Vector3(.5f, .5f, 0);
+                var count = Physics2D.RaycastNonAlloc(pos, dir.normalized, hits, dir.magnitude, 1 << 11);
+                Debug.DrawLine(pos, pos + dir.ToVector3(), Color.red);
+                for (int i = 0; i < count; i++)
+                {
+                    if (hits[i].collider.isTrigger)
+                        continue;
+                    if (hits[i].rigidbody == instance.GetComponent<Rigidbody2D>())
+                        continue;
+                    var hitBlock = hits[i].rigidbody?.GetComponent<IBlockInstance>()?.GetContactedBlock(hits[i].point, hits[i].normal);
+                    if (hitBlock)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        bool HitBackward(BlockInstance instance)
+        {
+            var data = instance.GetData<MotionData>();
+            var dir = -data.velocity.normalized * .5f;
+            if (Mathf.Approximately(data.velocity.magnitude, 0))
+                dir = this.Direction == MoveDirection.Horizontal
+                    ? Vector2.left
+                    : Vector2.down;
+            foreach (var block in instance.Blocks)
+            {
+                var pos = block.Position.ToVector3() - instance.Blocks.Bound.center + instance.transform.position + new Vector3(.5f, .5f, 0);
+                var count = Physics2D.RaycastNonAlloc(pos, dir.normalized, hits, dir.magnitude, 1 << 11);
+                Debug.DrawLine(pos, pos + dir.ToVector3(), Color.red);
+                for (int i = 0; i < count; i++)
+                {
+                    if (hits[i].collider.isTrigger)
+                        continue;
+                    if (hits[i].rigidbody == instance.GetComponent<Rigidbody2D>())
+                        continue;
+                    var hitBlock = hits[i].rigidbody?.GetComponent<IBlockInstance>()?.GetContactedBlock(hits[i].point, hits[i].normal);
+                    if (hitBlock)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         public override void UpdateInstance(BlockInstance instance)
         {
             var data = instance.GetData<MotionData>();
+
+            if(HitForward(instance))
+            {
+                if (HitBackward(instance))
+                    data.velocity = Vector2.zero;
+                else if (Mathf.Approximately(data.velocity.magnitude, 0))
+                    data.velocity = (Direction == MoveDirection.Horizontal ? Vector2.left : Vector2.down) * Speed;
+                else
+                    data.velocity = -data.velocity;
+            }
+
+            instance.GetComponent<Rigidbody2D>().velocity = data.velocity;
+            /*
             if (MergeMode == BlockMergeMode.Both)
             {
-
+                
             }
             else
             {
@@ -67,8 +136,7 @@ namespace Project.Blocks
                     }
                 }
 
-            }
-            instance.GetComponent<Rigidbody2D>().velocity = data.velocity;
+            }*/
         }
 
         public override void OnCollision(BlockInstance instance, Collision2D collision)
