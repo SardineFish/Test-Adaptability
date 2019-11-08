@@ -15,6 +15,7 @@ MonoBehaviour:
   settings:
   - {fileID: 114375464177707528}
   - {fileID: 7209529153049187562}
+  - {fileID: 452218722815130768}
 --- !u!114 &114375464177707528
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -1326,6 +1327,32 @@ MonoBehaviour:
       - 0.5
       - 0.5
       - 0.5
+--- !u!114 &452218722815130768
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc5a951b3c17f9f4d90418e155f2e887, type: 3}
+  m_Name: NumberFX
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
+  XScale:
+    overrideState: 1
+    value: 50
+  YScale:
+    overrideState: 0
+    value: 0.5
+  NumberTex:
+    overrideState: 1
+    value: {fileID: 2800000, guid: f62064ace45d05a4fa550c7b82bf255e, type: 3}
+    defaultState: 1
 --- !u!114 &7209529153049187562
 MonoBehaviour:
   m_ObjectHideFlags: 3

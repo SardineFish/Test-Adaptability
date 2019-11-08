@@ -54,8 +54,6 @@ namespace Project
             var confiner = obj.GetComponent<CinemachineConfiner>();
             confiner.m_ConfineMode = CinemachineConfiner.Mode.Confine2D;
             confiner.m_BoundingShape2D = scene.BoundaryCollider;
-            confiner.m_ConfineScreenEdges = true;
-            confiner.m_Damping = 0;
             return camera;
         }
 
@@ -70,8 +68,6 @@ namespace Project
             var confiner = obj.GetComponent<CinemachineConfiner>();
             confiner.m_ConfineMode = CinemachineConfiner.Mode.Confine2D;
             confiner.m_BoundingShape2D = scene.BoundaryCollider;
-            confiner.m_ConfineScreenEdges = true;
-            confiner.m_Damping = 0;
             return camera;
         }
 
