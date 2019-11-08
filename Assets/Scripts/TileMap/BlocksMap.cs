@@ -332,46 +332,34 @@ namespace Project.GameMap
 
         IEnumerable<BlockData> GetNeighbors(BlockData block)
         {
+            var left = GetNeighbor(block, new Vector2Int(-1, 0));
+            var right = GetNeighbor(block, new Vector2Int(1, 0));
+            var top = GetNeighbor(block, new Vector2Int(0, 1));
+            var bottom = GetNeighbor(block, new Vector2Int(0, -1));
             if(block.BlockType.MergeMode == BlockMergeMode.Either)
             {
-                var tile = GetNeighbor(block, new Vector2Int(1, 0));
-                if(tile!=null)
+                if(left.BlockType == block.BlockType || right.BlockType == block.BlockType)
                 {
-                    yield return tile;
-                    yield return GetNeighbor(block, new Vector2Int(-1, 0));
+                    yield return left;
+                    yield return right;
                     yield break;
                 }
-                tile = GetNeighbor(block, new Vector2Int(-1, 0));
-                if(tile!=null)
+                if(top.BlockType == block.BlockType || bottom.BlockType == block.BlockType)
                 {
-                    yield return tile;
+                    yield return bottom;
+                    yield return top;
                     yield break;
                 }
-
-                tile = GetNeighbor(block, new Vector2Int(0, 1));
-                if (tile != null)
-                {
-                    yield return tile;
-                    yield return GetNeighbor(block, new Vector2Int(0, -1));
-                    yield break;
-                }
-                tile = GetNeighbor(block, new Vector2Int(0, -1));
-                if (tile != null)
-                {
-                    yield return tile;
-                    yield break;
-                }
-                yield break;
             }
             if((block.BlockType.MergeMode & BlockMergeMode.Horizontal) == BlockMergeMode.Horizontal)
             {
-                yield return new BlockData(block.Position + new Vector2Int(1, 0), GameMap.GetTile<Block>((block.Position + new Vector2Int(1, 0)).ToVector3Int()));
-                yield return new BlockData(block.Position + new Vector2Int(-1, 0), GameMap.GetTile<Block>((block.Position + new Vector2Int(-1, 0)).ToVector3Int()));
+                yield return left;
+                yield return right;
             }
             if((block.BlockType.MergeMode & BlockMergeMode.Vertical) == BlockMergeMode.Vertical)
             {
-                yield return new BlockData(block.Position + new Vector2Int(0, 1), GameMap.GetTile<Block>((block.Position + new Vector2Int(0, 1)).ToVector3Int()));
-                yield return new BlockData(block.Position + new Vector2Int(0, -1), GameMap.GetTile<Block>((block.Position + new Vector2Int(0, -1)).ToVector3Int())); 
+                yield return bottom;
+                yield return top;
             }
         }
 
