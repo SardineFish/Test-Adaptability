@@ -69,8 +69,8 @@ namespace Project.GameMap
 
         public void UpdateInstance(BlockInstanceOptions options)
         {
-            if (Collider)
-                Destroy(Collider);
+            /*if (Collider)
+                Destroy(Collider);*/
             if (BlocksObject != null)
                 BlocksObject.ForEach(block => Destroy(block));
 
@@ -82,17 +82,21 @@ namespace Project.GameMap
 
             if (options.GenerateCollider && options.BlockType.MergeMode == BlockMergeMode.Both)
             {
-                var composite = gameObject.AddComponent<CompositeCollider2D>();
+                var composite = gameObject.GetOrAddComponent<CompositeCollider2D>();
                 composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
                 composite.offsetDistance = 0.01f;
                 composite.isTrigger = options.IsTrigger;
+                if (!(Collider is CompositeCollider2D))
+                    Destroy(Collider);
                 Collider = composite;
             }
             else if (options.GenerateCollider)
             {
-                BoxCollider = gameObject.AddComponent<BoxCollider2D>();
+                BoxCollider = gameObject.GetOrAddComponent<BoxCollider2D>();
                 BoxCollider.size = options.Blocks.Bound.size.ToVector2();
                 BoxCollider.isTrigger = options.IsTrigger;
+                if (!(Collider is BoxCollider2D))
+                    Destroy(Collider);
                 Collider = BoxCollider;
             }
 
@@ -118,7 +122,8 @@ namespace Project.GameMap
                         collider.size = Vector2.one;
                         collider.usedByComposite = true;
                     }
-                    options.BlockType.OnBlockObjectCreated(this, obj, block);
+                    if (!options.IsStatic)
+                        options.BlockType.OnBlockObjectCreated(this, obj, block);
                     return obj;
                 }).ToList();
             }
