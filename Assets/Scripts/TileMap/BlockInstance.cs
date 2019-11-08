@@ -19,29 +19,18 @@ namespace Project.GameMap
 
         public bool IsStatic { get; set; }
 
-        public Block GetContactedBlock(Vector3 point, Vector3 normal)
+        public virtual Block GetContactedBlock(Vector3 point, Vector3 normal)
         {
             return BlockType;
         }
 
-        private void Awake()
+        protected virtual void Awake()
         {
             GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             gameObject.layer = 11;
         }
 
-        // Use this for initialization
-        void Start()
-        {
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
-        private void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
             if (!IsStatic)
                 BlockType.UpdateInstance(this);
@@ -67,7 +56,7 @@ namespace Project.GameMap
         public T GetData<T>(Vector3 point, Vector3 normal) where T : BlockInstanceData
             => data as T;
 
-        public void UpdateInstance(BlockInstanceOptions options)
+        public virtual void UpdateInstance(BlockInstanceOptions options)
         {
             /*if (Collider)
                 Destroy(Collider);*/
@@ -131,8 +120,12 @@ namespace Project.GameMap
 
         public static BlockInstance CreateInstance(BlockInstanceOptions options)
         {
+            return CreateInstance<BlockInstance>(options);
+        }
+        public static T CreateInstance<T>(BlockInstanceOptions options) where T : BlockInstance
+        {
             var gameobject = options.GameObject ?? new GameObject($"{options.BlockType.name}{options.Blocks.Bound.center.x},{options.Blocks.Bound.center.y}");
-            var instance = gameobject.AddComponent<BlockInstance>();
+            var instance = gameobject.AddComponent<T>();
 
             instance.UpdateInstance(options);
 

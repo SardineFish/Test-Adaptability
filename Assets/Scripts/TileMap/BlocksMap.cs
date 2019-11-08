@@ -404,8 +404,12 @@ namespace Project.GameMap
 
         public static BlockInstance CreateBlockInstance(BlockInstanceOptions options)
         {
+            return CreateBlockInstance<BlockInstance>(options);
+        }
+        public static BlockInstance CreateBlockInstance<T>(BlockInstanceOptions options) where T : BlockInstance
+        {
             options.positionZ = Instance.InstanceBlocks.transform.position.z;
-            var instance = BlockInstance.CreateInstance(options);
+            var instance = BlockInstance.CreateInstance<T>(options);
             instance.transform.parent = Instance.InstanceBlocks.transform;
             return instance;
         }

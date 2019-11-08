@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Project.Controller
 {
@@ -16,6 +17,7 @@ namespace Project.Controller
     [RequireComponent(typeof(Rigidbody2D), typeof(GameEntity))]
     public class MotionController : EntityBehaviour
     {
+        public float ContactThreshold = 0.0625f;
         public Vector2 VelocityLimit = new Vector2(100, 100);
         public float FallDownVelocityLimit = 40;
         public Vector2 ControlledVelocityLimit = new Vector2(-1, -1);
@@ -35,11 +37,13 @@ namespace Project.Controller
         public Vector2 SurfaceVelocity
             => velocity - groundBlockVelocity;
 
+        public List<BlockContactData> ContactedBlocks { get; protected set; } = new List<BlockContactData>(32);
+
         protected event Action<Collision2D> OnCollide;
-        public event Action<ContactPoint2D> OnHitGround;
-        public event Action<ContactPoint2D> OnHitWall;
+        public event Action<BlockContactData> OnHitGround;
+        public event Action<BlockContactData> OnHitWall;
         public event Action OnPreBlockDetect;
-        public event Action<Blocks.Block, Vector2, Vector2> OnBlockContacted;
+        public event Action<BlockContactData> OnBlockContacted;
         public event Action<Blocks.Block, Vector2> OnBlockWallContacted;
         public event Action<Blocks.Block> OnBlockGroundContacted;
 
@@ -73,7 +77,7 @@ namespace Project.Controller
             base.Awake();
             rigidbody = GetComponent<Rigidbody2D>();
 
-            OnCollide += (collision) =>
+            /*OnCollide += (collision) =>
             {
                 for (int i = 0; i < collision.contactCount; i++)
                 {
@@ -93,7 +97,7 @@ namespace Project.Controller
                     {
                         //Debug.Log("ground");
                         OnHitGround?.Invoke(contract);
-                    }*/
+                    } * /
                     dot = Mathf.Abs(Vector2.Dot(contract.normal, Vector2.right));
 
                     if(dot > 0.9)
@@ -102,7 +106,7 @@ namespace Project.Controller
                     }
 
                 }
-            };
+            };*/
             OnHitGround += (contact) =>
             {
                 OnGround = true;
@@ -208,11 +212,102 @@ namespace Project.Controller
 
         }
 
+        Dictionary<Blocks.Block, float> contactCount = new Dictionary<Blocks.Block, float>(32);
+        void DetectContact(Vector2 center, Vector2 dir, float offset, float distance, Vector2 extendDir, float size, List<BlockContactData> contactedBlocks)
+        {
+            contactCount.Clear();
+            var count = Physics2D.RaycastNonAlloc(center + dir * offset + extendDir * size / 2, dir, hits, distance, 1 << 11);
+            Debug.DrawLine(center + dir * offset + extendDir * size / 2, center + dir * offset + extendDir * size / 2 + distance * dir);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (!block)
+                    continue;
+                if (contactCount.ContainsKey(block))
+                    contactCount[block]++;
+                else
+                    contactCount[block] = 1;
+            }
+            count = Physics2D.RaycastNonAlloc(center + dir * offset, dir, hits, distance, 1 << 11);
+            Debug.DrawLine(center + dir * offset , center + dir * offset + distance * dir);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (!block)
+                    continue;
+                if (contactCount.ContainsKey(block))
+                    contactCount[block]++;
+                else
+                    contactCount[block] = 1;
+            }
+            count = Physics2D.RaycastNonAlloc(center + dir * offset - extendDir * size / 2, dir, hits, distance, 1 << 11);
+            Debug.DrawLine(center + dir * offset - extendDir * size / 2, center + dir * offset - extendDir * size / 2 + distance * dir);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (!block)
+                    continue;
+                if (contactCount.ContainsKey(block))
+                    contactCount[block]++;
+                else
+                    contactCount[block] = 1;
+            }
+            float sum = 0;
+            float max = 0;
+            foreach(var value in contactCount.Values)
+            {
+                sum += value;
+                max = Mathf.Max(max, value);
+            }
+            foreach(var pair in contactCount)
+            {
+                contactedBlocks.Add(new BlockContactData()
+                {
+                    Block = pair.Key,
+                    ContactWeight = pair.Value / sum,
+                    IsMainContact = pair.Value == max,
+                    Normal = -dir
+                });
+            }
+        }
+
         protected virtual void GetBlockContact()
         {
             // Cast left
             OnPreBlockDetect?.Invoke();
-            var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
+
+            ContactedBlocks.Clear();
+
+            var center = BodyCollider.transform.position.ToVector2() + BodyCollider.offset;
+            var size = BodyCollider.size + Vector2.one * BodyCollider.edgeRadius * 2;
+            DetectContact(center, Vector2.left, size.x / 2 , ContactThreshold, Vector2.up, size.y, ContactedBlocks);
+            DetectContact(center, Vector2.right, size.x / 2 , ContactThreshold, Vector2.up, size.y, ContactedBlocks);
+            DetectContact(center, Vector2.down, size.y / 2 , ContactThreshold, Vector2.left, size.x, ContactedBlocks);
+            DetectContact(center, Vector2.up, size.y / 2 , ContactThreshold, Vector2.left, size.x, ContactedBlocks);
+            for (var i = 0; i < ContactedBlocks.Count; i++)
+            {
+                var contact = ContactedBlocks[i];
+                OnBlockContacted?.Invoke(contact);
+                if (Mathf.Abs(Vector2.Dot(Vector2.up, contact.Normal)) < 0.01f)
+                {
+                    OnBlockWallContacted?.Invoke(contact.Block, contact.Normal);
+                    OnHitWall?.Invoke(contact);
+                }
+                else if(Vector2.Dot(Vector2.up, contact.Normal) >0.9f)
+                {
+                    OnBlockGroundContacted?.Invoke(contact.Block);
+                    OnHitGround?.Invoke(contact);
+                }
+            }
+
+            /*
+            var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + ContactThreshold, 1 << 11);
             for (var i = 0; i < count; i++)
             {
                 var block = hits[i].rigidbody
@@ -261,7 +356,7 @@ namespace Project.Controller
                 {
                     OnBlockContacted?.Invoke(block, hits[i].point, Vector2.down);
                 }
-            }
+            }*/
         }
 
         void UpdateCollision()

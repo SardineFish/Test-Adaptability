@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Project.Blocks;
 
 namespace Project.GameMap
 {
-    public class PlatformInstance : MonoBehaviour
+    public class PlatformInstance : BlockInstance
     {
         [DisplayInInspector]
         bool enablePass = false;
-        new BoxCollider2D collider;
         PlatformEffector2D platformEffector;
         List<GameEntity> passingEntities;
 
@@ -17,9 +17,9 @@ namespace Project.GameMap
             TilePlatformManager.RemoveEntity(this);
         }
 
-        private void Awake()
+        protected override void Awake()
         {
-            collider = GetComponent<BoxCollider2D>();
+            base.Awake();
             platformEffector = GetComponent<PlatformEffector2D>();
             TilePlatformManager.RegisterEntity(this);
         }
@@ -29,26 +29,39 @@ namespace Project.GameMap
         {
             if (enablePass)
                 return;
-            if(!Physics2D.OverlapBox(transform.position.ToVector2() + collider.offset, collider.size, 0, 1 << 9))
+            if(!Physics2D.OverlapBox(transform.position.ToVector2() + BoxCollider.offset, BoxCollider.size, 0, 1 << 9))
             {
-                collider.enabled = true;
+                BoxCollider.enabled = true;
             }
         }
 
-        void OnTriggerExit2D(Collider2D collision)
+        public override Block GetContactedBlock(Vector3 point, Vector3 normal)
         {
-
+            if (Mathf.Abs(point.y - (transform.position.y + BoxCollider.offset.y + BoxCollider.size.y / 2)) < 0.0625f)
+                return BlockType;
+            return null;
         }
 
         public void AllowPass(GameEntity entity)
         {
             enablePass = true;
-            collider.enabled = false;
+            BoxCollider.enabled = false;
         }
 
         public void BlockPass(GameEntity entity)
         {
             enablePass = false;
+        }
+
+        public override void UpdateInstance(BlockInstanceOptions options)
+        {
+            base.UpdateInstance(options);
+            BoxCollider.usedByEffector = true;
+            platformEffector = gameObject.GetOrAddComponent<PlatformEffector2D>();
+            platformEffector.useColliderMask = false;
+            platformEffector.sideArc = 0;
+            platformEffector.surfaceArc = 170;
+            GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
         }
     }
 

@@ -8,13 +8,14 @@ namespace Project.Blocks
     {
         public override void ProcessMergedBlocks(BlocksCollection blocks)
         {
-            var instance = GameMap.BlocksMap.CreateBlockInstance(new GameMap.BlockInstanceOptions()
+            var instance = GameMap.BlocksMap.CreateBlockInstance<GameMap.PlatformInstance>(new GameMap.BlockInstanceOptions()
             {
                 Blocks = blocks,
                 BlockType = this,
                 GenerateRenderer = true,
+                GenerateCollider = true
             });
-            var collider = instance.gameObject.AddComponent<BoxCollider2D>();
+            /*var collider = instance.gameObject.AddComponent<BoxCollider2D>();
             collider.size = new Vector2(blocks.Bound.size.x, blocks.Bound.size.y);
             collider.usedByEffector = true;
             var effector = instance.gameObject.AddComponent<PlatformEffector2D>();
@@ -23,7 +24,7 @@ namespace Project.Blocks
             effector.surfaceArc = 170;
             var rigidBody = instance.gameObject.GetComponent<Rigidbody2D>();
             rigidBody.bodyType = RigidbodyType2D.Static;
-            var platform = instance.gameObject.AddComponent<GameMap.PlatformInstance>();
+            var platform = instance.gameObject.AddComponent<GameMap.PlatformInstance>();*/
         }
 
         public override void PostBlockProcess(BlockData data)

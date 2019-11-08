@@ -7,12 +7,12 @@ namespace Project.Blocks
     public class DashBlock : Block
     {
         public float Speed;
-        public override IEnumerator ProcessPlayerContacted(GameEntity player, Vector2 point, Vector2 normal)
+        public override IEnumerator ProcessPlayerContacted(GameEntity player, BlockContactData contact)
         {
             var motionController = player.GetComponent<Controller.PlayerMotionController>();
             var playerController = player.GetComponent<Controller.PlayerController>();
             var input = player.GetComponent<Controller.PlayerInput>();
-            if (Vector2.Dot(normal, DirectionVector) < -0.9f)
+            if (Vector2.Dot(contact.Normal, DirectionVector) < -0.9f)
                 yield break;
             if(BlockDirection == BlockDirection.Down || BlockDirection == BlockDirection.Up)
             {

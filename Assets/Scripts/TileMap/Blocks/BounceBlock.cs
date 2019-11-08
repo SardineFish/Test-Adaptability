@@ -7,9 +7,9 @@ namespace Project.Blocks
     public class BounceBlock : Block
     {
         public float BounceHeight = 5;
-        public override IEnumerator ProcessPlayerContacted(GameEntity player, Vector2 point, Vector2 normal)
+        public override IEnumerator ProcessPlayerContacted(GameEntity player, BlockContactData contact)
         {
-            if(Vector2.Dot(normal, Vector2.up) > 0.9f)
+            if(Vector2.Dot(contact.Normal, Vector2.up) > 0.9f)
             {
                 var motionController = player.GetComponent<Controller.PlayerMotionController>();
                 var playerController = player.GetComponent<Controller.PlayerController>();

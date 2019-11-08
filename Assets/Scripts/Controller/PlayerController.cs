@@ -80,14 +80,17 @@ namespace Project.Controller
             {
                 contactedBlocks.Clear();
             };
-            motionController.OnBlockContacted += (block, point, normal) =>
+            motionController.OnBlockContacted += (contact) =>
             {
-                contactedBlocks.Add(block);
-                var processor = block.ProcessPlayerContacted(Entity, point, normal);
-                if (processor != null)
+                contactedBlocks.Add(contact.Block);
+                if(contact.IsMainContact)
                 {
-                    StopAllCoroutines();
-                    StartCoroutine(SpecialState(processor));
+                    var processor = contact.Block.ProcessPlayerContacted(Entity, contact);
+                    if (processor != null)
+                    {
+                        StopAllCoroutines();
+                        StartCoroutine(SpecialState(processor));
+                    }
                 }
             };
         }
