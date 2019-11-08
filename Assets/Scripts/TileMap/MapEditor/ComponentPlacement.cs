@@ -105,6 +105,11 @@ namespace Project.GameMap.Editor
             if (Placed)
                 return;
 
+            CanPlace = !CheckBlockOccupation();
+            if (!CanPlace)
+                return;
+
+
             UI.gameObject.SetActive(false);
             SetFx(defaultMat, Color.white);
 
