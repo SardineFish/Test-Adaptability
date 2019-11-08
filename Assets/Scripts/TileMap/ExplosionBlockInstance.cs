@@ -59,6 +59,7 @@ namespace Project.GameMap
             StartCoroutine(Explosion());
         }
 
+        Collider2D[] overlapResults = new Collider2D[16];
         IEnumerator Explosion()
         {
             exploded = true;
@@ -80,6 +81,16 @@ namespace Project.GameMap
             }
 
             yield return new WaitForSeconds(BlockType.RecoverTime);
+        RetrySpawn:
+            var count = Physics2D.OverlapBoxNonAlloc(transform.position.ToVector2() + collider.offset, collider.size, 0, overlapResults, 1 << 11);
+            for (int i = 0; i < count; i++)
+            {
+                if (overlapResults[i].attachedRigidbody?.gameObject != BlockInstance.gameObject)
+                {
+                    yield return null;
+                    goto RetrySpawn;
+                }
+            }
             GetComponent<Animator>().SetTrigger("Reset");
             StartCoroutine(WaitForContact());
         }
