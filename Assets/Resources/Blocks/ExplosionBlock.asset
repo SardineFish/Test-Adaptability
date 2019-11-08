@@ -40,7 +40,7 @@ MonoBehaviour:
   MergeMode: 3
   BlockDirection: 1
   ExplosionRange: 1
-  CountDownTime: 2
-  RecoverTime: 4
+  CountDownTime: 0.8
+  RecoverTime: 5
   TriggerByBlock: 0
   ExplosionAnimator: {fileID: 9100000, guid: 8fbfa83766b8cd9429fff757c6c8e417, type: 2}
