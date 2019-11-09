@@ -287,7 +287,7 @@ MonoBehaviour:
   GroundDamping: 0.5
   ForceInAir: 100
   AirSpeedLimit: {x: 12, y: 35}
-  JumpHeight: 4
+  JumpHeight: 4.8
   JumpTime: 0.5
   WallJumpVelocityX: 10
   WallJumpHeight: 4
