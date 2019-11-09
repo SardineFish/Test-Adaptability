@@ -72,6 +72,11 @@ namespace Project.Blocks
             return null;
         }
 
+        public virtual bool OverrideSpecialState(Block previous)
+        {
+            return false;
+        }
+
         public virtual BlockData ToBlockData(Vector2Int pos)
             => new BlockData(pos, this);
 

@@ -25,6 +25,10 @@ namespace Project.Controller
         public float WallJumpFreezeTime = 0.3f;
         public float CoyoteTime = 0.05f;
         public float FallDownGravityScale = 1;
+        
+        [DisplayInInspector]
+        bool IsSpecialState { get; set; }
+        Blocks.Block SpecialStateBlock { get; set; }
 
         Animator animator;
         PlayerMotionController motionController;
@@ -86,11 +90,23 @@ namespace Project.Controller
                 contactedBlocks.Add(contact.Block);
                 if(contact.IsMainContact)
                 {
-                    var processor = contact.Block.ProcessPlayerContacted(Entity, contact);
-                    if (processor != null)
+                    if (SpecialStateBlock && SpecialStateBlock != contact.Block && contact.Block.OverrideSpecialState(SpecialStateBlock))
                     {
-                        StopAllCoroutines();
-                        StartCoroutine(SpecialState(processor));
+                        var processor = contact.Block.ProcessPlayerContacted(Entity, contact);
+                        if(processor != null)
+                        {
+                            StopAllCoroutines();
+                            StartCoroutine(ControlledByBlock(contact.Block, processor));
+                        }
+                    }
+                    else if (!SpecialStateBlock)
+                    {
+                        var processor = contact.Block.ProcessPlayerContacted(Entity, contact);
+                        if (processor != null)
+                        {
+                            StopAllCoroutines();
+                            StartCoroutine(ControlledByBlock(contact.Block, processor));
+                        }
                     }
                 }
             };
@@ -410,8 +426,15 @@ namespace Project.Controller
             ChangeState(PlayerAirborne());
         }
 
+        IEnumerator ControlledByBlock(Blocks.Block block, IEnumerator processor)
+        {
+            SpecialStateBlock = block;
+            yield return SpecialState(processor);
+            SpecialStateBlock = null;
+        }
         IEnumerator SpecialState(IEnumerator processor)
         {
+            IsSpecialState = true;
             while(processor.MoveNext())
             {
                 SetMotionParameters();
@@ -423,6 +446,7 @@ namespace Project.Controller
                 StartCoroutine(PlayerIdle());
             else
                 StartCoroutine(PlayerAirborne());
+            IsSpecialState = false;
         }
 
         void OnCollisionEnter2D(Collision2D collision)

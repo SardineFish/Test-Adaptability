@@ -169,10 +169,10 @@ namespace Project.GameMap
 
 
 
-        public void StartEditorPlay()
+        public void SetGameMapForEditorPlay()
         {
             GameMap.ClearAllTiles();
-            GenerateGameMap();
+            PlaceAllUserBlocks();
             UserLayer.gameObject.SetActive(false);
             BaseLayer.gameObject.SetActive(false);
             GenerateBlockInstances();
@@ -226,17 +226,20 @@ namespace Project.GameMap
                 .ForEach(block => this.StaticBlocks.TileMap.SetTile(block.Position.ToVector3Int(), block.BlockType));
         }
 
-        public void GenerateGameMap()
+        public void PlaceAllUserBlocks()
         {
+            PlacementLayer.ClearAllTiles();
             for (var y = Bound.position.y; y < Bound.size.y + Bound.position.y; y++)
             {
                 for (var x = Bound.position.x; x < Bound.size.x + Bound.position.x; x++)
                 {
-                    var block = BaseLayer.GetTile(new Vector3Int(x, y, 0));
+                    var block = UserLayer.GetTile(new Vector3Int(x, y, 0));
+                    PlacementLayer.SetTile(new Vector3Int(x, y, 0), block);
+                    /*
                     GameMap.SetTile(new Vector3Int(x, y, 0), block);
                     var userBlock = UserLayer.GetTile(new Vector3Int(x, y, 0));
                     if (userBlock)
-                        GameMap.SetTile(new Vector3Int(x, y, 0), userBlock);
+                        GameMap.SetTile(new Vector3Int(x, y, 0), userBlock);*/
                 }
             }
             UserLayer.gameObject.SetActive(false);

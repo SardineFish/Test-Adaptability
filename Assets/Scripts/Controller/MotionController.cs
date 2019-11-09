@@ -194,6 +194,8 @@ namespace Project.Controller
             Debug.DrawLine(center, center + dir * distance);
             for (var i = 0; i < count; i++)
             {
+                if (hits[i].collider.isTrigger)
+                    continue;
                 var block = hits[i].rigidbody
                     ?.GetComponent<GameMap.IBlockInstance>()
                     ?.GetContactedBlock(hits[i].point, hits[i].normal);

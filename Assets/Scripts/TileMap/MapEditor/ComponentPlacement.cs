@@ -89,6 +89,8 @@ namespace Project.GameMap.Editor
                     return true;
                 if (BlocksMap.Instance.PlacementLayer.GetTile(block.Position.ToVector3Int()) != null)
                     return true;
+                if (ScenesManager.GetSceneAt(block.Position) != ScenesManager.Instance.CurrentScene)
+                    return true;
             }
             return false;
         }

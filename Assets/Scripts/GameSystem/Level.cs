@@ -24,11 +24,16 @@ namespace Project
         public Transform SpawnPoint;
         public Player ActivePlayer;
         public event Action OnPlayerDead;
+        public bool TestMode = false;
 
         private void Awake()
         {
             GameMap.BlocksMap.Instance.AfterMapGeneration += () =>
             {
+                if (TestMode)
+                {
+                    GameMap.BlocksMap.Instance.PlaceAllUserBlocks();
+                }
                 RestartLevel();
             };
         }

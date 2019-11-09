@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 namespace Project.Blocks
 {
@@ -7,6 +8,15 @@ namespace Project.Blocks
     public class DashBlock : Block
     {
         public float Speed;
+        public override bool OverrideSpecialState(Block previous)
+        {
+            if(this.BlockDirection == BlockDirection.Up || BlockDirection == BlockDirection.Down)
+            {
+                if (previous.BlockDirection == BlockDirection.Left || BlockDirection == BlockDirection.Right)
+                    return true;
+            }
+            return false;
+        }
         public override IEnumerator ProcessPlayerContacted(GameEntity player, BlockContactData contact)
         {
             var motionController = player.GetComponent<Controller.PlayerMotionController>();
@@ -33,6 +43,7 @@ namespace Project.Blocks
                         motionController.YControl = Controller.ControlType.Ignored;
                         yield break;
                     }
+
                     yield return new WaitForFixedUpdate();
                 }
                 motionController.YControl = Controller.ControlType.Ignored;
@@ -52,6 +63,7 @@ namespace Project.Blocks
                         motionController.XControl = Controller.ControlType.Velocity;
                         yield break;
                     }
+
                     yield return new WaitForFixedUpdate();
                 }
                 yield break;
