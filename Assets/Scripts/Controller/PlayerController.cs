@@ -72,7 +72,7 @@ namespace Project.Controller
                 if (block && block.AllowWallJump)
                     CachedWallContact.Record(Time.fixedUnscaledTime);
             };
-            motionController.OnHitGround += (contact) =>
+            motionController.OnBlockGroundContacted += (contact) =>
             {
                 CachedGroundContact.Record(Time.fixedUnscaledTime);
             };

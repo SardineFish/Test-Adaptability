@@ -39,10 +39,12 @@ namespace Project.Controller
 
         public List<BlockContactData> ContactedBlocks { get; protected set; } = new List<BlockContactData>(32);
 
-        protected event Action<Collision2D> OnCollide;
-        public event Action<BlockContactData> OnHitGround;
-        public event Action<BlockContactData> OnHitWall;
+
+        protected event Action<BlockContactData> OnHitGround;
+        protected event Action<BlockContactData> OnHitWall;
+
         public event Action OnPreBlockDetect;
+
         public event Action<BlockContactData> OnBlockContacted;
         public event Action<Blocks.Block, Vector2> OnBlockWallContacted;
         public event Action<Blocks.Block> OnBlockGroundContacted;
@@ -77,36 +79,6 @@ namespace Project.Controller
             base.Awake();
             rigidbody = GetComponent<Rigidbody2D>();
 
-            /*OnCollide += (collision) =>
-            {
-                for (int i = 0; i < collision.contactCount; i++)
-                {
-                    var contract = collision.GetContact(i);
-                    var localPoint = transform.worldToLocalMatrix.MultiplyPoint(contract.point);
-                    var dot = Vector2.Dot(contract.normal, Vector2.up);
-                    Debug.DrawLine(contract.point, contract.point + contract.normal, Color.red);
-                    if (Mathf.Approximately(1, dot)
-                        //&& localPoint.y <= OnGroundThreshold
-                        && contract.relativeVelocity.y >= -0.01)
-                    {
-                        //Debug.Log("ground");
-                        OnHitGround?.Invoke(contract);
-                    }
-                    /*
-                    else if (dot < 1 && Mathf.Abs(localPoint.y) <= 2 * OnGroundThreshold && contract.normalImpulse >= 0)
-                    {
-                        //Debug.Log("ground");
-                        OnHitGround?.Invoke(contract);
-                    } * /
-                    dot = Mathf.Abs(Vector2.Dot(contract.normal, Vector2.right));
-
-                    if(dot > 0.9)
-                    {
-                        OnHitWall?.Invoke(contract);
-                    }
-
-                }
-            };*/
             OnHitGround += (contact) =>
             {
                 OnGround = true;
@@ -115,6 +87,7 @@ namespace Project.Controller
             {
                 WallContacted = true;
             };
+
             PhysicsSystem.BeforePhysicsSimulation += PlayerMotionUpdate;
             PhysicsSystem.BeforePhysicsSimulation += ValueResetBeforePhyiscalUpdate;
             PhysicsSystem.AfterPhysicsSimulation += GetBlockContact;
@@ -213,51 +186,30 @@ namespace Project.Controller
         }
 
         Dictionary<Blocks.Block, float> contactCount = new Dictionary<Blocks.Block, float>(32);
+        void PerformRayCasst(Vector2 center, Vector2 dir, float distance)
+        {
+            var count = Physics2D.RaycastNonAlloc(center, dir, hits, distance, 1 << 11);
+            Debug.DrawLine(center, center + dir * distance);
+            for (var i = 0; i < count; i++)
+            {
+                var block = hits[i].rigidbody
+                    ?.GetComponent<GameMap.IBlockInstance>()
+                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
+                if (!block)
+                    continue;
+                if (contactCount.ContainsKey(block))
+                    contactCount[block]++;
+                else
+                    contactCount[block] = 1;
+            }
+        }
         void DetectContact(Vector2 center, Vector2 dir, float offset, float distance, Vector2 extendDir, float size, List<BlockContactData> contactedBlocks)
         {
             contactCount.Clear();
-            var count = Physics2D.RaycastNonAlloc(center + dir * offset + extendDir * size / 2, dir, hits, distance, 1 << 11);
-            Debug.DrawLine(center + dir * offset + extendDir * size / 2, center + dir * offset + extendDir * size / 2 + distance * dir);
-            for (var i = 0; i < count; i++)
-            {
-                var block = hits[i].rigidbody
-                    ?.GetComponent<GameMap.IBlockInstance>()
-                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if (!block)
-                    continue;
-                if (contactCount.ContainsKey(block))
-                    contactCount[block]++;
-                else
-                    contactCount[block] = 1;
-            }
-            count = Physics2D.RaycastNonAlloc(center + dir * offset, dir, hits, distance, 1 << 11);
-            Debug.DrawLine(center + dir * offset , center + dir * offset + distance * dir);
-            for (var i = 0; i < count; i++)
-            {
-                var block = hits[i].rigidbody
-                    ?.GetComponent<GameMap.IBlockInstance>()
-                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if (!block)
-                    continue;
-                if (contactCount.ContainsKey(block))
-                    contactCount[block]++;
-                else
-                    contactCount[block] = 1;
-            }
-            count = Physics2D.RaycastNonAlloc(center + dir * offset - extendDir * size / 2, dir, hits, distance, 1 << 11);
-            Debug.DrawLine(center + dir * offset - extendDir * size / 2, center + dir * offset - extendDir * size / 2 + distance * dir);
-            for (var i = 0; i < count; i++)
-            {
-                var block = hits[i].rigidbody
-                    ?.GetComponent<GameMap.IBlockInstance>()
-                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if (!block)
-                    continue;
-                if (contactCount.ContainsKey(block))
-                    contactCount[block]++;
-                else
-                    contactCount[block] = 1;
-            }
+            PerformRayCasst(center + dir * offset + extendDir * size / 2, dir, distance);
+            PerformRayCasst(center + dir * offset, dir, distance);
+            PerformRayCasst(center + dir * offset - extendDir * size / 2, dir, distance);
+
             float sum = 0;
             float max = 0;
             foreach(var value in contactCount.Values)
@@ -290,6 +242,22 @@ namespace Project.Controller
             DetectContact(center, Vector2.right, size.x / 2 , ContactThreshold, Vector2.up, size.y, ContactedBlocks);
             DetectContact(center, Vector2.down, size.y / 2 , ContactThreshold, Vector2.left, size.x, ContactedBlocks);
             DetectContact(center, Vector2.up, size.y / 2 , ContactThreshold, Vector2.left, size.x, ContactedBlocks);
+
+            // First pass for internal physical update.
+            for (var i = 0; i < ContactedBlocks.Count; i++)
+            {
+                var contact = ContactedBlocks[i];
+                if (Mathf.Abs(Vector2.Dot(Vector2.up, contact.Normal)) < 0.01f)
+                {
+                    OnHitWall?.Invoke(contact);
+                }
+                else if(Vector2.Dot(Vector2.up, contact.Normal) >0.9f)
+                {
+                    OnHitGround?.Invoke(contact);
+                }
+            }
+            
+            // Second pass for external usage.
             for (var i = 0; i < ContactedBlocks.Count; i++)
             {
                 var contact = ContactedBlocks[i];
@@ -297,81 +265,17 @@ namespace Project.Controller
                 if (Mathf.Abs(Vector2.Dot(Vector2.up, contact.Normal)) < 0.01f)
                 {
                     OnBlockWallContacted?.Invoke(contact.Block, contact.Normal);
-                    OnHitWall?.Invoke(contact);
                 }
-                else if(Vector2.Dot(Vector2.up, contact.Normal) >0.9f)
+                else if (Vector2.Dot(Vector2.up, contact.Normal) > 0.9f)
                 {
                     OnBlockGroundContacted?.Invoke(contact.Block);
-                    OnHitGround?.Invoke(contact);
                 }
             }
-
-            /*
-            var count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.left, hits, BodyCollider.size.x / 2 + ContactThreshold, 1 << 11);
-            for (var i = 0; i < count; i++)
-            {
-                var block = hits[i].rigidbody
-                    ?.GetComponent<GameMap.IBlockInstance>()
-                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if (block)
-                {
-                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.right);
-                    OnBlockWallContacted?.Invoke(block, hits[i].normal);
-                }
-            }
-            // Cast right
-            count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.right, hits, BodyCollider.size.x / 2 + 0.0625f, 1 << 11);
-            for (var i = 0; i < count; i++)
-            {
-                var block = hits[i].rigidbody
-                    ?.GetComponent<GameMap.IBlockInstance>()
-                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if (block)
-                {
-                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.left);
-                    OnBlockWallContacted?.Invoke(block, hits[i].normal);
-                }
-            }
-            // Cast down
-            count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.down, hits, BodyCollider.size.y / 2 + 0.0625f, 1 << 11);
-            for (var i = 0; i < count; i++)
-            {
-                var block = hits[i].rigidbody
-                    ?.GetComponent<GameMap.IBlockInstance>()
-                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if (block)
-                {
-                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.up);
-                    OnBlockGroundContacted?.Invoke(block);
-                }
-            }
-            // Cast up
-            count = Physics2D.RaycastNonAlloc(BodyCollider.transform.position.ToVector2() + BodyCollider.offset, Vector2.up, hits, BodyCollider.size.y / 2 + 0.0625f, 1 << 11);
-            for (var i = 0; i < count; i++)
-            {
-                var block = hits[i].rigidbody
-                    ?.GetComponent<GameMap.IBlockInstance>()
-                    ?.GetContactedBlock(hits[i].point, hits[i].normal);
-                if (block)
-                {
-                    OnBlockContacted?.Invoke(block, hits[i].point, Vector2.down);
-                }
-            }*/
         }
 
         void UpdateCollision()
         {
 
-        }
-
-        private void OnCollisionStay2D(Collision2D collision)
-        {
-            OnCollide?.Invoke(collision);
-        }
-
-        private void OnCollisionEnter2D(Collision2D collision)
-        {
-            OnCollide?.Invoke(collision);
         }
     }
 
