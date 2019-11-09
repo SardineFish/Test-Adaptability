@@ -22,6 +22,12 @@ namespace Project.Blocks
                 while(playerController.IsContactedWith(this))
                 {
                     motionController.Move(Speed * DirectionVector);
+                    
+                    if(Vector2.Dot(input.Movement, contact.Normal) > 0)
+                    {
+                        motionController.YControl = Controller.ControlType.Ignored;
+                        yield break;
+                    }
                     if (input.CachedJumpPress)
                     {
                         motionController.YControl = Controller.ControlType.Ignored;

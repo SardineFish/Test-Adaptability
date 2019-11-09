@@ -24,6 +24,7 @@ namespace Project.Controller
         public float WallJumpHeight = 3;
         public float WallJumpFreezeTime = 0.3f;
         public float CoyoteTime = 0.05f;
+        public float FallDownGravityScale = 1;
 
         Animator animator;
         PlayerMotionController motionController;
@@ -279,6 +280,10 @@ namespace Project.Controller
             {
                 motionController.Move(new Vector2(input.Movement.x * ForceInAir, 0));
                 SetMotionParameters();
+                if (motionController.velocity.y < 0)
+                    motionController.GravityScale = FallDownGravityScale;
+                else
+                    motionController.GravityScale = 1;
                 if(input.Crouch && input.Jump)
                 {
                     ChangeState(PlayerFall());
@@ -347,6 +352,11 @@ namespace Project.Controller
                 motionController.Move(input.Movement);
                 SetMotionParameters();
                 SetStateParameters(fall: true);
+
+                if (motionController.velocity.y < 0)
+                    motionController.GravityScale = FallDownGravityScale;
+                else
+                    motionController.GravityScale = 1;
 
                 yield return new WaitForFixedUpdate();
 

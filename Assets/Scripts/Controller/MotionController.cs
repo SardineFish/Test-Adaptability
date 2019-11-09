@@ -31,6 +31,8 @@ namespace Project.Controller
         [DisplayInInspector]
         public float Gravity { get; set; }
         [DisplayInInspector]
+        public float GravityScale { get; set; }
+        [DisplayInInspector]
         public bool OnGround { get; protected set; }
         [DisplayInInspector]
         public bool WallContacted { get; protected set; }
@@ -112,7 +114,7 @@ namespace Project.Controller
             groundBlockVelocity = Vector2.zero;
             if (EnableGravity)
             {
-                rigidbody.gravityScale = Gravity / Mathf.Abs(Physics2D.gravity.y);
+                rigidbody.gravityScale = Gravity * GravityScale / Mathf.Abs(Physics2D.gravity.y);
 
                 // Follow the motion block
                 if (OnGround)
