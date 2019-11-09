@@ -82,7 +82,7 @@ namespace Project.GameMap
 
             yield return new WaitForSeconds(BlockType.RecoverTime);
         RetrySpawn:
-            var count = Physics2D.OverlapBoxNonAlloc(transform.position.ToVector2() + collider.offset, collider.size, 0, overlapResults, 1 << 11);
+            var count = Physics2D.OverlapBoxNonAlloc(transform.position.ToVector2() + collider.offset, collider.size * 0.9f, 0, overlapResults, 1 << 11);
             for (int i = 0; i < count; i++)
             {
                 if (overlapResults[i].attachedRigidbody?.gameObject != BlockInstance.gameObject)
