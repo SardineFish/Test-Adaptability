@@ -36,6 +36,13 @@ namespace Project
                 }
                 RestartLevel();
             };
+            Input.InputManager.Input.EditorMode.ToggleEditMode.performed+=(ctx)=>
+            {
+                if (GameState == GameState.EditMode)
+                    StartGamePlay();
+                else if (GameState == GameState.Playing)
+                    StartLevelEdit();
+            };
         }
 
         private void Start()

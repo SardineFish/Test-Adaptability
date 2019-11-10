@@ -65,6 +65,32 @@ public static class Utility
             return obj.GetHashCode();
         }
     }
+
+    public static T MinOf<T, TCompare>(this IEnumerable<T> ts, Func<T, TCompare> selector) where TCompare : IComparable<TCompare>
+    {
+        var first = true;
+        TCompare minValue = default;
+        T minItem = default;
+        foreach(var item in ts)
+        {
+            if(first)
+            {
+                minValue = selector(item);
+                minItem = item;
+                first = false;
+            }
+            else
+            {
+                var value = selector(item);
+                if(value.CompareTo(minValue) < 0)
+                {
+                    minValue = value;
+                    minItem = item;
+                }
+            }
+        }
+        return minItem;
+    }
     public static void ForEach<T>(this IEnumerable<T> ts, Action<T> callback)
     {
         foreach (var item in ts)

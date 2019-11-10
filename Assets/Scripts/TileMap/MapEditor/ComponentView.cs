@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 namespace Project.GameMap.Editor
 {
-    public class ComponentView : MonoBehaviour, IPointerClickHandler
+    public class ComponentView : Selectable, IPointerClickHandler, ISubmitHandler
     {
         public RawImage ComponentImage;
         public UserComponentUIData Component;
@@ -15,18 +15,36 @@ namespace Project.GameMap.Editor
         public Color ActiveNumberColor;
         public Color DisableNumberColor;
 
+        bool selected = false;
+
         public void OnPointerClick(PointerEventData eventData)
         {
             EditorManager.CreatePlacement(Component)?.StartDrag(PlaceMode.Click);
-            // ComponentPlacement.Create(Component, PlaceMode.Click);
+        }
+        public void OnSubmit(BaseEventData eventData)
+        {
+            Input.InputManager.Input.EditorMode.Place.UsePressed();
+            EditorManager.CreatePlacement(Component)?.StartDrag(PlaceMode.Click);
         }
 
-        // Use this for initialization
-        void Start()
+        protected override void Start()
         {
+            base.Start();
             ComponentImage.texture = Component.Texture;
             var fitter = ComponentImage.GetComponent<AspectRatioFitter>();
             fitter.aspectRatio = Component.Texture.width / (float)Component.Texture.height;
+        }
+
+        public override void OnSelect(BaseEventData eventData)
+        {
+            base.OnSelect(eventData);
+            selected = true;
+        }
+
+        public override void OnDeselect(BaseEventData eventData)
+        {
+            base.OnDeselect(eventData);
+            selected = false;
         }
 
         // Update is called once per frame
@@ -42,5 +60,6 @@ namespace Project.GameMap.Editor
                 TextWrapper.color = ActiveNumberColor;
             }
         }
+
     }
 }

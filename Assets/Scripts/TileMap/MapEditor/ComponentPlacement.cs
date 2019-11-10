@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using Project.Blocks;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace Project.GameMap.Editor
 {
@@ -15,7 +17,7 @@ namespace Project.GameMap.Editor
         None,
     }
 
-    public class ComponentPlacement : MonoBehaviour
+    public class ComponentPlacement : Selectable
     {
         public RectTransform UI;
         public UserComponentUIData ComponentData;
@@ -24,7 +26,10 @@ namespace Project.GameMap.Editor
         [ColorUsage(true, true)]
         public Color PlaceColor;
         [ColorUsage(true, true)]
+        public Color SelectColor;
+        [ColorUsage(true, true)]
         public Color ErrorColor;
+        public float GamepadMoveSpeed = 1;
 
         int rotateStep = 0;
         public float Angle => rotateStep * 90;
@@ -41,8 +46,9 @@ namespace Project.GameMap.Editor
         Blocks.BlocksCollection rotatedBlocks;
         SpriteRenderer[] renderers;
         Material defaultMat;
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             defaultMat = new Material(Shader.Find("Sprites/Default"));
             onTrigger += (collider) =>
             {
@@ -52,25 +58,50 @@ namespace Project.GameMap.Editor
             Input.InputManager.Input.EditorMode.Rotate.performed += Rotate_performed;
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
             Input.InputManager.Input.EditorMode.Rotate.performed -= Rotate_performed;
         }
-
         private void Rotate_performed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {
             Rotate();
         }
 
-        // Use this for initialization
-        void Start()
+        private void Update()
         {
+            if (!Dragging && Input.InputManager.CurrentInputScheme == Input.InputSchemes.GamePad)
+                StartDrag(PlaceMode.Click);
 
         }
-
-        // Update is called once per frame
-        void Update()
+        private void FixedUpdate()
         {
+            if(EventSystem.current.currentSelectedGameObject == gameObject)
+            {
+                if(Placed && Input.InputManager.CurrentInputScheme == Input.InputSchemes.GamePad && Input.InputManager.Input.EditorMode.Place.UsePressed())
+                {
+                    Pick();
+                    if (Input.InputManager.CurrentInputScheme == Input.InputSchemes.GamePad)
+                        StartDrag(PlaceMode.Click);
+                }
+            }
+
+            if (!Placed && Input.InputManager.Input.EditorMode.Remove.UsePressed())
+            {
+                Remove();
+            }
+        }
+        public override void OnSelect(BaseEventData eventData)
+        {
+            base.OnSelect(eventData);
+            if (Placed)
+                SetFx(FXMaterial, SelectColor);
+        }
+        public override void OnDeselect(BaseEventData eventData)
+        {
+            base.OnDeselect(eventData);
+            if (Placed)
+                SetFx(defaultMat, Color.white);
         }
         IEnumerable<BlockData> BlocksInWorldSpace()
         {
@@ -110,7 +141,11 @@ namespace Project.GameMap.Editor
             CanPlace = !CheckBlockOccupation();
             if (!CanPlace)
                 return;
-
+            if (dragCoroutine != null)
+            {
+                StopCoroutine(dragCoroutine);
+                dragCoroutine = null;
+            }
 
             UI.gameObject.SetActive(false);
             SetFx(defaultMat, Color.white);
@@ -120,6 +155,8 @@ namespace Project.GameMap.Editor
         public void Pick()
         {
             if (!Placed)
+                return;
+            if (!EditorManager.TryPickUpPlacement(this))
                 return;
             Placed = false;
             Dragging = false;
@@ -181,7 +218,7 @@ namespace Project.GameMap.Editor
                     yield return DragMove();
                     yield break;
                 }
-                else if (UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
+                else if (Input.InputManager.Input.EditorMode.Place.UsePressed())
                 {
                     yield return ClickMove();
                     yield break;
@@ -189,15 +226,25 @@ namespace Project.GameMap.Editor
                 yield return null;
             }
             yield return DragMove();
+            dragCoroutine = null;
         }
 
         IEnumerator DragMove()
         {
-            while(true)
+            //CameraManager.Instance.EditorCamera.Follow = transform;
+            var position = transform.position;
+            while (true)
             {
                 yield return null;
 
-                var position = CameraManager.Instance.MainCamera.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                if (Project.Input.InputManager.CurrentInputScheme == Input.InputSchemes.Keyboard)
+                {
+                    position = CameraManager.Instance.CinemachineBrain.GetComponent<Camera>().ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                }
+                else if (Input.InputManager.CurrentInputScheme == Input.InputSchemes.GamePad)
+                {
+                    position += (Input.InputManager.Input.EditorMode.Movement.ReadValue<Vector2>() * GamepadMoveSpeed * Time.deltaTime).ToVector3();
+                }
                 MoveTo(position);
 
                 CanPlace = !CheckBlockOccupation();
@@ -210,6 +257,7 @@ namespace Project.GameMap.Editor
                 if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
                 {
                     Dragging = false;
+                    //CameraManager.Instance.EditorCamera.Follow = null;
                     yield break;
                 }
             }
@@ -217,24 +265,38 @@ namespace Project.GameMap.Editor
 
         IEnumerator ClickMove()
         {
+            //CameraManager.Instance.EditorCamera.Follow = transform;
+            var position = transform.position;
             while (true)
             {
                 yield return null;
 
-                var position = CameraManager.Instance.CinemachineBrain.GetComponent<Camera>().ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                if(Project.Input.InputManager.CurrentInputScheme == Input.InputSchemes.Keyboard)
+                {
+                    position = CameraManager.Instance.CinemachineBrain.GetComponent<Camera>().ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToVector2();
+                }
+                else if ( Input.InputManager.CurrentInputScheme == Input.InputSchemes.GamePad)
+                {
+                    position += (Input.InputManager.Input.EditorMode.Movement.ReadValue<Vector2>() * GamepadMoveSpeed * Time.deltaTime).ToVector3();
+                }
                 MoveTo(position);
 
                 CanPlace = !CheckBlockOccupation();
 
-                if (CanPlace)
-                    SetFx(FXMaterial, PlaceColor);
-                else
-                    SetFx(FXMaterial, ErrorColor);
-
-                if (CanPlace && UnityEngine.Input.GetKeyUp(KeyCode.Mouse0))
+                if(CanPlace)
                 {
-                    Dragging = false;
-                    yield break;
+                    SetFx(FXMaterial, PlaceColor);
+                    if(Input.InputManager.Input.EditorMode.Place.UsePressed())
+                    {
+                        Dragging = false;
+                        Place();
+                        //CameraManager.Instance.EditorCamera.Follow = null;
+                        yield break;
+                    }
+                }
+                else
+                {
+                    SetFx(FXMaterial, ErrorColor);
                 }
             }
         }
@@ -250,9 +312,12 @@ namespace Project.GameMap.Editor
 
         public void StartDrag(PlaceMode placeMode)
         {
+            if (Placed)
+                return;
             if (Dragging)
                 return;
             Dragging = true;
+            Input.InputManager.Input.EditorMode.Place.UsePressed();
             switch(placeMode)
             {
                 case PlaceMode.None:

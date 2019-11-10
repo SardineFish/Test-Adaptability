@@ -1,0 +1,75 @@
+{
+    "name": "test",
+    "maps": [
+        {
+            "name": "Default",
+            "id": "6c16e42a-f9b7-442b-99b4-1f94339d07cd",
+            "actions": [
+                {
+                    "name": "J",
+                    "type": "Button",
+                    "id": "5289c793-41e3-4f48-b440-7ab68ed1fe7e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "K1",
+                    "type": "Button",
+                    "id": "e8315edb-5de5-4e57-8538-72c97464c8cf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "cd65e726-a72c-421a-bc72-11a31d195f35",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "K1",
+                    "action": "J",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2f02a751-4300-45f2-a135-9557b1a7cc04",
+                    "path": "<Keyboard>/k",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "K2",
+                    "action": "K1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "K1",
+            "bindingGroup": "K1",
+            "devices": [
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "K2",
+            "bindingGroup": "K2",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
