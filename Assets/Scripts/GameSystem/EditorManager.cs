@@ -162,6 +162,7 @@ namespace Project
             currentPlacement = placement;
             Debug.Log("Placement");
             MapEidtoUI.Instance.ComponentPanel.Hide();
+            CameraManager.Instance.EditorCamera.GetComponent<Controller.EditorCameraController>().Follow = placement.transform;
             do
                 yield return null;
             while (!placement.Placed);

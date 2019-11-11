@@ -16,6 +16,17 @@ namespace Project
         public CinemachineVirtualCamera GamePlayCamera;
         public CinemachineVirtualCamera EditorCamera;
 
+        [DisplayInInspector]
+        public Vector2 ScreenWorldSize
+        {
+            get
+            {
+                var leftBottom = MainCamera.ViewportToWorldPoint(new Vector3(0, 0, 0));
+                var rightTop = MainCamera.ViewportToWorldPoint(new Vector3(1, 1, 0));
+                return (rightTop - leftBottom).ToVector2();
+            }
+        }
+
         Dictionary<SceneArea, CinemachineVirtualCamera> SceneCameras = new Dictionary<SceneArea, CinemachineVirtualCamera>();
         Dictionary<SceneArea, CinemachineVirtualCamera> SceneEditorCameras = new Dictionary<SceneArea, CinemachineVirtualCamera>();
         private void Awake()

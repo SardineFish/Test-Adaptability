@@ -96,12 +96,14 @@ namespace Project.GameMap.Editor
             base.OnSelect(eventData);
             if (Placed)
                 SetFx(FXMaterial, SelectColor);
+            CameraManager.Instance.EditorCamera.GetComponent<Controller.EditorCameraController>().Follow = transform;
         }
         public override void OnDeselect(BaseEventData eventData)
         {
             base.OnDeselect(eventData);
             if (Placed)
                 SetFx(defaultMat, Color.white);
+            CameraManager.Instance.EditorCamera.GetComponent<Controller.EditorCameraController>().Follow = null;
         }
         IEnumerable<BlockData> BlocksInWorldSpace()
         {
