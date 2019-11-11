@@ -240,7 +240,7 @@ namespace Project.Controller
 
             ContactedBlocks.Clear();
 
-            var center = BodyCollider.transform.position.ToVector2() + BodyCollider.offset;
+            var center = BodyCollider.transform.position.ToVector2() + BodyCollider.transform.localToWorldMatrix.MultiplyVector(BodyCollider.offset).ToVector2();
             var size = BodyCollider.size + Vector2.one * BodyCollider.edgeRadius * 2;
             DetectContact(center, Vector2.left, size.x / 2 , ContactThreshold, Vector2.up, size.y, ContactedBlocks);
             DetectContact(center, Vector2.right, size.x / 2 , ContactThreshold, Vector2.up, size.y, ContactedBlocks);
