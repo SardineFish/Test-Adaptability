@@ -50,6 +50,7 @@ namespace Project.Input
 
         void FixedUpdate()
         {
+            InputUtility.Reset();
             BeforeInputUpdate?.Invoke();
 
             UnityEngine.InputSystem.InputSystem.Update();
