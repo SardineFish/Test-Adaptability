@@ -48,6 +48,7 @@ namespace Project.Blocks
                 dir = this.Direction == MoveDirection.Horizontal
                     ? Vector2.right
                     : Vector2.up;
+            dir += dir.normalized * 0.0625f;
             foreach (var block in instance.Blocks)
             {
                 var pos = block.Position.ToVector3() - instance.Blocks.Bound.center + instance.transform.position + new Vector3(.5f, .5f, 0);
@@ -80,7 +81,7 @@ namespace Project.Blocks
             {
                 var pos = block.Position.ToVector3() - instance.Blocks.Bound.center + instance.transform.position + new Vector3(.5f, .5f, 0);
                 var count = Physics2D.RaycastNonAlloc(pos, dir.normalized, hits, dir.magnitude, 1 << 11);
-                Debug.DrawLine(pos, pos + dir.ToVector3(), Color.red);
+                Debug.DrawLine(pos, pos + dir.ToVector3(), Color.blue);
                 for (int i = 0; i < count; i++)
                 {
                     if (hits[i].collider.isTrigger)
@@ -109,6 +110,8 @@ namespace Project.Blocks
                 else
                     data.velocity = -data.velocity;
             }
+            else if (Mathf.Approximately(data.velocity.magnitude, 0))
+                data.velocity = (Direction == MoveDirection.Horizontal ? Vector2.left : Vector2.down) * Speed;
 
             instance.GetComponent<Rigidbody2D>().velocity = data.velocity;
             /*

@@ -115,6 +115,7 @@ namespace Project
             GameMap.Editor.MapEidtoUI.Instance.gameObject.SetActive(false);
             GameMap.BlocksMap.Instance.SwitchToPlayMap();
 
+            Physics2D.Simulate(Time.fixedDeltaTime);
 
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
