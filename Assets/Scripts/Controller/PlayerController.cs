@@ -201,15 +201,7 @@ namespace Project.Controller
                 if (Locker.Locked)
                     yield return null;
 
-                if (input.Movement.magnitude > 0.1)
-                {
-                    DoMoveGround();
-                    if(motionController.ControlledMovement.magnitude > 0.1)
-                    {
-                        ChangeState(PlayerMove());
-                        yield break;
-                    }
-                }
+                
                 if(input.Crouch)
                 {
                     // Fall down
@@ -221,8 +213,17 @@ namespace Project.Controller
                     ChangeState(PlayerCrouch());
                     yield break;
                 }
+                if (input.Movement.magnitude > 0.1)
+                {
+                    DoMoveGround();
+                    if (motionController.ControlledMovement.magnitude > 0.1)
+                    {
+                        ChangeState(PlayerMove());
+                        yield break;
+                    }
+                }
                 // jump to airborne
-                if(DoJump())
+                if (DoJump())
                 {
                     ChangeState(PlayerAirborne());
                     yield break;
@@ -330,6 +331,9 @@ namespace Project.Controller
         IEnumerator PlayerCrouch()
         {
             CurrentState = "Crouch";
+            motionController.XControl = ControlType.Velocity;
+            motionController.YControl = ControlType.Ignored;
+            motionController.ControlledVelocityLimit = new Vector2(SpeedOnGround, AirSpeedLimit.y);
             while (true)
             {
                 SetStateParameters(true, false);
@@ -365,7 +369,8 @@ namespace Project.Controller
             GameMap.TilePlatformManager.Platforms.ForEach(platform => platform.AllowPass(Entity));
             while (true)
             {
-                motionController.Move(input.Movement);
+                if (!motionController.OnGround)
+                    motionController.Move(input.Movement);
                 SetMotionParameters();
                 SetStateParameters(fall: true);
 

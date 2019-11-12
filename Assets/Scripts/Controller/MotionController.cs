@@ -52,9 +52,13 @@ namespace Project.Controller
         public event Action<Blocks.Block> OnBlockGroundContacted;
 
         new Rigidbody2D rigidbody;
+        [DisplayInInspector]
         protected Vector2 controlledMovement;
+        [DisplayInInspector]
         protected Vector2 forceVelocity;
+        [DisplayInInspector]
         protected Vector2 groundBlockVelocity;
+        private Vector2 groundBlockVelocityInLastFrame;
 
         RaycastHit2D[] hits = new RaycastHit2D[64];
 
@@ -148,6 +152,7 @@ namespace Project.Controller
                     break;
                 case ControlType.Force:
                     v.x = rigidbody.velocity.x;
+                    v.x -= groundBlockVelocityInLastFrame.x;
                     if (ControlledVelocityLimit.x > 0 && Mathf.Abs(v.x) >= ControlledVelocityLimit.x && MathUtility.SignInt(controlledMovement.x) == MathUtility.SignInt(v.x))
                         break;
                     rigidbody.AddForce(new Vector2(controlledMovement.x, 0), ForceMode2D.Force);
@@ -184,7 +189,7 @@ namespace Project.Controller
                 v.y = Mathf.Clamp(v.y, -FallDownVelocityLimit, 0);
 
             rigidbody.velocity = v + groundBlockVelocity;
-
+            groundBlockVelocityInLastFrame = groundBlockVelocity;
         }
 
         Dictionary<Blocks.Block, float> contactCount = new Dictionary<Blocks.Block, float>(32);
