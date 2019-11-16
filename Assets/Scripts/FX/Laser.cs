@@ -85,7 +85,7 @@ namespace Project.FX
             Active = false;
         }
 
-        private void OnWillRenderObject()
+        private void LateUpdate()
         {
             if (Active)
                 Length = GetLength();
