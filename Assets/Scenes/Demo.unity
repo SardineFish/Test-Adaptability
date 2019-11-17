@@ -47063,11 +47063,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4294146819638328087, guid: 87735504e2de8dd4a8b1fcfb7bc789ca,
-        type: 3}
-      propertyPath: WallJumpHeight
-      value: 3.5
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 87735504e2de8dd4a8b1fcfb7bc789ca, type: 3}
 --- !u!4 &1375126396 stripped
