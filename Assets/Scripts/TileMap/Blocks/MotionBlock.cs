@@ -48,7 +48,7 @@ namespace Project.Blocks
                 dir = this.Direction == MoveDirection.Horizontal
                     ? Vector2.right
                     : Vector2.up;
-            dir += dir.normalized * 0.0625f;
+            dir += dir.normalized * 0.01f;
             foreach (var block in instance.Blocks)
             {
                 var pos = block.Position.ToVector3() - instance.Blocks.Bound.center + instance.transform.position + new Vector3(.5f, .5f, 0);
