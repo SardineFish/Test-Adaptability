@@ -289,12 +289,13 @@ MonoBehaviour:
   ForceInAir: 100
   AirSpeedLimit: {x: 8, y: 35}
   JumpHeight: 3.5
-  JumpTime: 0.65
+  JumpTime: 0.325
+  JumpRiseTime: 0.16
   WallJumpVelocityX: 10
   WallJumpHeight: 3
   WallJumpFreezeTime: 0.3
   CoyoteTime: 0.1
-  FallDownGravityScale: 1
+  FallDownGravityScale: 1.5
 --- !u!114 &4294146819638328084
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -120,7 +120,7 @@ namespace Project.Controller
             {
                 rigidbody.gravityScale = Gravity * GravityScale / Mathf.Abs(Physics2D.gravity.y);
 
-                // Follow the motion block
+                // Follow the motion block  
                 if (OnGround)
                 {
                     var count = Physics2D.RaycastNonAlloc(transform.position, Vector2.down, hits, 0.0625f, 1 << 11);

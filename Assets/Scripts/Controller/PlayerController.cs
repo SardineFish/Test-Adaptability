@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Project.Controller
 {
@@ -20,6 +21,8 @@ namespace Project.Controller
         public float JumpHeight = 3;
         [Delayed]
         public float JumpTime = 0.5f;
+        [Delayed]
+        public float JumpRiseTime = .3f;
         public float WallJumpVelocityX = 12;
         public float WallJumpHeight = 3;
         public float WallJumpFreezeTime = 0.3f;
@@ -46,11 +49,17 @@ namespace Project.Controller
         Vector2 contactedWallNormal;
 
         [DisplayInInspector]
-        float WallJumpVelocityY => CalculateJumpVelocity(WallJumpHeight);
+        float WallJumpVelocityYLegacy => CalculateJumpVelocity(WallJumpHeight);
         [DisplayInInspector]
-        float JumpVelocity => 2 * JumpHeight / (JumpTime / 2);
+        float WallJumpRaiseVelocity => -Gravity * JumpRiseTime + Mathf.Sqrt(Gravity * (2 * WallJumpHeight + Gravity * JumpRiseTime * JumpRiseTime));
         [DisplayInInspector]
-        float Gravity => 2 * JumpHeight / Mathf.Pow(JumpTime / 2, 2);
+        float JumpVelocityLegacy => 2 * JumpHeight / (JumpTime);
+        [DisplayInInspector]
+        float JumpRiseVelocity => 2 * JumpHeight / (JumpRiseTime + JumpTime);
+        [DisplayInInspector]
+        float MinJumpHeight => JumpRiseVelocity * JumpTime / 2;
+        [DisplayInInspector]
+        float Gravity => 2 * JumpHeight / Mathf.Pow(JumpTime, 2);
 
         [DisplayInInspector]
         public string CurrentState { get; private set; } = "";
@@ -141,7 +150,7 @@ namespace Project.Controller
             animator.SetFloat("VelocityX", motionController.velocity.x);
             animator.SetFloat("VelocityY", motionController.velocity.y);
             animator.SetFloat("ControlledMovementX", Mathf.Abs(motionController.ControlledMovement.x));
-            actionController.SetDirection(input.Movement.x);
+            actionController.SetDirection(motionController.ControlledMovement.x);
         }
 
         void SetStateParameters(bool crouch = false, bool move = false, bool fall = false)
@@ -158,7 +167,7 @@ namespace Project.Controller
         {
             if(input.CachedJumpPress && CachedGroundContact)
             {
-                motionController.Jump(JumpVelocity);
+                //motionController.Jump(JumpVelocity);
                 animator.SetTrigger("Jump");
                 input.CachedJumpPress.Clear();
                 CachedGroundContact.Clear();
@@ -173,7 +182,7 @@ namespace Project.Controller
             if(CachedWallContact && input.CachedJumpPress)
             {
                 actionController.SetDirection(contactedWallNormal.x);
-                motionController.Jump(new Vector2(WallJumpVelocityX * contactedWallNormal.x, WallJumpVelocityY));
+                //motionController.Jump(new Vector2(WallJumpVelocityX * contactedWallNormal.x, WallJumpVelocityY));
                 input.CachedJumpPress.Clear();
                 CachedWallContact.Clear();
                 return true;
@@ -225,7 +234,7 @@ namespace Project.Controller
                 // jump to airborne
                 if (DoJump())
                 {
-                    ChangeState(PlayerAirborne());
+                    ChangeState(PlayerJump());
                     yield break;
                 }
                 // fall to airborne
@@ -271,7 +280,7 @@ namespace Project.Controller
                 // jump to airborne
                 else if (DoJump())
                 {
-                    ChangeState(PlayerAirborne());
+                    ChangeState(PlayerJump());
                     yield break;
                 }
                 // fall to airborne
@@ -286,6 +295,86 @@ namespace Project.Controller
             }
         }
 
+
+        IEnumerator PlayerJump()
+        {
+            CurrentState = "Jump";
+            motionController.YControl = ControlType.Velocity;
+            motionController.XControl = ControlType.Force;
+            motionController.ControlledVelocityLimit = AirSpeedLimit;
+            motionController.FallDownVelocityLimit = AirSpeedLimit.y;
+
+            foreach (var t in Utility.FixedTimer(JumpRiseTime))
+            {
+                motionController.Move(new Vector2(input.Movement.x * ForceInAir, JumpRiseVelocity));
+                SetMotionParameters();
+                if(DoWallJump())
+                {
+                    ChangeState(PlayerWallJump());
+                    yield break;
+                }
+                if (!input.Jump)
+                    break;
+                if (motionController.ContactedBlocks.Any(contact => contact.Normal == Vector2.down))
+                    break;
+                yield return new WaitForFixedUpdate();
+
+            }
+
+            motionController.YControl = ControlType.Ignored;
+            ChangeState(PlayerAirborne());
+        }
+
+        IEnumerator PlayerWallJump()
+        {
+            var dir = contactedWallNormal.x;
+            motionController.YControl = ControlType.Velocity;
+            motionController.XControl = ControlType.Force;
+            motionController.ControlledVelocityLimit = AirSpeedLimit;
+            motionController.FallDownVelocityLimit = AirSpeedLimit.y;
+            motionController.Jump(new Vector2(WallJumpVelocityX * dir, JumpRiseVelocity));
+
+            float raiseTime = 0;
+            foreach (var t in Utility.FixedTimer(JumpRiseTime))
+            {
+                raiseTime = t;
+                motionController.Move(new Vector2(WallJumpVelocityX * dir, JumpRiseVelocity));
+                SetMotionParameters();
+                if (DoWallJump())
+                {
+                    ChangeState(PlayerWallJump());
+                    yield break;
+                }
+                if (!input.Jump)
+                    break;
+                if (motionController.ContactedBlocks.Any(contact => contact.Normal == Vector2.down))
+                    break;
+                yield return new WaitForFixedUpdate();
+
+            }
+            motionController.YControl = ControlType.Ignored;
+            Debug.Log(raiseTime);
+
+            foreach (var frezeTime in Utility.FixedTimer(WallJumpFreezeTime - raiseTime))
+            {
+                motionController.Move(new Vector2(WallJumpVelocityX * dir, 0));
+                SetMotionParameters();
+                if (DoWallJump())
+                {
+                    ChangeState(PlayerWallJump());
+                    yield break;
+                }
+                if (motionController.ContactedBlocks.Any(contact => contact.Normal == Vector2.down))
+                    break;
+                if (motionController.OnGround)
+                    break;
+                yield return new WaitForFixedUpdate();
+
+            }
+
+            motionController.YControl = ControlType.Ignored;
+            ChangeState(PlayerAirborne());
+        }
 
         IEnumerator PlayerAirborne()
         {
@@ -356,6 +445,7 @@ namespace Project.Controller
             }
         }
 
+
         IEnumerator PlayerFall()
         {
             if (PlatformCollider)
@@ -401,34 +491,6 @@ namespace Project.Controller
                     yield break;
                 }
             }
-        }
-
-        IEnumerator PlayerWallJump()
-        {
-            var dir = contactedWallNormal.x;
-            motionController.ControlledVelocityLimit = AirSpeedLimit;
-            motionController.XControl = ControlType.Ignored;
-
-            foreach (var t in Utility.Timer(WallJumpFreezeTime))
-            {
-                SetMotionParameters();
-                actionController.SetDirection(dir);
-
-                if (motionController.OnGround)
-                {
-                    motionController.XControl = ControlType.Velocity;
-                    ChangeState(PlayerIdle());
-                    yield break;
-                }
-                if (DoWallJump())
-                {
-                    ChangeState(PlayerWallJump());
-                    yield break;
-                }
-
-                yield return new WaitForFixedUpdate();
-            }
-            ChangeState(PlayerAirborne());
         }
 
         IEnumerator ControlledByBlock(Blocks.Block block, IEnumerator processor)
