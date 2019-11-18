@@ -86,6 +86,23 @@ namespace Project.UI
             transitionCoroutine = StartCoroutine(ShowProcess());
             return transitionCoroutine;
         }
+
+        public void HideImmediate()
+        {
+            if (transitionCoroutine != null)
+                StopCoroutine(transitionCoroutine);
+            transitionState = 0;
+            ApplyVisibilityTransition(transitionState);
+            AfterHide();
+        }
+        public void ShowImmediate()
+        {
+            if (transitionCoroutine != null)
+                StopCoroutine(transitionCoroutine);
+            transitionState = 1;
+            ApplyVisibilityTransition(transitionState);
+            AfterShow();
+        }
     }
 }
 

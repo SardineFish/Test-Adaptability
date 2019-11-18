@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,8 @@ namespace Project.Blocks
         protected List<BlockData> blocksList = new List<BlockData>(4);
         Dictionary<Vector2Int, BlockData> locatedBlocks = new Dictionary<Vector2Int, BlockData>(4);
 
-        public BoundsInt Bound
+        public BoundsInt Bound { get; private set; }
+        /*
         {
             get
             {
@@ -25,9 +27,21 @@ namespace Project.Blocks
                     xMin, yMin, 0,
                     xMax - xMin, yMax - yMin, 0);
             }
-        }
+        }*/
+        public ReadOnlyCollection<BlockData> BlocksList { get; private set; }
         public BlocksCollection()
         {
+            BlocksList = new ReadOnlyCollection<BlockData>(blocksList);
+        }
+        private void UpdateBound()
+        {
+            var xMin = blocksList.Min(block => block.Position.x);
+            var yMin = blocksList.Min(block => block.Position.y);
+            var xMax = blocksList.Max(block => block.Position.x) + 1;
+            var yMax = blocksList.Max(block => block.Position.y) + 1;
+            Bound = new BoundsInt(
+                xMin, yMin, 0,
+                xMax - xMin, yMax - yMin, 0);
         }
         public BlocksCollection(IEnumerable<BlockData> source)
         {
@@ -40,6 +54,8 @@ namespace Project.Blocks
         {
             this.blocksList = clone.blocksList;
             this.locatedBlocks = clone.locatedBlocks;
+            BlocksList = new ReadOnlyCollection<BlockData>(blocksList);
+            UpdateBound();
         }
 
         public override bool Equals(object obj)
@@ -68,6 +84,8 @@ namespace Project.Blocks
                 blocksList.Add(data);
             }
             locatedBlocks[position] = data;
+
+            UpdateBound();
         }
 
         public bool Has(Vector2Int position)

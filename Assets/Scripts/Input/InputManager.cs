@@ -22,6 +22,8 @@ namespace Project.Input
         {
             get
             {
+                if (Utility.GetGenericPlatform(Application.platform) == GenericPlatform.Mobile)
+                    return InputSchemes.Touch;
                 switch(Instance.playerInput.currentControlScheme)
                 {
                     case "Gamepad":
@@ -43,6 +45,7 @@ namespace Project.Input
             if (Utility.GetGenericPlatform(Application.platform) == GenericPlatform.Mobile)
             {
                 playerInput.enabled = false;
+                
             }
             InputUtility.Init(Input);
         }

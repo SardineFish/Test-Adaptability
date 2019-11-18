@@ -49,8 +49,9 @@ namespace Project.Blocks
                     ? Vector2.right
                     : Vector2.up;
             dir += dir.normalized * 0.01f;
-            foreach (var block in instance.Blocks)
+            for (var blockIdx = 0; blockIdx < instance.Blocks.BlocksList.Count; blockIdx++)
             {
+                var block = instance.Blocks.BlocksList[blockIdx];
                 var pos = block.Position.ToVector3() - instance.Blocks.Bound.center + instance.transform.position + new Vector3(.5f, .5f, 0);
                 var count = Physics2D.RaycastNonAlloc(pos, dir.normalized, hits, dir.magnitude, 1 << 11);
                 Debug.DrawLine(pos, pos + dir.ToVector3(), Color.red);
@@ -77,8 +78,9 @@ namespace Project.Blocks
                 dir = this.Direction == MoveDirection.Horizontal
                     ? Vector2.left
                     : Vector2.down;
-            foreach (var block in instance.Blocks)
+            for (var blockIdx = 0; blockIdx < instance.Blocks.BlocksList.Count; blockIdx++)
             {
+                var block = instance.Blocks.BlocksList[blockIdx];
                 var pos = block.Position.ToVector3() - instance.Blocks.Bound.center + instance.transform.position + new Vector3(.5f, .5f, 0);
                 var count = Physics2D.RaycastNonAlloc(pos, dir.normalized, hits, dir.magnitude, 1 << 11);
                 Debug.DrawLine(pos, pos + dir.ToVector3(), Color.blue);

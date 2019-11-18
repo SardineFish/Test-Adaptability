@@ -38,7 +38,7 @@ namespace Project
                 {
                     GameMap.BlocksMap.Instance.PlaceAllUserBlocks();
                 }
-                RestartLevel();
+                this.WaitForSecond(RestartLevel, .1f);
             };
             Input.InputManager.Input.EditorMode.ToggleEditMode.performed+=(ctx)=>
             {

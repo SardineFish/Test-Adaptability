@@ -560,6 +560,7 @@ public static class Utility
     }
 }
 
+
 public enum GenericPlatform
 {
     Desktop,
