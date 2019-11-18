@@ -17,6 +17,9 @@ MonoBehaviour:
   - Keyboard
   - Mouse
   - Pointer
+  - TouchInputDevice
+  - Touchscreen
+  - HID
   m_UpdateMode: 3
   m_CompensateForScreenOrientation: 1
   m_FilterNoiseOnCurrent: 0

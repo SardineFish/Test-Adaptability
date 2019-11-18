@@ -40,6 +40,10 @@ namespace Project.Input
             Input = new GameInput();
             Input.Enable();
             playerInput = GetComponent<PlayerInput>();
+            if (Utility.GetGenericPlatform(Application.platform) == GenericPlatform.Mobile)
+            {
+                playerInput.enabled = false;
+            }
             InputUtility.Init(Input);
         }
         // Use this for initialization

@@ -28,6 +28,10 @@ namespace Project
 
         private void Awake()
         {
+            ActivePlayer = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
+            if (ActivePlayer)
+                Destroy(ActivePlayer.gameObject);
+
             GameMap.BlocksMap.Instance.AfterMapGeneration += () =>
             {
                 if (TestMode)
@@ -47,7 +51,6 @@ namespace Project
 
         private void Start()
         {
-            ActivePlayer = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
         }
 
         private void Update()

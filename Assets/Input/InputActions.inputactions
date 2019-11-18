@@ -115,6 +115,17 @@
                 },
                 {
                     "name": "",
+                    "id": "af732642-edb9-4279-81fd-eb5b48148a2f",
+                    "path": "<TouchInputDevice>/stick0",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TouchScreen",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "dfe2f69b-21b5-43e0-b62d-6f4ce5402c80",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
@@ -137,6 +148,17 @@
                 },
                 {
                     "name": "",
+                    "id": "1ce9eec1-6833-48bd-ad94-8135c2b72b19",
+                    "path": "<TouchInputDevice>/button0",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TouchScreen",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "70e8fc35-bf9e-4c73-a743-4ea532b6b1db",
                     "path": "<Gamepad>/leftStick/down",
                     "interactions": "",
@@ -153,6 +175,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "22bfa674-a1e4-4914-a372-c571728909d8",
+                    "path": "<TouchInputDevice>/stick0/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TouchScreen",
                     "action": "Crouch",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -940,6 +973,11 @@
             "devices": [
                 {
                     "devicePath": "<Touchscreen>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<TouchInputDevice>",
                     "isOptional": false,
                     "isOR": false
                 }

@@ -8,10 +8,10 @@ using UnityEngine.InputSystem.Utilities;
 
 namespace Project.Input
 {
-    public class GameInput : IInputActionCollection, IDisposable
+    public class @GameInput : IInputActionCollection, IDisposable
     {
         private InputActionAsset asset;
-        public GameInput()
+        public @GameInput()
         {
             asset = InputActionAsset.FromJson(@"{
     ""name"": ""InputActions"",
@@ -130,6 +130,17 @@ namespace Project.Input
                 },
                 {
                     ""name"": """",
+                    ""id"": ""af732642-edb9-4279-81fd-eb5b48148a2f"",
+                    ""path"": ""<TouchInputDevice>/stick0"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""dfe2f69b-21b5-43e0-b62d-6f4ce5402c80"",
                     ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
@@ -152,6 +163,17 @@ namespace Project.Input
                 },
                 {
                     ""name"": """",
+                    ""id"": ""1ce9eec1-6833-48bd-ad94-8135c2b72b19"",
+                    ""path"": ""<TouchInputDevice>/button0"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""70e8fc35-bf9e-4c73-a743-4ea532b6b1db"",
                     ""path"": ""<Gamepad>/leftStick/down"",
                     ""interactions"": """",
@@ -168,6 +190,17 @@ namespace Project.Input
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""22bfa674-a1e4-4914-a372-c571728909d8"",
+                    ""path"": ""<TouchInputDevice>/stick0/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
                     ""action"": ""Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -957,6 +990,11 @@ namespace Project.Input
                     ""devicePath"": ""<Touchscreen>"",
                     ""isOptional"": false,
                     ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<TouchInputDevice>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
                 }
             ]
         }
@@ -1046,8 +1084,8 @@ namespace Project.Input
         private readonly InputAction m_GamePlay_CameraZoom;
         public struct GamePlayActions
         {
-            private GameInput m_Wrapper;
-            public GamePlayActions(GameInput wrapper) { m_Wrapper = wrapper; }
+            private @GameInput m_Wrapper;
+            public GamePlayActions(@GameInput wrapper) { m_Wrapper = wrapper; }
             public InputAction @Movement => m_Wrapper.m_GamePlay_Movement;
             public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
             public InputAction @Crouch => m_Wrapper.m_GamePlay_Crouch;
@@ -1062,40 +1100,40 @@ namespace Project.Input
             {
                 if (m_Wrapper.m_GamePlayActionsCallbackInterface != null)
                 {
-                    Movement.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMovement;
-                    Movement.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMovement;
-                    Movement.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMovement;
-                    Jump.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
-                    Jump.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
-                    Jump.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
-                    Crouch.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCrouch;
-                    Crouch.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCrouch;
-                    Crouch.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCrouch;
-                    Interact.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
-                    Interact.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
-                    Interact.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
-                    CameraZoom.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
-                    CameraZoom.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
-                    CameraZoom.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
+                    @Movement.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMovement;
+                    @Movement.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMovement;
+                    @Movement.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMovement;
+                    @Jump.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                    @Jump.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                    @Jump.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                    @Crouch.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCrouch;
+                    @Crouch.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCrouch;
+                    @Crouch.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCrouch;
+                    @Interact.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
+                    @Interact.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
+                    @Interact.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
+                    @CameraZoom.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
+                    @CameraZoom.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
+                    @CameraZoom.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
                 }
                 m_Wrapper.m_GamePlayActionsCallbackInterface = instance;
                 if (instance != null)
                 {
-                    Movement.started += instance.OnMovement;
-                    Movement.performed += instance.OnMovement;
-                    Movement.canceled += instance.OnMovement;
-                    Jump.started += instance.OnJump;
-                    Jump.performed += instance.OnJump;
-                    Jump.canceled += instance.OnJump;
-                    Crouch.started += instance.OnCrouch;
-                    Crouch.performed += instance.OnCrouch;
-                    Crouch.canceled += instance.OnCrouch;
-                    Interact.started += instance.OnInteract;
-                    Interact.performed += instance.OnInteract;
-                    Interact.canceled += instance.OnInteract;
-                    CameraZoom.started += instance.OnCameraZoom;
-                    CameraZoom.performed += instance.OnCameraZoom;
-                    CameraZoom.canceled += instance.OnCameraZoom;
+                    @Movement.started += instance.OnMovement;
+                    @Movement.performed += instance.OnMovement;
+                    @Movement.canceled += instance.OnMovement;
+                    @Jump.started += instance.OnJump;
+                    @Jump.performed += instance.OnJump;
+                    @Jump.canceled += instance.OnJump;
+                    @Crouch.started += instance.OnCrouch;
+                    @Crouch.performed += instance.OnCrouch;
+                    @Crouch.canceled += instance.OnCrouch;
+                    @Interact.started += instance.OnInteract;
+                    @Interact.performed += instance.OnInteract;
+                    @Interact.canceled += instance.OnInteract;
+                    @CameraZoom.started += instance.OnCameraZoom;
+                    @CameraZoom.performed += instance.OnCameraZoom;
+                    @CameraZoom.canceled += instance.OnCameraZoom;
                 }
             }
         }
@@ -1118,8 +1156,8 @@ namespace Project.Input
         private readonly InputAction m_EditorMode_ToggleEditMode;
         public struct EditorModeActions
         {
-            private GameInput m_Wrapper;
-            public EditorModeActions(GameInput wrapper) { m_Wrapper = wrapper; }
+            private @GameInput m_Wrapper;
+            public EditorModeActions(@GameInput wrapper) { m_Wrapper = wrapper; }
             public InputAction @Movement => m_Wrapper.m_EditorMode_Movement;
             public InputAction @CameraMovement => m_Wrapper.m_EditorMode_CameraMovement;
             public InputAction @Zoom => m_Wrapper.m_EditorMode_Zoom;
@@ -1141,82 +1179,82 @@ namespace Project.Input
             {
                 if (m_Wrapper.m_EditorModeActionsCallbackInterface != null)
                 {
-                    Movement.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnMovement;
-                    Movement.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnMovement;
-                    Movement.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnMovement;
-                    CameraMovement.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnCameraMovement;
-                    CameraMovement.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnCameraMovement;
-                    CameraMovement.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnCameraMovement;
-                    Zoom.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnZoom;
-                    Zoom.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnZoom;
-                    Zoom.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnZoom;
-                    Rotate.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRotate;
-                    Rotate.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRotate;
-                    Rotate.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRotate;
-                    Place.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPlace;
-                    Place.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPlace;
-                    Place.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPlace;
-                    Remove.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRemove;
-                    Remove.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRemove;
-                    Remove.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRemove;
-                    Exit.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnExit;
-                    Exit.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnExit;
-                    Exit.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnExit;
-                    ShowComponents.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnShowComponents;
-                    ShowComponents.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnShowComponents;
-                    ShowComponents.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnShowComponents;
-                    ToggleComponents.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleComponents;
-                    ToggleComponents.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleComponents;
-                    ToggleComponents.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleComponents;
-                    Point.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPoint;
-                    Point.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPoint;
-                    Point.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPoint;
-                    Click.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnClick;
-                    Click.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnClick;
-                    Click.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnClick;
-                    ToggleEditMode.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleEditMode;
-                    ToggleEditMode.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleEditMode;
-                    ToggleEditMode.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleEditMode;
+                    @Movement.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnMovement;
+                    @Movement.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnMovement;
+                    @Movement.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnMovement;
+                    @CameraMovement.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnCameraMovement;
+                    @CameraMovement.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnCameraMovement;
+                    @CameraMovement.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnCameraMovement;
+                    @Zoom.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnZoom;
+                    @Zoom.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnZoom;
+                    @Zoom.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnZoom;
+                    @Rotate.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRotate;
+                    @Rotate.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRotate;
+                    @Rotate.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRotate;
+                    @Place.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPlace;
+                    @Place.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPlace;
+                    @Place.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPlace;
+                    @Remove.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRemove;
+                    @Remove.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRemove;
+                    @Remove.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnRemove;
+                    @Exit.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnExit;
+                    @Exit.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnExit;
+                    @Exit.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnExit;
+                    @ShowComponents.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnShowComponents;
+                    @ShowComponents.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnShowComponents;
+                    @ShowComponents.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnShowComponents;
+                    @ToggleComponents.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleComponents;
+                    @ToggleComponents.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleComponents;
+                    @ToggleComponents.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleComponents;
+                    @Point.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPoint;
+                    @Point.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPoint;
+                    @Point.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnPoint;
+                    @Click.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnClick;
+                    @Click.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnClick;
+                    @Click.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnClick;
+                    @ToggleEditMode.started -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleEditMode;
+                    @ToggleEditMode.performed -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleEditMode;
+                    @ToggleEditMode.canceled -= m_Wrapper.m_EditorModeActionsCallbackInterface.OnToggleEditMode;
                 }
                 m_Wrapper.m_EditorModeActionsCallbackInterface = instance;
                 if (instance != null)
                 {
-                    Movement.started += instance.OnMovement;
-                    Movement.performed += instance.OnMovement;
-                    Movement.canceled += instance.OnMovement;
-                    CameraMovement.started += instance.OnCameraMovement;
-                    CameraMovement.performed += instance.OnCameraMovement;
-                    CameraMovement.canceled += instance.OnCameraMovement;
-                    Zoom.started += instance.OnZoom;
-                    Zoom.performed += instance.OnZoom;
-                    Zoom.canceled += instance.OnZoom;
-                    Rotate.started += instance.OnRotate;
-                    Rotate.performed += instance.OnRotate;
-                    Rotate.canceled += instance.OnRotate;
-                    Place.started += instance.OnPlace;
-                    Place.performed += instance.OnPlace;
-                    Place.canceled += instance.OnPlace;
-                    Remove.started += instance.OnRemove;
-                    Remove.performed += instance.OnRemove;
-                    Remove.canceled += instance.OnRemove;
-                    Exit.started += instance.OnExit;
-                    Exit.performed += instance.OnExit;
-                    Exit.canceled += instance.OnExit;
-                    ShowComponents.started += instance.OnShowComponents;
-                    ShowComponents.performed += instance.OnShowComponents;
-                    ShowComponents.canceled += instance.OnShowComponents;
-                    ToggleComponents.started += instance.OnToggleComponents;
-                    ToggleComponents.performed += instance.OnToggleComponents;
-                    ToggleComponents.canceled += instance.OnToggleComponents;
-                    Point.started += instance.OnPoint;
-                    Point.performed += instance.OnPoint;
-                    Point.canceled += instance.OnPoint;
-                    Click.started += instance.OnClick;
-                    Click.performed += instance.OnClick;
-                    Click.canceled += instance.OnClick;
-                    ToggleEditMode.started += instance.OnToggleEditMode;
-                    ToggleEditMode.performed += instance.OnToggleEditMode;
-                    ToggleEditMode.canceled += instance.OnToggleEditMode;
+                    @Movement.started += instance.OnMovement;
+                    @Movement.performed += instance.OnMovement;
+                    @Movement.canceled += instance.OnMovement;
+                    @CameraMovement.started += instance.OnCameraMovement;
+                    @CameraMovement.performed += instance.OnCameraMovement;
+                    @CameraMovement.canceled += instance.OnCameraMovement;
+                    @Zoom.started += instance.OnZoom;
+                    @Zoom.performed += instance.OnZoom;
+                    @Zoom.canceled += instance.OnZoom;
+                    @Rotate.started += instance.OnRotate;
+                    @Rotate.performed += instance.OnRotate;
+                    @Rotate.canceled += instance.OnRotate;
+                    @Place.started += instance.OnPlace;
+                    @Place.performed += instance.OnPlace;
+                    @Place.canceled += instance.OnPlace;
+                    @Remove.started += instance.OnRemove;
+                    @Remove.performed += instance.OnRemove;
+                    @Remove.canceled += instance.OnRemove;
+                    @Exit.started += instance.OnExit;
+                    @Exit.performed += instance.OnExit;
+                    @Exit.canceled += instance.OnExit;
+                    @ShowComponents.started += instance.OnShowComponents;
+                    @ShowComponents.performed += instance.OnShowComponents;
+                    @ShowComponents.canceled += instance.OnShowComponents;
+                    @ToggleComponents.started += instance.OnToggleComponents;
+                    @ToggleComponents.performed += instance.OnToggleComponents;
+                    @ToggleComponents.canceled += instance.OnToggleComponents;
+                    @Point.started += instance.OnPoint;
+                    @Point.performed += instance.OnPoint;
+                    @Point.canceled += instance.OnPoint;
+                    @Click.started += instance.OnClick;
+                    @Click.performed += instance.OnClick;
+                    @Click.canceled += instance.OnClick;
+                    @ToggleEditMode.started += instance.OnToggleEditMode;
+                    @ToggleEditMode.performed += instance.OnToggleEditMode;
+                    @ToggleEditMode.canceled += instance.OnToggleEditMode;
                 }
             }
         }
@@ -1232,8 +1270,8 @@ namespace Project.Input
         private readonly InputAction m_UI_Click;
         public struct UIActions
         {
-            private GameInput m_Wrapper;
-            public UIActions(GameInput wrapper) { m_Wrapper = wrapper; }
+            private @GameInput m_Wrapper;
+            public UIActions(@GameInput wrapper) { m_Wrapper = wrapper; }
             public InputAction @Navigation => m_Wrapper.m_UI_Navigation;
             public InputAction @OK => m_Wrapper.m_UI_OK;
             public InputAction @Back => m_Wrapper.m_UI_Back;
@@ -1248,40 +1286,40 @@ namespace Project.Input
             {
                 if (m_Wrapper.m_UIActionsCallbackInterface != null)
                 {
-                    Navigation.started -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigation;
-                    Navigation.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigation;
-                    Navigation.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigation;
-                    OK.started -= m_Wrapper.m_UIActionsCallbackInterface.OnOK;
-                    OK.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnOK;
-                    OK.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnOK;
-                    Back.started -= m_Wrapper.m_UIActionsCallbackInterface.OnBack;
-                    Back.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnBack;
-                    Back.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnBack;
-                    Point.started -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
-                    Point.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
-                    Point.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
-                    Click.started -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
-                    Click.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
-                    Click.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
+                    @Navigation.started -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigation;
+                    @Navigation.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigation;
+                    @Navigation.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnNavigation;
+                    @OK.started -= m_Wrapper.m_UIActionsCallbackInterface.OnOK;
+                    @OK.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnOK;
+                    @OK.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnOK;
+                    @Back.started -= m_Wrapper.m_UIActionsCallbackInterface.OnBack;
+                    @Back.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnBack;
+                    @Back.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnBack;
+                    @Point.started -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                    @Point.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                    @Point.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnPoint;
+                    @Click.started -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
+                    @Click.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
+                    @Click.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnClick;
                 }
                 m_Wrapper.m_UIActionsCallbackInterface = instance;
                 if (instance != null)
                 {
-                    Navigation.started += instance.OnNavigation;
-                    Navigation.performed += instance.OnNavigation;
-                    Navigation.canceled += instance.OnNavigation;
-                    OK.started += instance.OnOK;
-                    OK.performed += instance.OnOK;
-                    OK.canceled += instance.OnOK;
-                    Back.started += instance.OnBack;
-                    Back.performed += instance.OnBack;
-                    Back.canceled += instance.OnBack;
-                    Point.started += instance.OnPoint;
-                    Point.performed += instance.OnPoint;
-                    Point.canceled += instance.OnPoint;
-                    Click.started += instance.OnClick;
-                    Click.performed += instance.OnClick;
-                    Click.canceled += instance.OnClick;
+                    @Navigation.started += instance.OnNavigation;
+                    @Navigation.performed += instance.OnNavigation;
+                    @Navigation.canceled += instance.OnNavigation;
+                    @OK.started += instance.OnOK;
+                    @OK.performed += instance.OnOK;
+                    @OK.canceled += instance.OnOK;
+                    @Back.started += instance.OnBack;
+                    @Back.performed += instance.OnBack;
+                    @Back.canceled += instance.OnBack;
+                    @Point.started += instance.OnPoint;
+                    @Point.performed += instance.OnPoint;
+                    @Point.canceled += instance.OnPoint;
+                    @Click.started += instance.OnClick;
+                    @Click.performed += instance.OnClick;
+                    @Click.canceled += instance.OnClick;
                 }
             }
         }
