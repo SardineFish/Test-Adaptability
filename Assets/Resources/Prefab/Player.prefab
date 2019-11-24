@@ -227,7 +227,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlatformCollider: {fileID: 0}
   SpeedOnGround: 8
-  GroundDamping: 0.593
+  GroundDamping: 0.4
   ForceInAir: 100
   AirSpeedLimit: {x: 8, y: 35}
   JumpHeight: 3.5
