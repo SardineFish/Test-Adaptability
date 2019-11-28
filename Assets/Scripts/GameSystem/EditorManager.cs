@@ -11,6 +11,8 @@ namespace Project
     public class EditorManager : Singleton<EditorManager>
     {
         public GameObject PlacementPrefab;
+        [SerializeField]
+        UnityEngine.Rendering.PostProcessing.PostProcessVolume PostProcessVolume;
 
 
         Dictionary<SceneArea, SceneEditorState> sceneEditorStates = new Dictionary<SceneArea, SceneEditorState>();
@@ -29,6 +31,7 @@ namespace Project
                     sceneEditorStates[scene] = editorState;
                 });
             };
+            Instance.PostProcessVolume.profile.GetSetting<FX.EditModeSceneBoundary>().active = false;
         }
         public static ComponentPlacement CreatePlacement(UserComponentUIData data)
         {
@@ -65,6 +68,7 @@ namespace Project
             MapEidtoUI.Instance.gameObject.SetActive(true);
             BlocksMap.Instance.SwitchToEditorMap();
             MapEidtoUI.Instance.SetComponents(Instance.CurrentEditorState.AvailableComponents);
+            Instance.PostProcessVolume.profile.GetSetting<FX.EditModeSceneBoundary>().active = true;
             foreach (var placed in Instance.CurrentEditorState.PlacedComponents)
             {
                 placed.gameObject.SetActive(true);
@@ -81,8 +85,9 @@ namespace Project
         {
             Instance.StopAllCoroutines();
             MapEidtoUI.Instance.gameObject.SetActive(false);
+            Instance.PostProcessVolume.profile.GetSetting<FX.EditModeSceneBoundary>().active = false;
 
-            for(var i=0;i<Instance.CurrentEditorState.PlacedComponents.Count;i++)
+            for (var i=0;i<Instance.CurrentEditorState.PlacedComponents.Count;i++)
             {
                 var placement = Instance.CurrentEditorState.PlacedComponents[i];
                 if (!placement.Placed)

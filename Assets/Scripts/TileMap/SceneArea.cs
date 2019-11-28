@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Project.Blocks;
 using System.Linq;
+using UnityEngine.Tilemaps;
 
 namespace Project.GameMap
 {
@@ -14,6 +15,7 @@ namespace Project.GameMap
         public BlocksCollection Blocks { get; private set; }
         public BoundsInt Bound => Blocks.Bound;
         public Collider2D BoundaryCollider { get; set; }
+        public TilemapRenderer BoundaryRenderer { get; set; }
 
         public SceneArea(BlocksCollection blocks, string name = null)
         {

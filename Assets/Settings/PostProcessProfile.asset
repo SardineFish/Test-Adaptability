@@ -1,5 +1,21 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6005539864000529683
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 811b56fab8ef3ed4daa8dfedce574b49, type: 3}
+  m_Name: EditModeSceneBoundary
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16,6 +32,7 @@ MonoBehaviour:
   - {fileID: 114375464177707528}
   - {fileID: 7209529153049187562}
   - {fileID: 452218722815130768}
+  - {fileID: -6005539864000529683}
 --- !u!114 &114375464177707528
 MonoBehaviour:
   m_ObjectHideFlags: 3

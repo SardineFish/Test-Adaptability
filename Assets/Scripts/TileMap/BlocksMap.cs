@@ -164,6 +164,9 @@ namespace Project.GameMap
                 var rigidbody = obj.GetComponent<Rigidbody2D>();
                 rigidbody.bodyType = RigidbodyType2D.Static;
                 scene.BoundaryCollider = composite;
+                scene.BoundaryRenderer = obj.AddComponent<TilemapRenderer>();
+                tilemap.color = tilemap.color.Set(a: 0);
+
             }
         }
 
