@@ -952,6 +952,66 @@ namespace Project.Input
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Global"",
+            ""id"": ""c172965c-9c99-4e4a-a5e8-0fd3f9379a0e"",
+            ""actions"": [
+                {
+                    ""name"": ""Accept"",
+                    ""type"": ""Button"",
+                    ""id"": ""c5dbf8e4-1d63-4358-8df6-3d5d3d0d8324"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""4b5a7973-211f-46f9-9141-dc95996c2b83"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Accept"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b11dd350-bab8-4827-a184-60b195d612b1"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Accept"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3654c31e-ff30-4080-8f0c-296bd5c9bef4"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Accept"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8b9515ec-e207-4d27-be84-682bf9f75660"",
+                    ""path"": ""<Touchscreen>/press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
+                    ""action"": ""Accept"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -1028,6 +1088,9 @@ namespace Project.Input
             m_UI_Back = m_UI.FindAction("Back", throwIfNotFound: true);
             m_UI_Point = m_UI.FindAction("Point", throwIfNotFound: true);
             m_UI_Click = m_UI.FindAction("Click", throwIfNotFound: true);
+            // Global
+            m_Global = asset.FindActionMap("Global", throwIfNotFound: true);
+            m_Global_Accept = m_Global.FindAction("Accept", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -1324,6 +1387,39 @@ namespace Project.Input
             }
         }
         public UIActions @UI => new UIActions(this);
+
+        // Global
+        private readonly InputActionMap m_Global;
+        private IGlobalActions m_GlobalActionsCallbackInterface;
+        private readonly InputAction m_Global_Accept;
+        public struct GlobalActions
+        {
+            private @GameInput m_Wrapper;
+            public GlobalActions(@GameInput wrapper) { m_Wrapper = wrapper; }
+            public InputAction @Accept => m_Wrapper.m_Global_Accept;
+            public InputActionMap Get() { return m_Wrapper.m_Global; }
+            public void Enable() { Get().Enable(); }
+            public void Disable() { Get().Disable(); }
+            public bool enabled => Get().enabled;
+            public static implicit operator InputActionMap(GlobalActions set) { return set.Get(); }
+            public void SetCallbacks(IGlobalActions instance)
+            {
+                if (m_Wrapper.m_GlobalActionsCallbackInterface != null)
+                {
+                    @Accept.started -= m_Wrapper.m_GlobalActionsCallbackInterface.OnAccept;
+                    @Accept.performed -= m_Wrapper.m_GlobalActionsCallbackInterface.OnAccept;
+                    @Accept.canceled -= m_Wrapper.m_GlobalActionsCallbackInterface.OnAccept;
+                }
+                m_Wrapper.m_GlobalActionsCallbackInterface = instance;
+                if (instance != null)
+                {
+                    @Accept.started += instance.OnAccept;
+                    @Accept.performed += instance.OnAccept;
+                    @Accept.canceled += instance.OnAccept;
+                }
+            }
+        }
+        public GlobalActions @Global => new GlobalActions(this);
         private int m_GamepadSchemeIndex = -1;
         public InputControlScheme GamepadScheme
         {
@@ -1381,6 +1477,10 @@ namespace Project.Input
             void OnBack(InputAction.CallbackContext context);
             void OnPoint(InputAction.CallbackContext context);
             void OnClick(InputAction.CallbackContext context);
+        }
+        public interface IGlobalActions
+        {
+            void OnAccept(InputAction.CallbackContext context);
         }
     }
 }

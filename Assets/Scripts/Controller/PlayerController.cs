@@ -78,7 +78,7 @@ namespace Project.Controller
             (Entity as Player).OnPlayerDead += () =>
             {
                 StopAllCoroutines();
-                StartCoroutine(PlayerIdle());
+                StartCoroutine(PlayerDead());
             };
             motionController.OnBlockWallContacted += (block, normal) =>
             {
@@ -195,6 +195,13 @@ namespace Project.Controller
             var damping = (1 - Mathf.Sqrt(GroundDamping)) * 60;
             var velocity = Mathf.Lerp(motionController.SurfaceVelocity.x, input.Movement.x * SpeedOnGround, Time.fixedDeltaTime * damping);
             motionController.Move(Vector2.right * velocity);
+        }
+
+        IEnumerator PlayerDead()
+        {
+            CurrentState = "Dead";
+            animator.SetTrigger("Dead");
+            yield break;
         }
 
         IEnumerator PlayerIdle()

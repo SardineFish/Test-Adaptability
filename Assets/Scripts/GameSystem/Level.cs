@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.Events;
 
 namespace Project
 {
@@ -13,6 +14,7 @@ namespace Project
         Pause,
         EditMode,
         Playing,
+        PlayerDead,
     }
 
     [RequireComponent(typeof(ScenesManager))]
@@ -23,8 +25,10 @@ namespace Project
         public GameObject PlayerPrefab;
         public Transform SpawnPoint;
         public Player ActivePlayer;
-        public event Action OnPlayerDead;
         public bool TestMode = false;
+
+        public UnityEngine.Events.UnityEvent OnPlayerDead;
+        public UnityEvent OnLevelRestart;
 
         private void Awake()
         {
@@ -63,13 +67,21 @@ namespace Project
             {
                 StartGamePlay();
             }
+            if(GameState == GameState.PlayerDead)
+            {
+                if(Input.InputManager.Input.Global.Accept.UsePressed())
+                {
+                    OnLevelRestart?.Invoke();
+                    //RestartScene();
+                }
+            }
         }
 
         private void Level_OnPlayerDead()
         {
             Debug.Log("Player Dead.");
             OnPlayerDead?.Invoke();
-            RestartScene();
+            GameState = GameState.PlayerDead;
         }
 
         public void StartGamePlay()
@@ -103,9 +115,11 @@ namespace Project
         {
             if (ActivePlayer)
                 Destroy(ActivePlayer.gameObject);
+
             ActivePlayer = Instantiate(PlayerPrefab).GetComponent<Player>();
             ActivePlayer.OnPlayerDead += Level_OnPlayerDead;
             ActivePlayer.transform.position = ScenesManager.Instance.CurrentScene.SpawnPoint.ToVector3();
+            GameState = GameState.Playing;
         }
 
         public void RestartLevel()
