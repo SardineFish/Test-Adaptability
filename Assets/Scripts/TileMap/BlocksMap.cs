@@ -171,6 +171,13 @@ namespace Project.GameMap
         }
 
 
+        public BlockData GetSceneEffectData(Vector2 pos)
+        {
+            var block = EffectLayer.GetTile(pos.ToVector3Int());
+            if (block is Data.EffectArea effect)
+                return new BlockData(pos.ToVector2Int(), effect);
+            return BlockData.Null;
+        }
 
         public void SetGameMapForEditorPlay()
         {

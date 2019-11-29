@@ -9,7 +9,7 @@ namespace Project.Blocks
         public float MaxMoveSpeed = 12;
         public float MoveForce = 50;
 
-        public override IEnumerator ProcessPlayerContacted(GameEntity player, BlockContactData contact)
+        public override IEnumerator ProcessPlayerContact(GameEntity player, BlockContactData contact)
         {
             if(Vector2.Dot(contact.Normal, Vector2.up) > 0.9f)
             {

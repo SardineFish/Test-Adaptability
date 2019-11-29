@@ -6,10 +6,17 @@ namespace Project
 {
     public class Player : GameEntity
     {
+        bool killed = false;
         public event Action OnPlayerDead;
         public void Kill()
         {
-            OnPlayerDead?.Invoke();
+            if (!killed)
+            {
+                killed = true;
+                OnPlayerDead?.Invoke();
+
+            }
+
         }
     }
 

@@ -17,7 +17,7 @@ namespace Project.Blocks
             }
             return false;
         }
-        public override IEnumerator ProcessPlayerContacted(GameEntity player, BlockContactData contact)
+        public override IEnumerator ProcessPlayerContact(GameEntity player, BlockContactData contact)
         {
             var motionController = player.GetComponent<Controller.PlayerMotionController>();
             var playerController = player.GetComponent<Controller.PlayerController>();

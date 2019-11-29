@@ -67,7 +67,7 @@ namespace Project.Blocks
 
         }
 
-        public virtual IEnumerator ProcessPlayerContacted(GameEntity player, BlockContactData contact)
+        public virtual IEnumerator ProcessPlayerContact(GameEntity player, BlockContactData contact)
         {
             return null;
         }

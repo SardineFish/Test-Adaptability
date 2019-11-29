@@ -50,6 +50,7 @@ namespace Project.Controller
         public event Action<BlockContactData> OnBlockContacted;
         public event Action<Blocks.Block, Vector2> OnBlockWallContacted;
         public event Action<Blocks.Block> OnBlockGroundContacted;
+        public event Action<Blocks.BlockData> OnSceneEffectAreaContacted;
 
         new Rigidbody2D rigidbody;
         [DisplayInInspector]
@@ -245,7 +246,7 @@ namespace Project.Controller
 
             ContactedBlocks.Clear();
 
-            var center = BodyCollider.transform.position.ToVector2() + BodyCollider.transform.localToWorldMatrix.MultiplyVector(BodyCollider.offset).ToVector2();
+            var center = BodyCollider.transform.localToWorldMatrix.MultiplyPoint(BodyCollider.offset).ToVector2();
             var size = BodyCollider.size + Vector2.one * BodyCollider.edgeRadius * 2;
             DetectContact(center, Vector2.left, size.x / 2 , ContactThreshold, Vector2.up, size.y, ContactedBlocks);
             DetectContact(center, Vector2.right, size.x / 2 , ContactThreshold, Vector2.up, size.y, ContactedBlocks);
@@ -279,6 +280,13 @@ namespace Project.Controller
                 {
                     OnBlockGroundContacted?.Invoke(contact.Block);
                 }
+            }
+
+            // contact with effect area
+            {
+                var block = GameMap.BlocksMap.Instance.GetSceneEffectData(center);
+                if (!block.IsNull)
+                    OnSceneEffectAreaContacted?.Invoke(block);
             }
         }
 

@@ -101,7 +101,7 @@ namespace Project.Controller
                 {
                     if (SpecialStateBlock && SpecialStateBlock != contact.Block && contact.Block.OverrideSpecialState(SpecialStateBlock))
                     {
-                        var processor = contact.Block.ProcessPlayerContacted(Entity, contact);
+                        var processor = contact.Block.ProcessPlayerContact(Entity, contact);
                         if(processor != null)
                         {
                             StopAllCoroutines();
@@ -110,7 +110,7 @@ namespace Project.Controller
                     }
                     else if (!SpecialStateBlock)
                     {
-                        var processor = contact.Block.ProcessPlayerContacted(Entity, contact);
+                        var processor = contact.Block.ProcessPlayerContact(Entity, contact);
                         if (processor != null)
                         {
                             StopAllCoroutines();
@@ -118,6 +118,10 @@ namespace Project.Controller
                         }
                     }
                 }
+            };
+            motionController.OnSceneEffectAreaContacted += (contact) =>
+            {
+                (contact.BlockType as GameMap.Data.EffectArea).ProcessPlayerContact(Entity);
             };
         }
 
