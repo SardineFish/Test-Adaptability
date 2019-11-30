@@ -48131,7 +48131,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 3895
+    m_Bits: 12087
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -48230,7 +48230,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687258581}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c88f5cead0c0b2a4eb05b5900433f8d1, type: 3}
   m_Name: 
@@ -48486,32 +48486,6 @@ PrefabInstance:
       propertyPath: OnLevelRestart.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
-    - target: {fileID: 1912856233940127383, guid: fd219505bea149c4da7194d760d50a53,
-        type: 3}
-      propertyPath: m_Camera
-      value: 
-      objectReference: {fileID: 1687258584}
-    - target: {fileID: 4416347761647331807, guid: fd219505bea149c4da7194d760d50a53,
-        type: 3}
-      propertyPath: MainCamera
-      value: 
-      objectReference: {fileID: 1687258584}
-    - target: {fileID: 1760543758, guid: fd219505bea149c4da7194d760d50a53, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1760543762, guid: fd219505bea149c4da7194d760d50a53, type: 3}
-      propertyPath: m_Alpha
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 422253791, guid: fd219505bea149c4da7194d760d50a53, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 422253791, guid: fd219505bea149c4da7194d760d50a53, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1907226631, guid: fd219505bea149c4da7194d760d50a53, type: 3}
       propertyPath: m_ExposedReferences.m_References.Array.size
       value: 2
@@ -48528,8 +48502,34 @@ PrefabInstance:
       propertyPath: m_InitialTime
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1760543758, guid: fd219505bea149c4da7194d760d50a53, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 422253791, guid: fd219505bea149c4da7194d760d50a53, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 422253791, guid: fd219505bea149c4da7194d760d50a53, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1912856233940127383, guid: fd219505bea149c4da7194d760d50a53,
+        type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 1687258584}
+    - target: {fileID: 4416347761647331807, guid: fd219505bea149c4da7194d760d50a53,
+        type: 3}
+      propertyPath: MainCamera
+      value: 
+      objectReference: {fileID: 1687258584}
     - target: {fileID: 945751975, guid: fd219505bea149c4da7194d760d50a53, type: 3}
       propertyPath: weight
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1760543762, guid: fd219505bea149c4da7194d760d50a53, type: 3}
+      propertyPath: m_Alpha
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
