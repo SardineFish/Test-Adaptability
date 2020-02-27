@@ -558,6 +558,38 @@ public static class Utility
         color.a = alpha;
         return color;
     }
+
+    public static Matrix4x4 ProjectionToWorldMatrix(Camera camera)
+    {
+        return (camera.projectionMatrix * camera.worldToCameraMatrix).inverse;
+    }
+
+    public static (Mesh, Matrix4x4) GenerateFullScreenQuad(Camera camera)
+    {
+        var mesh = new Mesh();
+        mesh.Clear();
+        mesh.vertices = new Vector3[]
+        {
+                    new Vector3(-1,-1,0),
+                    new Vector3(1,-1,0),
+                    new Vector3(1,1,0),
+                    new Vector3(-1,1,0),
+        };
+        mesh.triangles = new int[]
+        {
+                    0, 1, 2,
+                    2, 3, 0
+        };
+        mesh.uv = new Vector2[]
+        {
+                    new Vector2(0, 0),
+                    new Vector2(1, 0),
+                    new Vector2(1, 1),
+                    new Vector2(0, 1),
+        };
+        var transform = ProjectionToWorldMatrix(camera);
+        return (mesh, transform);
+    }
 }
 
 

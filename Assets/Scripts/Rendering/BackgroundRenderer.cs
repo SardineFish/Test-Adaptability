@@ -39,7 +39,6 @@ namespace Project.Rendering
                 var transfrom = (renderingData.cameraData.camera.projectionMatrix * renderingData.cameraData.camera.worldToCameraMatrix).inverse;
                 cmd.SetGlobalTexture(mainTexId, RenderingManager.Instance.BackgroundTile.texture);
                 var rect = RenderingManager.Instance.BackgroundTile.rect;
-                var textureRect = RenderingManager.Instance.BackgroundTile.textureRect;
                 var sprite = RenderingManager.Instance.BackgroundTile;
                 cmd.SetGlobalVector(spriteRectId, new Vector4(rect.x / sprite.texture.width, rect.y / sprite.texture.height, rect.width / sprite.texture.width, rect.height / sprite.texture.height));
                 cmd.DrawMesh(fullScreenMesh, transfrom, bgMat, 0, 0);
